@@ -5,3 +5,5 @@
 2. python -m SimpleHTTPServer 8000
 
 3. open localhost:8000
+
+4. select main.html
