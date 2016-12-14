@@ -1,0 +1,64 @@
+body{
+    font: 15px sans-serif;
+    font-family: 'Waiting for the Sunrise', cursive;
+    font-weight: bold;
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.button_div{
+    height: 200px;
+    width: 1400px;
+}
+
+.set_div{
+    height: 700px;
+    width: 800px;
+}
+
+#drop_zone{
+    border-radius: 25px;
+    border: 2px solid #73AD21;
+    width: 100px;
+}
+
+/* #full{ */
+/*     position:relative; */
+/*     y: 200px; */
+/* } */
+
+.view{
+    fill: #BBB;
+    stroke: #000;
+}
+
+.axis line {
+  stroke-opacity: 0.3;
+  shape-rendering: crispEdges;
+}
+
+.group-tick line {
+  stroke: #000;
+}
+
+.ribbons {
+    fill-opacity: 0.67;
+}
+
+button{
+    position: absolute;
+    Top: 245px;
+    left: 190px;
+}
+
+/* #epsilon-button{ */
+/*     position: absolute; */
+/*     top: 44px; */
+/*     left: 200px; */
+/* } */
+
+/* #tao{ */
+/*     position: absolute; */
+/*     top: 44px; */
+/*     left: 340px; */
+/* } */
