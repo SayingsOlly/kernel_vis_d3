@@ -10,52 +10,92 @@
     <!-- <div id="drop_zone"> Drops file here </div> -->
     <div class="button_div">
 
-      <input type="file" id="files" name="files[]" multiple />
-      <output id="list"></output>
+      <!-- <input type="file" id="files" name="files[]" multiple /> -->
+      <!-- <output id="list"></output> -->
+
+
       <p>
         <label for="std"
                style="display: inline-block; width: 240px; text-align: right">
-          std = <span id="std-value">0.01</span> (0.006 - 0.02)
+          std = <span id="std-value">0.01</span> (0.002 - 0.02)
         </label>
-        <input id="std" type="range" min="0.006" max="0.02" step="0.002" value="0.01" /></p>
+        <input id="std" type="range" min="0.002" max="0.02" step="0.001" value="0.01" /></p>
 
        <p>
         <label for="radius"
                style="display: inline-block; width: 240px; text-align: right">
-          Radius =  <span id="radius-value">501</span> (1 - 501)
+          Radius =  <span id="radius-value">1.5</span> (0.1 - 1.5)
         </label>
-        <input id="radius" type="range" min="1" max="501" step="10" value="501" />
+        <input id="radius" type="range" min="1" max="100" step="5" value="101" />
 </p>
 
       <p>
         <label for="epsilon"
                style="display: inline-block; width: 240px; text-align: right">
-          Epsilon =  <span id="epsilon-value">0.04</span> (0.01 - 0.5)
+          Epsilon =  <span id="epsilon-value">0.03</span> (0.01 - 0.1)
         </label>
-        <input id="epsilon" type="range" min="0.01" max="0.5" step="0.02" value="0.04" /></p>
+        <input id="epsilon" type="range" min="0.01" max="0.1" step="0.005" value="0.03" />
+      </p>
+      <p id="sample_size">
+        Samples: <span id="sample_value"></span>
+      </p>
+
+       </p>
+      <p id="full_size">
+        Data size: <span id="full_value">199162</span>
+      </p>
+
+      <p id="sample_time">
+        Running time: <span id="sample_time_value"></span> seconds.
+      </p>
+
+       </p>
+      <p id="full_time">
+        Full Data running time: <span id="full_time_value">301.5</span> seconds.
+      </p>
+
       <p>
         <label for="tau"
                style="display: inline-block; width: 240px; text-align: right">
-          Tau =  <span id="tau-value">0.25</span> (0.15 - 0.95)
+          Tau =  <span id="tau-value">0.15</span> (0.15 - 0.95)
         </label>
-        <input id="tau" type="range" min="0.05" max="0.95" step="0.1" value="0.25" /></p>
+        <input id="tau" type="range" min="0.05" max="0.95" step="0.1" value="0.15" />
+      </p>
+
+      <form id="radius_input_form" name="radius_form" onSubmit="return handleRadiusClick()">
+            <input type="text" id="radius_input" placeholder="Input Radius">
+            <input name="radius_submit"  type="submit" value="Confirm" >
+      </form>
+
+      <form id="epsilon_input_form" name="epsilon_form" onSubmit="return handleEpsilonClick()">
+            <input type="text" id="epsilon_input" placeholder="Input Epsilon">
+            <input name="epsilon_submit"  type="submit" value="Confirm" >
+      </form>
+
+       <form id="std_input_form" name="std_form" onSubmit="return handleStdClick()">
+            <input type="text" id="std_input" placeholder="Input std">
+            <input name="std_submit"  type="submit" value="Confirm" >
+      </form>
+
     </div>
 
     <div id="coreset" class="set_div">
       <h1> Coreset Data </h1>
       <button>reset</button>
-      <svg id="coreset_svg" width="700" height="500"></svg>
-      <svg class="color_bar_svg" height="500", width="50"></svg>
+      <!-- <svg id="coreset_svg" width="700" height="500"></svg> -->
+
+      <svg class="color_bar_svg" height="500" width="50"></svg>
     </div>
+
     <div id="full" class="set_div">
       <h1> Full Data </h1>
-      <svg id="full_svg" width="700" height="500">
-      </svg>
+      <!-- <svg id="full_svg" width="700" height="500"> -->
+      <!-- </svg> -->
       <svg class="color_bar_svg" height="500", width="50"></svg>
     </div>
     <script type="application/javascript" src="js/coreset.js"></script>
     <script type="application/javascript" src="js/fullset.js"></script>
-    <script type="application/javascript" src="js/dropfile.js"></script>
+    <!-- <script type="application/javascript" src="js/dropfile.js"></script> -->
     <!-- <script type="application/javascript" src="js/test.js"></script> -->
   </body>
 

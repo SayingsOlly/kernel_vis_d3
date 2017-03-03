@@ -6,6 +6,92 @@ body{
     flex-wrap: wrap;
 }
 
+.circle{
+    position: absolute;
+}
+
+
+#radius_input_form{
+    position: absolute;
+    left: 400px;
+    top: 60px;
+}
+
+#epsilon_input_form{
+    position: absolute;
+    left: 400px;
+    top: 100px;
+}
+
+
+#std_input_form{
+    position: absolute;
+    left: 400px;
+    top: 20px;
+}
+
+#sample_size {
+    position: absolute;
+    left: 700px;
+    top: 10px;
+}
+
+#full_size {
+    position: absolute;
+    left: 900px;
+    top: 10px;
+}
+
+#sample_time {
+    position: absolute;
+    left: 700px;
+    top: 30px;
+}
+
+#full_time {
+    position: absolute;
+    left: 900px;
+    top: 30px;
+}
+
+
+#coreset div {
+    position: absolute;
+}
+#coreset svg {
+    position: absolute;
+    z-index: -1;
+}
+
+#coreset div canvas {
+  position: absolute;
+}
+
+#coreset .color_bar_svg{
+    position: absolute;
+    left:700px;
+}
+
+#full .color_bar_svg{
+    position: absolute;
+    left:1500px;
+}
+
+
+#full div {
+    position: absolute;
+    top: -200;
+}
+#full svg {
+    position: absolute;
+    z-index: -1;
+}
+
+#full div canvas {
+  position: absolute;
+}
+
+
 .button_div{
     height: 200px;
     width: 1400px;
@@ -39,10 +125,6 @@ body{
 
 .group-tick line {
   stroke: #000;
-}
-
-.ribbons {
-    fill-opacity: 0.67;
 }
 
 button{

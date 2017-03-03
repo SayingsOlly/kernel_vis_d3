@@ -10,16 +10,17 @@ d3.csv("../data/fulldata.csv", function(data){
   //   });
   // });
   fullData = data;
-  fullset();
+  draw_full_canvas();
 });
 
 var fullzoom;
 //var std = 0.01;
 
-var fullsvg = d3.select("#full_svg");
-var width = +fullsvg.attr("width");
-var height = +fullsvg.attr("height");
-
+//var fullsvg = d3.select("#full_svg");
+//var width = +fullsvg.attr("width");
+//var height = +fullsvg.attr("height");
+var width = 700;
+var height = 500;
 
 var fullxscale = d3.scaleLinear()
     .range([-1,width+1-100])
@@ -99,6 +100,114 @@ function full_eval_kernel(norData, std, x, y){
   return parseFloat(count)/(norData.length+1);
 }
 
+  d3.select('#full').selectAll('div').remove();
+  d3.select('#full').selectAll('g').remove();
+
+  var char_div = d3.select('#full').append('div')
+      .style('left', 200);
+//    .style('top', -500);
+
+  char_div.selectAll("canvas").remove();
+
+  var full_canvas = char_div.append("canvas")
+      .attr('width', width)
+      .attr('height', height)
+      //.call(zoom)
+      .node().getContext("2d");
+
+  var svg = d3.select("#full").append('svg')
+    .attr('width',700)
+      .attr('height', 500)
+      .append('g');
+
+  var full_xAxis = d3.axisBottom(x)
+      .ticks(width/height*10)
+      .tickSize(height)
+      .tickPadding(8 - height);
+
+  var full_yAxis = d3.axisRight(y)
+      .ticks(10)
+      .tickSize(width)
+      .tickPadding(8 - width);
+
+  svg.selectAll("g").remove();
+  var full_gx = svg.append("g")
+      .attr("class", "axis axis-x")
+      .call(full_xAxis);
+
+  var full_gy = svg.append("g")
+      .attr("class", "axis axis-y")
+      .call(full_yAxis);
+
+function draw_full_canvas(){
+
+  var transform = d3.zoomIdentity;
+
+  // var zoom = d3.zoom()
+  //     .scaleExtent([1,40])
+  //     .translateExtent([[-width,-height],[width, height]])
+  //     .on("zoom", zoomed);
+
+
+  var color_scale_bar_g = d3.selectAll(".color_bar_svg").selectAll("g")
+      .data(colorRange).enter().append("g");
+
+  color_scale_bar_g.append("rect")
+    .attr("width", 10)
+    .attr("height", 20)
+    .attr("x", 20)
+    .attr("y", function(d,i){
+      return i*20;
+    })
+    .attr("fill", function(d){
+      return d;
+    });
+
+  color_scale_bar_g.append("text")
+    .attr("x",20)
+    .attr("y",function(d,i){
+      return (i+1)*20;
+    })
+    .text(function(d,i){
+      return (95-(i)*10)+"%";
+    });
+
+  //0.037657
+
+  draw_full();
+
+
+  // function zoomed(){
+
+  //   transform = d3.event.transform;
+  //   // console.log(d3.event.translateX);
+  //   console.log(d3.event.transform.translate);
+  //   full_canvas.save();
+  //   canvas.clearRect(0, 0, width, height);
+
+  //   canvas.translate(transform.x, transform.y);
+  //   canvas.scale(transform.k, transform.k);
+
+  //   draw_full();
+  //   canvas.restore();
+
+  //   gx.call(xAxis.scale(d3.event.transform.rescaleX(x)));
+  //   gy.call(yAxis.scale(d3.event.transform.rescaleY(y)));
+  // }
+
+}
+
+  function draw_full(){
+
+    fullData.forEach(function(d){
+      full_canvas.beginPath();
+      full_canvas.rect(parseFloat(d.x)+90, -parseFloat(d.y)+350, parseFloat(d.delta), parseFloat(d.delta));
+      full_canvas.fillStyle = d.color;
+      full_canvas.fill();
+      //canvas.closePath();
+    });
+
+  }
 function full_update(std, epsilon){
 
   // if(epsilon == -1){
@@ -155,6 +264,23 @@ function full_update(std, epsilon){
       return d.color;
     });
 }
+  // var full_xAxis = d3.axisBottom(fullx)
+  //     .ticks(width/height*10)
+  //     .tickSize(height)
+  //     .tickPadding(8-height);
+
+  // var full_yAxis = d3.axisRight(fully)
+  //     .ticks(10)
+  //     .tickSize(width)
+  //     .tickPadding(8- width);
+
+  // var full_gx = fullsvg.append("g")
+  //     .attr("class", "axis axis-x")
+  //     .call(xAxis);
+
+  // var full_gy = fullsvg.append("g")
+  //     .attr("class", "axis axis-y")
+  //     .call(yAxis);
 
 function fullset(){
 
@@ -182,7 +308,6 @@ function fullset(){
   //     return (95-(i)*10)+"%";
   //   });
 
-
   fullzoom = d3.zoom()
       .scaleExtent([1,40])
       .translateExtent([[-width,-height],[width, height]])
@@ -190,23 +315,6 @@ function fullset(){
   //0.037657
   full_update(0.01, 0.037657);
 
-  var xAxis = d3.axisBottom(fullx)
-      .ticks(width/height*10)
-      .tickSize(height)
-      .tickPadding(8-height);
-
-  var yAxis = d3.axisRight(fully)
-      .ticks(10)
-      .tickSize(width)
-      .tickPadding(8- width);
-
-  var gx = fullsvg.append("g")
-      .attr("class", "axis axis-x")
-      .call(xAxis);
-
-  var gy = fullsvg.append("g")
-      .attr("class", "axis axis-y")
-      .call(yAxis);
 
   fullsvg.call(fullzoom);
 
