@@ -1,7 +1,10 @@
 var minX = -89.582541, maxX = -81.960144, minY = 36.3, maxY = 39.3;
 var fullData = [];
 
-d3.csv("../data/fulldata.csv", function(data){
+// var color_range = {"#c24429":0.95, "#c60065":0.85, "#ca44a3": 0.75,
+//                    "#b700ce":0.55, ""}
+
+d3.csv("../data/fulldata_v2.csv", function(data){
   // data.forEach(function(d){
   //   var cordinate = [];
   //   Object.values(d).forEach(function(item){
@@ -9,7 +12,10 @@ d3.csv("../data/fulldata.csv", function(data){
   //   fullData.push({'x':parseFloat(items[0]), 'y':parseFloat(items[1])});
   //   });
   // });
+
+  // full_update(0.01, 0.037657);
   fullData = data;
+  //console.log(fullData);
   draw_full_canvas();
 });
 
@@ -61,27 +67,43 @@ function fullfill(norData, std, max, x, y){
   for(var i=0.0; i<edge*x; i+=delta){
     for(var j=0.0; j<edge*y; j+=delta){
       var value = full_eval_kernel(norData, std, (i+delta/2.0)/edge, (j+delta/2.0)/edge);
-      if(value > 0.95*max){
-        coresetData.push({"x":i, "y":j, "color":"#c24429", "delta":delta});
-      }else if(value > 0.85*max){
-        coresetData.push({"x":i, "y":j, "color":"#c60065", "delta":delta});
-      }else if(value > 0.75*max){
-        coresetData.push({"x":i, "y":j, "color":"#ca44a3", "delta":delta});
-      }else if(value > 0.65*max){
-        coresetData.push({"x":i, "y":j, "color":"#b700ce", "delta":delta});
-      }else if(value > 0.55*max){
-        coresetData.push({"x":i, "y":j, "color":"#7b00d2", "delta":delta});
-      }else if(value > 0.45*max){
-        coresetData.push({"x":i, "y":j, "color":"#3e00d5", "delta":delta});
-      }else if(value > 0.35*max){
-        coresetData.push({"x":i, "y":j, "color":"#0001d9", "delta":delta});
-      }else if(value > 0.25*max){
-        coresetData.push({"x":i, "y":j, "color":"#0044dd", "delta":delta});
-      }else if(value > 0.15*max){
-        coresetData.push({"x":i, "y":j, "color":"#0089e1", "delta":delta});
-      }else if(value > 0.05*max){
-        coresetData.push({"x":i, "y":j, "color":"#00d0e5", "delta":delta});
+      var percent = parseFloat(value)/max;
+      var color_value = 0.0;
+
+      threshold.range().map(function(color) {
+        var d = threshold.invertExtent(color);
+        if (d[0] == null) d[0] = xBar.domain()[0];
+        if (d[1] == null) d[1] = xBar.domain()[1];
+        if(percent > d[0] && percent <= d[1]){
+          //console.log(d[0]);
+          color_value = d[0];
+        }
+      });
+
+      if(color_value >= 0.05){
+        coresetData.push({"x":i, "y":j, "color":threshold(color_value), "delta":delta, "value": value});
       }
+      // if(value > 0.95*max){
+      //   coresetData.push({"x":i, "y":j, "color":"#c24429", "delta":delta});
+      // }else if(value > 0.85*max){
+      //   coresetData.push({"x":i, "y":j, "color":"#c60065", "delta":delta});
+      // }else if(value > 0.75*max){
+      //   coresetData.push({"x":i, "y":j, "color":"#ca44a3", "delta":delta});
+      // }else if(value > 0.65*max){
+      //   coresetData.push({"x":i, "y":j, "color":"#b700ce", "delta":delta});
+      // }else if(value > 0.55*max){
+      //   coresetData.push({"x":i, "y":j, "color":"#7b00d2", "delta":delta});
+      // }else if(value > 0.45*max){
+      //   coresetData.push({"x":i, "y":j, "color":"#3e00d5", "delta":delta});
+      // }else if(value > 0.35*max){
+      //   coresetData.push({"x":i, "y":j, "color":"#0001d9", "delta":delta});
+      // }else if(value > 0.25*max){
+      //   coresetData.push({"x":i, "y":j, "color":"#0044dd", "delta":delta});
+      // }else if(value > 0.15*max){
+      //   coresetData.push({"x":i, "y":j, "color":"#0089e1", "delta":delta});
+      // }else if(value > 0.05*max){
+      //   coresetData.push({"x":i, "y":j, "color":"#00d0e5", "delta":delta});
+      // }
     }
   }
   return coresetData;
@@ -149,28 +171,28 @@ function draw_full_canvas(){
   //     .on("zoom", zoomed);
 
 
-  var color_scale_bar_g = d3.selectAll(".color_bar_svg").selectAll("g")
-      .data(colorRange).enter().append("g");
+  // var color_scale_bar_g = d3.selectAll(".color_bar_svg").selectAll("g")
+  //     .data(colorRange).enter().append("g");
 
-  color_scale_bar_g.append("rect")
-    .attr("width", 10)
-    .attr("height", 20)
-    .attr("x", 20)
-    .attr("y", function(d,i){
-      return i*20;
-    })
-    .attr("fill", function(d){
-      return d;
-    });
+  // color_scale_bar_g.append("rect")
+  //   .attr("width", 10)
+  //   .attr("height", 20)
+  //   .attr("x", 20)
+  //   .attr("y", function(d,i){
+  //     return i*20;
+  //   })
+  //   .attr("fill", function(d){
+  //     return d;
+  //   });
 
-  color_scale_bar_g.append("text")
-    .attr("x",20)
-    .attr("y",function(d,i){
-      return (i+1)*20;
-    })
-    .text(function(d,i){
-      return (95-(i)*10)+"%";
-    });
+  // color_scale_bar_g.append("text")
+  //   .attr("x",20)
+  //   .attr("y",function(d,i){
+  //     return (i+1)*20;
+  //   })
+  //   .text(function(d,i){
+  //     return (95-(i)*10)+"%";
+  //   });
 
   //0.037657
 
@@ -220,50 +242,51 @@ function full_update(std, epsilon){
   //   std = d3.select("#std").property("value");
   // }
 
-  // var coresetData = fullgetCore(std, epsilon);
-  // // console.log("coreset");
-  // // console.log(coresetData);
+  var coresetData = fullgetCore(std, epsilon);
+  // console.log("coreset");
+  // console.log(coresetData);
 
-  // for(var key in coresetData[0]){
-  //   console.log(key);
-  // }
-  // console.log(coresetData.length);
-  // var csvContent = "data:text/csv;charset=utf-8,";
-  // csvContent +="x,y,color,delta\n";
-  // coresetData.forEach(function(infoArray){
-  //   var dataString = "";
-  //   for(var key in infoArray){
-  //     dataString += infoArray[key]+",";
-  //   }
-  //   csvContent += dataString+ "\n";
+  for(var key in coresetData[0]){
+    console.log(key);
+  }
+  console.log(coresetData.length);
+  var csvContent = "data:text/csv;charset=utf-8,";
+  csvContent +="x,y,color,delta,value\n";
+  coresetData.forEach(function(infoArray){
+    var dataString = "";
+    for(var key in infoArray){
+      dataString += infoArray[key]+",";
+    }
+    csvContent += dataString+ "\n";
 
-  // });
+  });
 
-  // var encodedUri = encodeURI(csvContent);
-  // window.open(encodedUri);
-
-  var rects = fullsvg.selectAll("rect").data(fullData);
-
-  rects.exit().remove();
-  rects = rects.enter().append("rect").merge(rects);
-
-  rects.attr("class", "full_rects")
-    .attr("x",function(d){
-      return parseFloat(d.x)+90;
-    })
-    .attr("y",function(d){
-      return parseFloat(-d.y)+350;
-    })
-    .attr("width", function(d){
-      return parseFloat(d.delta);
-    })
-    .attr("height", function(d){
-      return parseFloat(d.delta);
-    })
-    .style("fill", function(d){
-      return d.color;
-    });
+  var encodedUri = encodeURI(csvContent);
+  window.open(encodedUri);
 }
+  // var rects = fullsvg.selectAll("rect").data(fullData);
+
+//   rects.exit().remove();
+//   rects = rects.enter().append("rect").merge(rects);
+
+//   rects.attr("class", "full_rects")
+//     .attr("x",function(d){
+//       return parseFloat(d.x)+90;
+//     })
+//     .attr("y",function(d){
+//       return parseFloat(-d.y)+350;
+//     })
+//     .attr("width", function(d){
+//       return parseFloat(d.delta);
+//     })
+//     .attr("height", function(d){
+//       return parseFloat(d.delta);
+//     })
+//     .style("fill", function(d){
+//       return d.color;
+//     });
+  // }
+
   // var full_xAxis = d3.axisBottom(fullx)
   //     .ticks(width/height*10)
   //     .tickSize(height)

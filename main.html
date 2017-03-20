@@ -4,10 +4,14 @@
     <meta charset="UTF-8">
     <title>index</title>
     <script type="text/javascript" src="bower_components/d3/d3.js"></script>
+    <script src="http://d3js.org/colorbrewer.v1.min.js"></script>
+    <script type="text/javascript" src="js/colorbrewer.v1.min.js"></script>
     <link rel="stylesheet" href="css/styles.css"/>
   </head>
   <body>
     <!-- <div id="drop_zone"> Drops file here </div> -->
+    <div id="colorbrewer_selection">
+    </div>
     <div class="button_div">
 
       <!-- <input type="file" id="files" name="files[]" multiple /> -->
@@ -81,7 +85,7 @@
 
     <div id="coreset" class="set_div">
       <h1> Coreset Data </h1>
-      <button>reset</button>
+      <!--<button>reset</button> -->
       <!-- <svg id="coreset_svg" width="700" height="500"></svg> -->
 
       <svg class="color_bar_svg" height="500" width="50"></svg>

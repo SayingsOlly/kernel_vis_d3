@@ -10,48 +10,56 @@ body{
     position: absolute;
 }
 
+.key .tick{
+    cursor: ew-resize;
+}
+
+#colorbrewer_selection{
+    postition: absolute;
+    left: 200px;
+}
 
 #radius_input_form{
     position: absolute;
     left: 400px;
-    top: 60px;
+    top: 300px;
 }
 
 #epsilon_input_form{
     position: absolute;
     left: 400px;
-    top: 100px;
+    top: 340px;
 }
 
 
 #std_input_form{
     position: absolute;
     left: 400px;
-    top: 20px;
+    top: 260px;
 }
 
 #sample_size {
     position: absolute;
     left: 700px;
-    top: 10px;
+    top: 310px;
 }
 
 #full_size {
     position: absolute;
     left: 900px;
-    top: 10px;
+    top: 310px;
 }
 
 #sample_time {
     position: absolute;
     left: 700px;
-    top: 30px;
+    top: 330px;
 }
 
 #full_time {
     position: absolute;
     left: 900px;
-    top: 30px;
+    top: 330px;
 }
 
 
@@ -70,6 +78,13 @@ body{
 #coreset .color_bar_svg{
     position: absolute;
     left:700px;
+}
+
+#coreset #color_bar_new{
+    position: absolute;
+    left:350px;
+    top: 450px;
+    z-index:10;
 }
 
 #full .color_bar_svg{
@@ -144,3 +159,21 @@ button{
 /*     top: 44px; */
 /*     left: 340px; */
 /* } */
+
+
+.palette {
+  cursor: pointer;
+  display: inline-block;
+  vertical-align: bottom;
+  margin: 4px 20px 4px 20px;
+  padding: 4px;
+  background: #fff;
+  border: solid 1px #aaa;
+}
+
+.swatch {
+  display: block;
+  vertical-align: middle;
+  width: 40px;
+  height: 20px;
+}
