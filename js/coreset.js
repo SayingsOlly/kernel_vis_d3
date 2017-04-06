@@ -1,4 +1,9 @@
 var minX = -89.582541, maxX = -81.960144, minY = 36.3, maxY = 39.3;
+//124.16 145.571
+//24.3471 45.4094
+//var minX = -75.2781, maxX = -74.9576, minY = 39.8763, maxY = 40.1372;
+//var minX = 124.16, maxX = 145.571, minY = 24.3471, maxY = 45.4094;
+// -75.2781 -74.9576 39.8763 40.1372
 var ken = [];
 var norData = [];
 var coresetData = [];
@@ -20,11 +25,31 @@ var scale_value = 1.0;
 var transform_x = 0.0;
 var transform_y = 0.0;
 
+var r_transform_x = 0.0;
+var r_transform_y = 0.0;
+
+var rescale_x = 0;
+var rescale_y = 0;
+
 var STD = 0.01;
 
 var color_data = d3.entries(colorbrewer).slice(1,18);
+color_data.splice(0,1);
 color_data.push({key: 'Default',
                  value: {11: ["#f7f4f9","#00d0e5", "#0089e1", "#0044dd", "#0001d9", "#3e00d5","#7b00d2", "#b700ce", "#ca44a3", "#c60065", "#c24429"]}});
+color_data.push({key: 'YlOrBr2',
+                 value: {11: ["#ffffe5",
+                              "#fff7bc",
+                              "#fee391",
+                              "#fec44f",
+                              "#fe9929",
+                              "#f28000",
+                              "#ec7014",
+                              "#cc4c02",
+                              "#b35900",
+                              //                              "#993404",
+                              "#804000",
+                              "#662506"]}});
 
 // color scale.
 var scale = 'Blues';
@@ -40,13 +65,13 @@ var threshold = d3.scaleThreshold()
 
 d3.select("#colorbrewer_selection")
   .selectAll(".palette")
-    .data(color_data)
+  .data(color_data)
   .enter().append("span")
   .attr("class", "palette")
   .attr("id",function(d){
     return d.key;
   })
-    .attr("title", function(d) { return d.key; })
+  .attr("title", function(d) { return d.key; })
   .on("click", function(d) {
 
     d3.selectAll(".palette").style("background", "#fff");
@@ -70,7 +95,7 @@ d3.select("#colorbrewer_selection")
     barAxis.tickValues(threshold.domain());
 
     console.log(domain_vals);
-    update_color_bar();
+    update_color_bar(1);
     console.log(d3.values(d.value).map(JSON.stringify).join("\n"));
   })
   .selectAll(".swatch")
@@ -116,7 +141,7 @@ var drag = d3.drag()
         console.log(newDomain);
         threshold.domain(newDomain);
         barAxis.tickValues(newDomain);
-        update_color_bar();
+        update_color_bar(1);
     });
 
 var color_svgs = d3.select("#coreset").append("svg")
@@ -131,7 +156,7 @@ var color_gs = color_svgs.append("g")
 var color_rects = color_gs.append("g");
 
 
-function update_color_bar(){
+function update_color_bar(flag){
 
   var color_rect = color_rects.selectAll(".range")
         .data(threshold.range().map(function(color) {
@@ -141,8 +166,6 @@ function update_color_bar(){
           console.log(d);
           return d;
         }));
-
-  //console.log(color_rect);
 
   color_rect.exit().remove();
 
@@ -156,8 +179,6 @@ function update_color_bar(){
       // console.log(threshold(0));
       return threshold(d[0]);
     });
-
-  //console.log(color_gs.call(barAxis));
 
   var ticks = color_gs.call(barAxis)
       .selectAll(".tick")
@@ -190,8 +211,11 @@ function update_color_bar(){
     d.originColor = threshold(color_value);
   });
 
-  draw_canvas();
-
+  if(flag == 1){
+    draw();
+  }else{
+    draw_canvas();
+  }
 
   //update fullset data color
   fullData.forEach(function(d){
@@ -210,36 +234,71 @@ function update_color_bar(){
     d.color = threshold(color_value);
   });
 
-  draw_full_canvas();
+   if(flag == 1){
+    draw_full();
+    zoomed_rescale();
+  }else{
+    draw_full_canvas();
+  }
 }
 
 
 
 d3.csv("../data/kentucky_org.txt",function(data){
-  update_color_bar();
+  console.log(data);
+  update_color_bar(0);
   ken = [];
   var epsilon = 0.03;
 
   var size = Math.floor(1/(epsilon*epsilon)*Math.log(1000));
 
   //size = 199162;
+  if(size > data.length){
+    size = data.length;
+  }
+
+  console.log(size);
   set_data_size(size);
 
   percent = parseFloat(size)/parseFloat(full_size);
-
-  //STD = 0.01 * Math.sqrt(percent) + 0.0075;
 
   if(STD > 0.01){
     STD = 0.01;
   }
 
-  console.log("new std: " + STD);
-
   var sampleList = [];
-  console.log('fulldata length: ' + data.length);
-  console.log('0.03 size: ' + size);
+
+  var tmpMinX = 10000;
+  var tmpMaxX = -10000;
+
+  var tmpMinY = 10000;
+  var tmpMaxY = -10000;
+
   data.forEach(function(d,i){
     //nothing
+    var tmpX;
+    var tmpY;
+    Object.values(d).forEach(function(item){
+      var items = item.split(" ");
+      tmpX = parseFloat(items[0]);
+      tmpY = parseFloat(items[1]);
+    });
+
+    if (tmpX < tmpMinX){
+      tmpMinX = tmpX;
+    }
+    if (tmpX > tmpMaxX){
+      tmpMaxX = tmpX;
+    }
+
+    if(tmpY < tmpMinY){
+      tmpMinY = tmpY;
+    }
+
+    if(tmpY > tmpMaxY){
+      tmpMaxY = tmpY;
+    }
+
     if(i<size){
       sampleList.push(d);
     }else{
@@ -249,7 +308,10 @@ d3.csv("../data/kentucky_org.txt",function(data){
       }
     }
   });
- // var formatedList = [];
+  // var formatedList = [];
+  console.log(tmpMinX + " " + tmpMaxX);
+  console.log(tmpMinY + " " + tmpMaxY);
+
   sampleList.forEach(function(d){
     var cordinate = [];
     Object.values(d).forEach(function(item){
@@ -279,6 +341,17 @@ d3.csv("../data/kentucky_org.txt",function(data){
 **/
 
 function randomSample(std, epsilon, flag){
+
+  // r_transform_x = transform_x;
+  // r_transform_y = transform_y;
+
+  // x = d3.scaleLinear()
+  //   .range([-1+r_transform_x, width+1+r_transform_x])
+  //   .domain([-maxX, -minX]);
+
+  // y = d3.scaleLinear()
+  //   .range([-1+r_transform_y, height+1+r_transform_y])
+  //   .domain([maxY, minY]);
 
   d3.csv("../data/kentucky_org.txt",function(data){
     ken = [];
@@ -336,7 +409,9 @@ function randomSample(std, epsilon, flag){
     var t1 = performance.now();
 
     set_time((t1-t0)/1000);
-    draw_canvas(1);
+    draw();
+    zoomed_rescale();
+    //draw_canvas(1);
   });
 
 }
@@ -428,6 +503,7 @@ function getCore(std, radius, tau){
 
 function killChaos(std, radius, tau){
 
+  console.log('tau:' + tau);
   console.log('real Radius' + radius);
   coresetData.forEach(function(d){
     if(d.value >= 0.05*max){
@@ -445,7 +521,9 @@ function killChaos(std, radius, tau){
     }
   });
   //updateHeapMap();
-  draw_canvas();
+  //draw_canvas();
+  draw();
+  zoomed_rescale();
   //return coresetData;
 }
 
@@ -467,6 +545,8 @@ function fill(norData, std, x, y){
 
   coresetData = [];
 
+  console.log("norData");
+  console.log(norData);
   // Update the max density.
   var v = 0.0;
   var cur_max = 0.0;
@@ -480,7 +560,7 @@ function fill(norData, std, x, y){
   }
 
   max = cur_max;
-  //console.log(max);
+  console.log("max:" + max);
 
   /**
    * Fill the rectangles base on the density
@@ -496,6 +576,7 @@ function fill(norData, std, x, y){
     for(var j=0.0; j<edge*y; j+=delta){
       var value = kde_kernel(norData, std, (i+delta/2.0)/edge, (j+delta/2.0)/edge);
       var percent = parseFloat(value)/max;
+
       var color_value = 0.0;
 
       threshold.range().map(function(color) {
@@ -540,10 +621,15 @@ function fill(norData, std, x, y){
 function kde_kernel(norData, std, x, y){
   var count = 0.0;
   var coeff = 1.0;
+  STD = 0.01;
 
   norData.forEach(function(d){
     var dist = (x-d.x_nor)*(x-d.x_nor) + (y-d.y_nor)*(y-d.y_nor);
-    count += coeff*Math.exp(-dist/(2.0*std*std));
+    //console.log(dist);
+   // if (dist <= 8.0*std/(maxX - minX)){
+    count += coeff*Math.exp(-dist/(2.0*STD*STD));
+   //console.log(count);
+  //  }
   });
 
   return parseFloat(count)/(norData.length+1);
@@ -560,14 +646,64 @@ function update(std, radius, tau){
   //draw_canvas();
 }
 
+var canvas;
+
+  d3.selectAll('.coreset_svg').remove();
+
+  var svg = d3.select("#coreset").append('svg')
+      .attr('width',700)
+      .attr('height', 500)
+      .attr('class', 'coreset_svg')
+      .append('g');
+      //.call(zoom);
+
+  var xAxis = d3.axisBottom(x)
+      .ticks(width/height*10)
+      .tickSize(height)
+      .tickPadding(8 - height);
+
+  var yAxis = d3.axisRight(y)
+      .ticks(10)
+      .tickSize(width)
+      .tickPadding(8 - width);
+
+  //svg.selectAll("g").remove();
+  var gx = svg.append("g")
+      .attr("class", "axis axis-x")
+      .call(xAxis);
+
+  var gy = svg.append("g")
+      .attr("class", "axis axis-y")
+      .call(yAxis);
+
+  function draw(){
+
+
+    // canvas.save();
+    // canvas.clearRect(0, 0, width, height);
+    // canvas.translate(transform_x, transform_y);
+    // canvas.scale(scale_value, scale_value);
+
+    console.log(coresetData);
+    coresetData.forEach(function(d){
+      canvas.beginPath();
+      canvas.rect(d.x+90, -d.y+350, d.delta, d.delta);
+      canvas.fillStyle = d.color;
+      canvas.fill();
+      //canvas.closePath();
+    });
+  }
+
 function draw_canvas(flag){
 
-  var transform = d3.zoomIdentity;
-  var zoom = d3.zoom()
-      .scaleExtent([1,40])
+
+  //if(flag == 0){
+    var transform = d3.zoomIdentity;
+    var zoom = d3.zoom()
+      .scaleExtent([1/scale_value,40/scale_value])
       .translateExtent([[-width,-height],[width, height]])
       .on("zoom", zoomed);
-
+  //}
   d3.select('#coreset').selectAll('div').remove();
   //d3.select('#coreset').selectAll('g').remove();
 
@@ -585,36 +721,12 @@ function draw_canvas(flag){
       .on("click", clickFunction);
 
 
-  core_canvas.call(zoom);
 
-  var canvas = core_canvas.node().getContext("2d");
-
-  d3.selectAll('.coreset_svg').remove();
-  var svg = d3.select("#coreset").append('svg')
-      .attr('width',700)
-      .attr('height', 500)
-      .attr('class', 'coreset_svg')
-      .append('g');
+  canvas = core_canvas.node().getContext("2d");
 
 
-  var xAxis = d3.axisBottom(x)
-      .ticks(width/height*10)
-      .tickSize(height)
-      .tickPadding(8 - height);
+  d3.selectAll(".coreset_svg").call(zoom);
 
-  var yAxis = d3.axisRight(y)
-      .ticks(10)
-      .tickSize(width)
-      .tickPadding(8 - width);
-
-  svg.selectAll("g").remove();
-  var gx = svg.append("g")
-      .attr("class", "axis axis-x")
-      .call(xAxis);
-
-  var gy = svg.append("g")
-      .attr("class", "axis axis-y")
-      .call(yAxis);
 
   // var color_scale_bar_g = d3.selectAll(".color_bar_svg").selectAll("g")
   //     .data(colorRange).enter().append("g");
@@ -644,18 +756,45 @@ function draw_canvas(flag){
 
   draw();
 
-  function draw(){
 
-    coresetData.forEach(function(d){
-      canvas.beginPath();
-      canvas.rect(d.x+90, -d.y+350, d.delta, d.delta);
-      canvas.fillStyle = d.color;
-      canvas.fill();
-      //canvas.closePath();
-    });
+}
 
+
+function zoomed_rescale(){
+
+    canvas.save();
+    canvas.clearRect(0, 0, width, height);
+
+    canvas.translate(transform_x, transform_y);
+    canvas.scale(scale_value, scale_value);
+
+    // scale_value = transform.k;
+    // transform_x = transform.x;
+    // transform_y = transform.y;
+
+    // rescale_x = d3.event.transform.rescaleX(x);
+    // rescale_y = d3.event.transform.rescaleY(y);
+
+    draw();
+  canvas.restore();
+
+  full_canvas.save();
+  full_canvas.clearRect(0, 0, width, height);
+
+  full_canvas.translate(transform_x, transform_y);
+  full_canvas.scale(scale_value, scale_value);
+
+  draw_full();
+  full_canvas.restore();
+
+  if(rescale_x == 0){
+    return;
   }
-
+    gx.call(xAxis.scale(rescale_x));
+    gy.call(yAxis.scale(rescale_y));
+    full_gx.call(full_xAxis.scale(rescale_x));
+    full_gy.call(full_yAxis.scale(rescale_y));
+}
   function zoomed(){
 
     transform = d3.event.transform;
@@ -671,11 +810,19 @@ function draw_canvas(flag){
     transform_x = transform.x;
     transform_y = transform.y;
 
+    rescale_x = d3.event.transform.rescaleX(x);
+    rescale_y = d3.event.transform.rescaleY(y);
+
+    console.log(scale_value);
+    console.log(transform_x);
+    console.log(transform_y);
+
     draw();
     canvas.restore();
-    //console.log(zoom.scale());
+
     gx.call(xAxis.scale(d3.event.transform.rescaleX(x)));
     gy.call(yAxis.scale(d3.event.transform.rescaleY(y)));
+
     //console.log(xAxis.rescale());
 
     full_canvas.save();
@@ -692,7 +839,6 @@ function draw_canvas(flag){
     full_gx.call(full_xAxis.scale(d3.event.transform.rescaleX(x)));
     full_gy.call(full_yAxis.scale(d3.event.transform.rescaleY(y)));
   }
-}
 
 function clickFunction(){
 
@@ -783,6 +929,19 @@ function handleRadiusClick(event){
   return false;
 }
 
+function handleTauClick(event){
+
+  var std = d3.select("#std").property("value");
+  var value = document.getElementById("tau_input").value;
+
+  var radius = d3.select("#radius").property("value");
+
+  d3.select("#tau-value").text(value);
+  d3.select("#tau").property("value", +value);
+  killChaos(std, radius, +value);
+  return false;
+}
+
 function handleEpsilonClick(event){
 
   var std = d3.select("#std").property("value");
@@ -797,7 +956,6 @@ function handleEpsilonClick(event){
 function handleStdClick(event){
 
   var epsilon = d3.select("#epsilon-value").text();
-  console.log('???: ' + epsilon);
   var value = document.getElementById("std_input").value;
 
   d3.select("#std-value").text((+value).toFixed(4));
@@ -805,6 +963,8 @@ function handleStdClick(event){
   randomSample(parseFloat(value), +epsilon, 0);
   return false;
 }
+
+
 
 
 function reset(){

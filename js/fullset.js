@@ -122,20 +122,8 @@ function full_eval_kernel(norData, std, x, y){
   return parseFloat(count)/(norData.length+1);
 }
 
-  d3.select('#full').selectAll('div').remove();
-  d3.select('#full').selectAll('g').remove();
-
-  var char_div = d3.select('#full').append('div')
-      .style('left', 200);
-//    .style('top', -500);
-
-  char_div.selectAll("canvas").remove();
-
-  var full_canvas = char_div.append("canvas")
-      .attr('width', width)
-      .attr('height', height)
-      //.call(zoom)
-      .node().getContext("2d");
+var char_div;
+var full_canvas;
 
   var svg = d3.select("#full").append('svg')
     .attr('width',700)
@@ -165,6 +153,20 @@ function draw_full_canvas(){
 
   var transform = d3.zoomIdentity;
 
+  d3.select('#full').selectAll('div').remove();
+  //d3.select('#full').selectAll('g').remove();
+
+  char_div = d3.select('#full').append('div')
+      .style('left', 200);
+//    .style('top', -500);
+
+  char_div.selectAll("canvas").remove();
+
+  full_canvas = char_div.append("canvas")
+      .attr('width', width)
+      .attr('height', height)
+      //.call(zoom)
+      .node().getContext("2d");
   // var zoom = d3.zoom()
   //     .scaleExtent([1,40])
   //     .translateExtent([[-width,-height],[width, height]])
@@ -219,7 +221,9 @@ function draw_full_canvas(){
 
 }
 
-  function draw_full(){
+function draw_full(){
+  // full_canvas.save();
+  // full_canvas.clearRect(0, 0, width, height);
 
     fullData.forEach(function(d){
       full_canvas.beginPath();
@@ -228,6 +232,7 @@ function draw_full_canvas(){
       full_canvas.fill();
       //canvas.closePath();
     });
+  // full_canvas.restore();
 
   }
 function full_update(std, epsilon){

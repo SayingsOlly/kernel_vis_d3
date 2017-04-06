@@ -21,44 +21,50 @@ body{
 
 #radius_input_form{
     position: absolute;
-    left: 400px;
+    left: 450px;
     top: 300px;
 }
 
 #epsilon_input_form{
     position: absolute;
-    left: 400px;
+    left: 450px;
     top: 340px;
 }
 
 
 #std_input_form{
     position: absolute;
-    left: 400px;
+    left: 450px;
     top: 260px;
+}
+
+#tau_input_form{
+    position: absolute;
+    left: 450px;
+    top: 380px;
 }
 
 #sample_size {
     position: absolute;
-    left: 700px;
+    left: 800px;
     top: 310px;
 }
 
 #full_size {
     position: absolute;
-    left: 900px;
+    left: 1000px;
     top: 310px;
 }
 
 #sample_time {
     position: absolute;
-    left: 700px;
+    left: 800px;
     top: 330px;
 }
 
 #full_time {
     position: absolute;
-    left: 900px;
+    left: 1000px;
     top: 330px;
 }
 
@@ -68,7 +74,7 @@ body{
 }
 #coreset svg {
     position: absolute;
-    z-index: -1;
+    z-index: 1;
 }
 
 #coreset div canvas {
@@ -136,6 +142,7 @@ body{
 .axis line {
   stroke-opacity: 0.3;
   shape-rendering: crispEdges;
+  z-index: 10;
 }
 
 .group-tick line {
