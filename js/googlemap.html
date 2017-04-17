@@ -37,7 +37,7 @@ height: 500px;
   <div class="stations"></div>
 </div>
 <script src="//maps.google.com/maps/api/js?key=AIzaSyBQ5PYD_Xf46rA5E2lwBzlouGodHnkjzeo"></script>
-<script src="//d3js.org/d3.v3.min.js"></script>
+<script src="//d3js.org/d3.v4.min.js"></script>
 <script>
 
   // Create the Google Map…
@@ -60,9 +60,7 @@ d3.csv("../data/fulldata.csv", function(error, data) {
   overlay.onAdd = function() {
   console.log(d3.select(this.getPanes().overlayLayer))
     var layer = d3.select(this.getPanes().overlayLayer).append("div")
-  .attr("class", "stations");
-
-  //var layer = d3.selectAll(".stations");
+  .attr("id", "full");
 
     // Draw each marker as a separate SVG element.
     // We could use a single SVG, but what size would it have?
@@ -70,35 +68,55 @@ d3.csv("../data/fulldata.csv", function(error, data) {
       var projection = this.getProjection(),
           padding = 10;
 
-      var marker = layer.selectAll("svg")
-          .data(d3.entries(data))
-          .each(transform) // update existing markers
-        .enter().append("svg")
-          .each(transform)
-          .attr("class", "marker");
 
-      // Add a circle.
-      marker.append("circle")
-          .attr("r", 4.5)
-          .attr("cx", padding)
-          .attr("cy", padding);
+  var full_canvas = layer.append("canvas")
+  .node().getContext("2d")
+      <!-- var marker = layer.selectAll("svg") -->
+      <!--     .data(d3.entries(data)) -->
+      <!--     .each(transform) // update existing markers -->
+      <!--   .enter().append("svg") -->
+      <!--     .each(transform) -->
+      <!--     .attr("class", "marker"); -->
 
-      // Add a label.
-      marker.append("text")
-          .attr("x", padding + 7)
-          .attr("y", padding)
-          .attr("dy", ".31em")
-          .text(function(d) { return d.key; });
+      <!-- // Add a circle. -->
+      <!-- marker.append("circle") -->
+      <!--     .attr("r", 4.5) -->
+      <!--     .attr("cx", padding) -->
+      <!--     .attr("cy", padding); -->
 
-      function transform(d) {
-        d = new google.maps.LatLng(d.x, d.y);
-        d = projection.fromLatLngToDivPixel(d);
-        return d3.select(this)
-            .style("left", (d.x - padding) + "px")
-            .style("top", (d.y - padding) + "px");
-      }
+      <!-- // Add a label. -->
+      <!-- marker.append("text") -->
+      <!--     .attr("x", padding + 7) -->
+      <!--     .attr("y", padding) -->
+      <!--     .attr("dy", ".31em") -->
+      <!--     .text(function(d) { return d.key; }); -->
+      draw_full();
+
+      <!-- function transform(d) { -->
+      <!--   d = new google.maps.LatLng(d.x, d.y); -->
+      <!--   d = projection.fromLatLngToDivPixel(d); -->
+      <!--   return d3.select(this) -->
+      <!--       .style("left", (d.x - padding) + "px") -->
+      <!--       .style("top", (d.y - padding) + "px"); -->
+      <!-- } -->
+
+      function draw_full(){
+
+      data.forEach(function(d){
+
+      full_canvas.beginPath();
+      d2 = new google.maps.LatLng(37.548834, -85.200017)
+      d2 = projection.fromLatLngToDivPixel(d2)
+      full_canvas.rect(d2.x, d2.y, parseFloat(20), parseFloat(20));
+      full_canvas.fillStyle = d.color;
+      full_canvas.fill();
+      //canvas.closePath();
+    });
+
+  }
     };
   };
+
 
   // Bind our overlay to the map…
   overlay.setMap(map);

@@ -149,11 +149,18 @@ body{
   stroke: #000;
 }
 
+#compare_btn{
+    position: absolute;
+    top: 500px;
+    left: 600px;
+}
+
 button{
     position: absolute;
     Top: 245px;
     left: 190px;
 }
+
 
 /* #epsilon-button{ */
 /*     position: absolute; */

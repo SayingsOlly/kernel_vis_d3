@@ -1,53 +1,120 @@
-var minX = -89.582541, maxX = -81.960144, minY = 36.3, maxY = 39.3;
+var minY = -89.582541, maxY = -81.960144, minX = 36.3, maxX = 39.3;
+//var minX = 124.16, maxX = 145.571, minY = 24.3471, maxY = 45.4094;
+//var minX = -75.2781, maxX = -74.9576, minY = 39.8763, maxY = 40.1372;
+// 0.01725467900106645
+// 0.037657
 var fullData = [];
 
 // var color_range = {"#c24429":0.95, "#c60065":0.85, "#ca44a3": 0.75,
-//                    "#b700ce":0.55, ""}
-
-d3.csv("../data/fulldata_v2.csv", function(data){
-  // data.forEach(function(d){
-  //   var cordinate = [];
-  //   Object.values(d).forEach(function(item){
-  //   var items = item.split(" ");
-  //   fullData.push({'x':parseFloat(items[0]), 'y':parseFloat(items[1])});
-  //   });
-  // });
-
-  // full_update(0.01, 0.037657);
-  fullData = data;
-  //console.log(fullData);
-  draw_full_canvas();
-});
+//"#b700ce":0.55, ""}
 
 var fullzoom;
+var STD = 0.003;
 //var std = 0.01;
 
 //var fullsvg = d3.select("#full_svg");
 //var width = +fullsvg.attr("width");
 //var height = +fullsvg.attr("height");
-var width = 700;
-var height = 500;
+var width;
+var height;
 
-var fullxscale = d3.scaleLinear()
+var fullxscale;
+
+var fullyscale;
+
+var fullx;
+
+var fully;
+
+init_right("Japan", false, true, false);
+
+function init_right(data_select, is_sorted, is_origin, is_left){
+
+  width = 700;
+  height = 500;
+
+  fullxscale = d3.scaleLinear()
     .range([-1,width+1-100])
     .domain([minX, maxX]);
 
-var fullyscale = d3.scaleLinear()
+  fullyscale = d3.scaleLinear()
     .range([-maxY,-minY])
     .domain([minY,maxY]);
 
-var fullx = d3.scaleLinear()
+  fullx = d3.scaleLinear()
     .range([-1, width+1])
     .domain([-maxX, -minX]);
 
-var fully = d3.scaleLinear()
+  fully = d3.scaleLinear()
     .range([-1, height+1])
     .domain([maxY, minY]);
 
 
+  svg = d3.select("#full").append('svg')
+    .attr('width',700)
+      .attr('height', 500)
+      .append('g');
+
+  full_xAxis = d3.axisBottom(x)
+      .ticks(width/height*10)
+      .tickSize(height)
+      .tickPadding(8 - height);
+
+  full_yAxis = d3.axisRight(y)
+      .ticks(10)
+      .tickSize(width)
+      .tickPadding(8 - width);
+
+  svg.selectAll("g").remove();
+  full_gx = svg.append("g")
+      .attr("class", "axis axis-x")
+      .call(full_xAxis);
+
+  full_gy = svg.append("g")
+      .attr("class", "axis axis-y")
+      .call(full_yAxis);
+
+  var fileName = "";
+  if(!is_sorted){
+    fileName = data_list[data_select];
+  }else{
+    fileName = sorted_data_list[data_select];
+  }
+
+  if(data_select == "Japan"){
+    minY = 124.16, maxY = 145.571, minX = 24.3471, maxX = 45.4094;
+    // x = d3.scaleLinear()
+    // .range([-1, width+1])
+    // .domain([minX, maxX]);
+  }else if(data_select == "Phily"){
+    minY = -75.2781, maxY = -74.9576, minX = 39.8763, maxX = 40.1372;
+  }
+
+  if(!is_origin){
+    console.log("right init kernel!!!!!");
+    init_kernel(fileName, is_sorted, false);
+  }else{
+  d3.csv("../data/twitter_clean_jp.txt", function(error, data){
+    if(error) throw error;
+    data.forEach(function(d){
+      var cordinate = [];
+      Object.values(d).forEach(function(item){
+      var items = item.split(" ");
+      fullData.push({'y':parseFloat(items[0]), 'x':parseFloat(items[1])});
+      });
+    });
+
+    full_update(0.01, 0.01725467901116645);
+    //fullData = data;
+    // //console.log(fullData);
+    //draw_full_canvas();
+  });
+  }
+}
+
 function fullgetCore(std, epsilon){
 
-  var norData = fullnormalize();
+  var norData = fullData;
 
   var x = 1.0;
   var y = (maxY-minY)/(maxX-minX);
@@ -60,13 +127,27 @@ function fullfill(norData, std, max, x, y){
   var res = 200.0;
   var edge = 500.0;
 
-  var delta = edge/res;
+  var delta = 0.002;
 
   var coresetData = [];
 
-  for(var i=0.0; i<edge*x; i+=delta){
-    for(var j=0.0; j<edge*y; j+=delta){
-      var value = full_eval_kernel(norData, std, (i+delta/2.0)/edge, (j+delta/2.0)/edge);
+   var v = 0.0;
+  var cur_max = 0.0;
+  for(var i=minX; i<=maxX; i+=delta){
+    for(var j=minY; j<maxY; j+=delta){
+      v = full_eval_kernel(norData, std, i+delta/2.0, j+delta/2.0);
+      if (v > cur_max){
+        cur_max = v;
+      }
+    }
+  }
+
+  max = cur_max;
+  console.log("max:" + max);
+
+  for(var i=minX; i<=maxX; i+=delta){
+    for(var j=minY; j<=maxY; j+=delta){
+      var value = full_eval_kernel(norData, std, i+delta/2.0, j+delta/2.0);
       var percent = parseFloat(value)/max;
       var color_value = 0.0;
 
@@ -82,6 +163,8 @@ function fullfill(norData, std, max, x, y){
 
       if(color_value >= 0.05){
         coresetData.push({"x":i, "y":j, "color":threshold(color_value), "delta":delta, "value": value});
+        // console.log(i);
+        // console.log(j);
       }
       // if(value > 0.95*max){
       //   coresetData.push({"x":i, "y":j, "color":"#c24429", "delta":delta});
@@ -112,11 +195,13 @@ function fullfill(norData, std, max, x, y){
 function full_eval_kernel(norData, std, x, y){
   var count = 0.0;
   var coeff = 1.0;
+  var STD = 0.003;
 
   norData.forEach(function(d){
-    var dist = (x-d.x_nor)*(x-d.x_nor) + (y-d.y_nor)*(y-d.y_nor);
-    //console.log(dist);
-    count += coeff*Math.exp(-dist/(2.0*std*std));
+    var dist = (x-d.x)*(x-d.x) + (y-d.y)*(y-d.y);
+     if (dist <= 8.0*STD/(maxY - minY)){
+       count += coeff*parseFloat(Math.exp(-dist/(2.0*STD*STD)));
+     }
   });
 
   return parseFloat(count)/(norData.length+1);
@@ -125,29 +210,13 @@ function full_eval_kernel(norData, std, x, y){
 var char_div;
 var full_canvas;
 
-  var svg = d3.select("#full").append('svg')
-    .attr('width',700)
-      .attr('height', 500)
-      .append('g');
+var svg;
 
-  var full_xAxis = d3.axisBottom(x)
-      .ticks(width/height*10)
-      .tickSize(height)
-      .tickPadding(8 - height);
+var full_xAxis;
+var full_yAxis;
 
-  var full_yAxis = d3.axisRight(y)
-      .ticks(10)
-      .tickSize(width)
-      .tickPadding(8 - width);
-
-  svg.selectAll("g").remove();
-  var full_gx = svg.append("g")
-      .attr("class", "axis axis-x")
-      .call(full_xAxis);
-
-  var full_gy = svg.append("g")
-      .attr("class", "axis axis-y")
-      .call(full_yAxis);
+var full_gx;
+var full_gy;
 
 function draw_full_canvas(){
 
@@ -224,8 +293,7 @@ function draw_full_canvas(){
 function draw_full(){
   // full_canvas.save();
   // full_canvas.clearRect(0, 0, width, height);
-
-    fullData.forEach(function(d){
+  fullData.forEach(function(d){
       full_canvas.beginPath();
       full_canvas.rect(parseFloat(d.x)+90, -parseFloat(d.y)+350, parseFloat(d.delta), parseFloat(d.delta));
       full_canvas.fillStyle = d.color;
@@ -354,12 +422,12 @@ function fullset(){
 
 }
 
-function fullnormalize(){
-  var diff = maxX - minX > maxY - minY ? maxX - minX : maxY - minY;
-  norData = [];
+// function fullnormalize(){
+//   var diff = maxX - minX > maxY - minY ? maxX - minX : maxY - minY;
+//   norData = [];
 
-  fullData.forEach(function(d){
-    norData.push({"x": d.x, "y": d.y, "x_nor": (d.x - minX)/diff, "y_nor": (d.y - minY)/diff, "color":"#fff"});
-  });
-  return norData;
-}
+//   fullData.forEach(function(d){
+//     norData.push({"x": d.x, "y": d.y, "x_nor": (d.x - minX)/diff, "y_nor": (d.y - minY)/diff, "color":"#fff"});
+//   });
+//   return norData;
+// }

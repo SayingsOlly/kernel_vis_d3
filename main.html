@@ -4,9 +4,11 @@
     <meta charset="UTF-8">
     <title>index</title>
     <script src="//maps.google.com/maps/api/js?key=AIzaSyBQ5PYD_Xf46rA5E2lwBzlouGodHnkjzeo"></script>
+    <script src="js/CanvasLayer.js"></script>
     <script type="text/javascript" src="bower_components/d3/d3.js"></script>
     <script src="http://d3js.org/colorbrewer.v1.min.js"></script>
     <script type="text/javascript" src="js/colorbrewer.v1.min.js"></script>
+
     <link rel="stylesheet" href="css/styles.css"/>
   </head>
   <body>
@@ -87,25 +89,46 @@
             <input name="tau_submit"  type="submit" value="Confirm" >
       </form>
 
-    </div>
+       <button id="compare_btn" onclick="handleCompare()">Compare</button>
+       <select id="data_type_select">
+          <option>Kentucky</option>
+          <option>Phily</option>
+          <option>Japan</option>
+        </select>
+       </div>
 
-    <div id="coreset" class="set_div">
+      <div id="coreset" class="set_div">
+        <select id="map_type_select_left">
+          <option>Coreset</option>
+          <option>Random Sampling</option>
+          <option>Coreset Relational Diff</option>
+          <option>Coreset Diff</option>
+          <option>Random Sampling Relational Diff</option>
+          <option>Random Sampling Diff</option>
+          <option>Original</option>
+        </select>
       <h1> Coreset Data </h1>
-      <!--<button>reset</button> -->
-      <!-- <svg id="coreset_svg" width="700" height="500"></svg> -->
 
-      <svg class="color_bar_svg" height="500" width="50"></svg>
-    </div>
+      </div>
 
-    <div id="full" class="set_div">
+      <div id="full" class="set_div">
+        <select id="map_type_select_right">
+          <option>Random Sampling</option>
+          <option>Coreset</option>
+          <option>Coreset Relational Diff</option>
+          <option>Coreset Diff</option>
+          <option>Random Sampling Relational Diff</option>
+          <option>Random Sampling Diff</option>
+          <option>Original</option>
+        </select>
       <h1> Full Data </h1>
-      <!-- <svg id="full_svg" width="700" height="500"> -->
-      <!-- </svg> -->
       <svg class="color_bar_svg" height="500", width="50"></svg>
-    </div>
-    <script type="application/javascript" src="js/coreset.js"></script>
-    <script type="application/javascript" src="js/fullset.js"></script>
-    <!-- <script type="application/javascript" src="js/dropfile.js"></script> -->
+
+      </div>
+      <script type="application/javascript" src="js/coreset.js"></script>
+      <!-- <script type="application/javascript" src="js/fullset.js"></script> -->
+    <script type="application/javascript" src="js/coreset_right.js"></script>
+    <!-- <script type="application/javascript" src="js/dropfile.js"></script>
     <!-- <script type="application/javascript" src="js/test.js"></script> -->
   </body>
 

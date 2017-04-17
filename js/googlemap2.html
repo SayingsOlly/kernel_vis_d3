@@ -1,0 +1,273 @@
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
+    <title>CanvasLayer 2d Example</title>
+    <style>
+      html, body, #map-div {
+        margin: 0;
+        padding: 0;
+        height: 100%;
+      }
+    </style>
+
+    <script src="//maps.google.com/maps/api/js?key=AIzaSyBQ5PYD_Xf46rA5E2lwBzlouGodHnkjzeo"></script>
+    <script src="//d3js.org/d3.v4.min.js"></script>
+    <script src="http://d3js.org/colorbrewer.v1.min.js"></script>
+    <script src="CanvasLayer.js"></script>
+
+    <script>
+
+var map, map2;
+initialize();
+function initialize(condition) {
+    // create the maps
+    var myOptions = {
+        zoom: 14,
+        center: new google.maps.LatLng(0.0, 0.0),
+        mapTypeId: google.maps.MapTypeId.ROADMAP
+    }
+    map = new google.maps.Map(document.getElementById("map_canvas"), myOptions);
+
+    map2 = new google.maps.Map(document.getElementById("map_canvas2"), myOptions);
+}
+
+
+//       <!-- var color_data = d3.entries(colorbrewer).slice(1,18); -->
+//       <!-- color_data.splice(0,1); -->
+//       <!-- color_data.push({key: 'Default', -->
+//       <!--                  value: {11: ["#f7f4f9","#00d0e5", "#0089e1", "#0044dd", "#0001d9", "#3e00d5","#7b00d2", "#b700ce", "#ca44a3", "#c60065", "#c24429"]}}); -->
+
+//       var domain_vals = [.05, .15 ,.25, .35, .45, .55, .65, .75, .85, .95];
+
+//       var threshold = d3.scaleThreshold()
+//       .domain(domain_vals)
+//       .range(["#f7f4f9","#00d0e5", "#0089e1", "#0044dd", "#0001d9", "#3e00d5","#7b00d2", "#b700ce", "#ca44a3", "#c60065", "#c24429"]);
+
+//       var xBar = d3.scaleLinear()
+//     .domain([0, 1])
+//       .range([0, 340]);
+
+
+//      // initiation
+//       var map;
+//       var minY = -89.582541, maxY = -81.960144, minX = 36.3, maxX = 39.3;
+//       var max = 0.037657;
+//       var delta = 0.04;
+//       var full_data;
+//       var ken = [];
+//       var coresetData = [];
+//       var canvasLayer;
+//       var context;
+
+//       var rectLatLng = new google.maps.LatLng(40, -95);
+//       var rectWidth = 6.5;
+
+// var resolutionScale = window.devicePixelRatio || 1;
+
+
+//       // get the data first
+//       function fill() {
+
+//        var v = 0.0;
+//   var cur_max = 0.0;
+//   for(var i=minX; i<=maxX; i+=delta){
+//     for(var j=minY; j<=maxY; j+=delta){
+//       v = kde_kernel(i+delta/2.0, j+delta/2.0);
+//       if (v > cur_max){
+//         cur_max = v;
+//       }
+//     }
+//   }
+
+//   max = cur_max;
+
+
+
+
+
+
+//       console.log(ken);
+//       for(var i = minX; i<= maxX; i+=delta){
+//           for(var j = minY; j<= maxY; j+=delta){
+//                                 var value = kde_kernel(i+delta/2.0, j+delta/2.0);
+//                                 var percent = parseFloat(value)/max;
+
+//                                 var color_value = 0.0;
+
+//                                 threshold.range().map(function(color){
+
+//                                   var d = threshold.invertExtent(color);
+//                                   if (d[0] == null) d[0] = xBar.domain()[0];
+//                                   if (d[1] == null) d[1] = xBar.domain()[1];
+//                                   if(percent > d[0] && percent <= d[1]){
+//                                       color_value = d[0];
+//                                   }});
+//                             if(color_value >= 0.05){
+//                             coresetData.push({"x":i, "y":j, "color": threshold(color_value), "value": value});
+
+//                                                                  }
+//                                                                  }
+//                                                                  }}
+
+//       function kde_kernel(x, y){
+//            var count = 0.0;
+//            var coeff = 1.0;
+//            STD = 0.07;
+
+//                             ken.forEach(function(d){
+
+//       var dist = (x-d.x)*(x-d.x) + (y-d.y)*(y-d.y);
+
+//       if (dist <= 8.0*STD/(maxY - minY)){
+//                    count += coeff*parseFloat(Math.exp(-dist/(2.0*STD*STD)));
+
+//       }
+//   });
+
+//       return parseFloat(count)/(ken.length+1);
+//       }
+
+//       // do the calculation
+//       function init() {
+
+//         // initialize the map
+//         var mapOptions = {
+//           zoom: 7,
+//           center: new google.maps.LatLng(37.548834, -85.200017),
+//           mapTypeId: google.maps.MapTypeId.COORDINATE,
+//           // styles: [
+//           //   {
+//           //     stylers: [{saturation: -85}]
+//           //   }, {
+//           //     featureType: "water",
+//           //     elementType: "geometry",
+//           //     stylers: [
+//           //       { lightness: -20 }
+//           //     ]
+//           //   }
+//           // ]
+//         };
+
+//         // Map div.
+//         d3.select("body").append("div")
+//           .attr("id", "map-div")
+//           .style("width", "700px")
+//           .style("height", "500px");
+
+//         var mapDiv = document.getElementById('map-div');
+//         console.log(mapDiv);
+//         map = new google.maps.Map(mapDiv, mapOptions);
+
+//         // initialize the canvasLayer
+//         var canvasLayerOptions = {
+//           map: map,
+//           resizeHandler: resize,
+//           animate: false,
+//           updateHandler: update,
+//           resolutionScale: resolutionScale
+//         };
+//         canvasLayer = new CanvasLayer(canvasLayerOptions);
+//         context = canvasLayer.canvas.getContext('2d');
+
+
+//      d3.csv("../data/ken_sort.txt", function(error, data){
+//       console.log("asdfas");
+//       if(error) throw error;
+//       var epsilon = 0.03;
+
+//       var size = Math.floor(1/(epsilon*epsilon)*Math.log(1000));
+
+//      console.log(size);
+//      for(var i=0; i<size; i++){
+//          var cordinate = [];
+//          Object.values(data[i]).forEach(function(item){
+//                           var items = item.split(" ");
+//                           //console.log(items);
+//          ken.push({'y':parseFloat(items[0]), 'x':parseFloat(items[1])});
+//                           });
+
+//       }
+
+//                           fill();
+//                           update();
+//     });
+
+//    <!--    ken.forEach(function(d){ -->
+//    <!--        context.beginPath(); -->
+//    <!--        context.rect(d.x, d.y, 0.01, 0.01); -->
+//    <!--        context.fillStyle = "red"; -->
+//    <!--    context.fill(); -->
+
+//    <!-- }); -->
+//       }
+
+//       function resize() {
+//         // nothing to do here
+//       }
+
+//       function update() {
+//         // clear previous canvas contents
+//         var canvasWidth = canvasLayer.canvas.width;
+//         var canvasHeight = canvasLayer.canvas.height;
+//       context.clearRect(0, 0, canvasWidth, canvasHeight);
+//       context.globalAlpha = 0.5;
+//         // we like our rectangles hideous
+//         //context.fillStyle = 'rgba(230, 77, 26, 1)';
+
+//         /* We need to scale and translate the map for current view.
+//          * see https://developers.google.com/maps/documentation/javascript/maptypes#MapCoordinates
+//          */
+//         var mapProjection = map.getProjection();
+
+//         /**
+//          * Clear transformation from last update by setting to identity matrix.
+//          * Could use context.resetTransform(), but most browsers don't support
+//          * it yet.
+//          */
+//         context.setTransform(1, 0, 0, 1, 0, 0);
+
+//         // scale is just 2^zoom
+//         // If canvasLayer is scaled (with resolutionScale), we need to scale by
+//         // the same amount to account for the larger canvas.
+//         var scale = Math.pow(2, map.zoom) * resolutionScale;
+//         context.scale(scale, scale);
+
+//         /* If the map was not translated, the topLeft corner would be 0,0 in
+//          * world coordinates. Our translation is just the vector from the
+//          * world coordinate of the topLeft corder to 0,0.
+//          */
+//         var offset = mapProjection.fromLatLngToPoint(canvasLayer.getTopLeft());
+//         context.translate(-offset.x, -offset.y);
+
+//         // project rectLatLng to world coordinates and draw
+//         //var worldPoint = mapProjection.fromLatLngToPoint(rectLatLng);
+
+//    coresetData.forEach(function(d){
+//     var newll = new google.maps.LatLng(d.x, d.y);
+//     var newpoint = mapProjection.fromLatLngToPoint(newll);
+//            //console.log(newpoint);
+//            context.beginPath();
+//            context.rect(newpoint.x, newpoint.y, delta, delta);
+//            context.fillStyle = d.color;
+//             context.fill();
+//            });
+//     <!-- context.beginPath(); -->
+//     <!-- context.rect(worldPoint.x, worldPoint.y, rectWidth, rectWidth); -->
+//     <!-- context.fill(); -->
+
+//     <!-- context.beginPath(); -->
+//     <!-- context.rect(worldPoint.x+2, worldPoint.y, rectWidth, rectWidth) -->
+//     <!-- context.fill(); -->
+
+// //       context.fillRect(worldPoint.x, worldPoint.y, rectWidth, rectWidth);
+//       }
+
+//       document.addEventListener('DOMContentLoaded', init, false);
+    </script>
+  </head>
+
+  <body>
+    <div id="map_canvas" style="width:700px; height:500px; margin-left:80px;"></div>
+<div id="map_canvas2" style="width:700px; height:500px; margin-left:80px;"></div>
+  </body>
+</html>
