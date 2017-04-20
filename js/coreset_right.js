@@ -524,7 +524,7 @@ function init_right(data_select, is_sorted, is_origin, is_right){
   current_data = data_select;
   if(data_select == "Japan"){
     minY = 124.16, maxY = 145.571, minX = 24.3471, maxX = 45.4094;
-  }else if(data_select == "Phily"){
+  }else if(data_select == "Philadelphia Crimes"){
     minY = -75.2781, maxY = -74.9576, minX = 39.8763, maxX = 40.1372;
   }else if(data_select == "Kentucky"){
     minY = -89.582541, maxY = -81.960144, minX = 36.3, maxX = 39.3;

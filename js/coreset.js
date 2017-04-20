@@ -6,27 +6,27 @@ var centerX = (maxX+minX)/2, centerY = (maxY+minY)/2;
 
 
 var data_list = {"Kentucky":"../data/kentucky_org.txt",
-                 "Phily":"../data/crime_clean.txt",
+                 "Philadelphia Crimes":"../data/crime_clean.txt",
                  "Japan": "../data/twitter_clean_jp.txt"};
 
 var sorted_data_list = {"Kentucky":"../data/ken_sort.txt",
-                        "Phily":"../data/crime_sort.txt",
+                        "Philadelphia Crimes":"../data/crime_sort.txt",
                         "Japan": "../data/twitter_sort.txt"};
 
 var STD_list = {"Kentucky": 0.07,
-                "Phily": 0.003,
+                "Philadelphia Crimes": 0.003,
                 "Japan": 0.25};
 
 var delta_list = {"Kentucky": 0.04,
-                  "Phily":0.002,
+                  "Philadelphia Crimes":0.002,
                   "Japan": 0.1};
 
 var zoom_list = {"Kentucky": 6,
-                 "Phily": 10,
+                 "Philadelphia Crimes": 10,
                  "Japan": 5};
 
 var full_data_list = {"Kentucky": "../data/kentucky_coreset.csv",
-                      "Phily": "../data/phily_coreset.csv",
+                      "Philadelphia Crimes": "../data/phily_coreset.csv",
                       "Japan": "../data/japan_coreset.csv"};
 
 var current_data = "Kentucky";
@@ -551,7 +551,7 @@ function init_left(data_select, is_sorted, is_origin, is_left){
   // current_data = data_select;
   if(data_select == "Japan"){
     minY = 124.16, maxY = 145.571, minX = 24.3471, maxX = 45.4094;
-  }else if(data_select == "Phily"){
+  }else if(data_select == "Philadelphia Crimes"){
     minY = -75.2781, maxY = -74.9576, minX = 39.8763, maxX = 40.1372;
   }else if(data_select == "Kentucky"){
     minY = -89.582541, maxY = -81.960144, minX = 36.3, maxX = 39.3;
