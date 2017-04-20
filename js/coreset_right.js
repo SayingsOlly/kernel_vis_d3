@@ -46,6 +46,7 @@ var right_rectLatLng = new google.maps.LatLng(40,-95);
 var right_resolutionScale = window.devicePixelRatio || 1;
 
 var delta = 0.0016;
+
 // Color Range
 var colorRange = ["rgba(194,68,41, 1.0)", "rgba(198,0,101, 1.0)","rgba(202,68,163, 1.0)", "rgba(183,0,206, 1.0)", "rgba(123,0,210, 1.0)", "rgba(62,0,213, 1.0)", "rgba(0,1,217, 1.0)", "rgba(0,68,221, 1.0)", "rgba(0,137,225, 1.0)", "rgba(0,208,229, 1.0)"];
 
@@ -302,7 +303,8 @@ function right_init_googlemap(){
   var mapOptions = {
     zoom:init_zoom,
     center: new google.maps.LatLng(centerX, centerY),
-    mapTypeId: google.maps.MapTypeId.COORDINATE
+    mapTypeId: google.maps.MapTypeId.COORDINATE,
+    styles: map_styles
   };
 
   d3.select("#map-div-right").remove();

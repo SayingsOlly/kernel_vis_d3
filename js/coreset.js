@@ -330,7 +330,8 @@ function init_googlemap(){
   var mapOptions = {
     zoom:init_zoom,
     center: new google.maps.LatLng(centerX, centerY),
-    mapTypeId: google.maps.MapTypeId.COORDINATE
+    mapTypeId: google.maps.MapTypeId.COORDINATE,
+    styles: map_styles
   };
 
   d3.select("#map-div-left").remove();
