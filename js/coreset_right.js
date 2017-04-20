@@ -383,6 +383,7 @@ function right_map_draw(){
     right_context.rect(newpoint.x, newpoint.y, parseFloat(delta), parseFloat(delta));
     right_context.fillStyle = d.color;
     right_context.fill();
+
    });
 }
 
@@ -871,6 +872,10 @@ function right_randomSample(std, epsilon, flag){
 function right_getCore(is_left, std, radius, tau){
 
   //no norData
+  var target_right = document.getElementById("full");
+
+  spinner_right = new Spinner(opts_right).spin();
+  target_right.appendChild(spinner_right.el);
   var norData = right_ken;
 
   var x = 1.0;
@@ -1012,6 +1017,8 @@ function right_fill(norData, std, x, y, is_right){
       }
 
 
+
+    spinner_right.stop();
   /**
    *  original
    **/

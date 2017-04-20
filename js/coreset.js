@@ -410,7 +410,7 @@ function map_draw(){
     left_context.rect(newpoint.x, newpoint.y, parseFloat(delta), parseFloat(delta));
     left_context.fillStyle = d.color;
     left_context.fill();
-   });
+  });
 }
 
 /**
@@ -433,17 +433,10 @@ function init_kernel(fileName, is_sorted, is_left){
     // mark data length.
     data_length_mark = size;
 
-    //size = 199162;
-    // if(size > data.length){
-    //   size = data.length;
-    // }
     set_data_size(size);
 
     percent = parseFloat(size)/parseFloat(full_size);
 
-    // if(STD > 0.01){
-    //   STD = 0.01;
-    // }
     var d0 = performance.now();
 
     var sampleList = [];
@@ -480,9 +473,6 @@ function init_kernel(fileName, is_sorted, is_left){
           tmpMaxY = tmpY;
         }
 
-        // if(i<size){
-        //   sampleList.push(d);
-        // }
         if(i<size){
           sampleList.push(d);
         }else{
@@ -492,9 +482,6 @@ function init_kernel(fileName, is_sorted, is_left){
           }
         }
       });
-      // var formatedList = [];
-      // console.log(tmpMinX + " " + tmpMaxX);
-      // console.log(tmpMinY + " " + tmpMaxY);
 
       sampleList.forEach(function(d){
         var cordinate = [];
@@ -574,24 +561,23 @@ function init_left(data_select, is_sorted, is_origin, is_left){
     });
   }else{
 
+    delta = delta_list[data_select];
+    STD = STD_list[data_select];
+    init_zoom = zoom_list[data_select];
+    current_sorted = is_sorted;
 
-  delta = delta_list[data_select];
-  STD = STD_list[data_select];
-  init_zoom = zoom_list[data_select];
-  current_sorted = is_sorted;
+    var fileName = "";
+    if(!is_sorted){
+      fileName = data_list[data_select];
+    }else{
+      fileName = sorted_data_list[data_select];
+    }
 
-  var fileName = "";
-  if(!is_sorted){
-    fileName = data_list[data_select];
-  }else{
-    fileName = sorted_data_list[data_select];
-  }
+    current_file = fileName;
 
-  current_file = fileName;
+    init_kernel(fileName, is_sorted, true);
 
-      init_kernel(fileName, is_sorted, true);
-
-    }}
+  }}
 
 //initiation
 init_left("Kentucky", false, false, true);
@@ -898,8 +884,14 @@ var y = d3.scaleLinear()
 function getCore(is_left, std, radius, tau){
 
   //no norData
-  var norData = ken;
 
+  // pre_loading spinner.
+  var target_left = document.getElementById("coreset");
+
+  spinner_left = new Spinner(opts_left).spin();
+  target_left.appendChild(spinner_left.el);
+
+  var norData = ken;
   var x = 1.0;
   var y = (maxY-minY)/(maxX-minX);
 
@@ -908,7 +900,8 @@ function getCore(is_left, std, radius, tau){
   // kill chaos.
   killChaos(std, radius, tau);
 
-}
+
+  }
 
 function killChaos(std, radius, tau){
 
@@ -1041,6 +1034,7 @@ function fill(norData, std, x, y, is_left){
         }
       }
 
+      spinner_left.stop();
   /**
    *  original
    **/

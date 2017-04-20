@@ -1,3 +1,7 @@
+/**
+  *   map styles config json.
+  **/
+
 var map_styles = [
   {
     "elementType": "geometry",
@@ -158,3 +162,41 @@ var map_styles = [
     ]
   }
 ];
+
+
+//spinner
+
+var spinner_left;
+var spinner_right;
+
+
+// loader settings
+var opts_left = {
+  lines: 9, // The number of lines to draw
+  length: 9, // The length of each line
+  width: 5, // The line thickness
+  zIndex: 3e9,
+  shadow: true,
+  top: '800px', // Top position relative to parent
+  left: '350px', // Left position relative to parent
+  radius: 14, // The radius of the inner circle
+  color: '#EE3124', // #rgb or #rrggbb or array of colors
+  speed: 1.9, // Rounds per second
+  trail: 40, // Afterglow percentage
+  className: 'spinner' // The CSS class to assign to the spinner
+};
+
+var opts_right = {
+  lines: 9, // The number of lines to draw
+  length: 9, // The length of each line
+  width: 5, // The line thickness
+  zIndex: 3e9,
+  shadow: true,
+  top: '800px', // Top position relative to parent
+  left: '1150px', // Left position relative to parent
+  radius: 14, // The radius of the inner circle
+  color: '#EE3124', // #rgb or #rrggbb or array of colors
+  speed: 1.9, // Rounds per second
+  trail: 40, // Afterglow percentage
+  className: 'spinner' // The CSS class to assign to the spinner
+};
