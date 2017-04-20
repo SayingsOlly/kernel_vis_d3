@@ -114,7 +114,7 @@ var threshold = d3.scaleThreshold()
     .range(["#f7f4f9","#00d0e5", "#0089e1", "#0044dd", "#0001d9", "#3e00d5","#7b00d2", "#b700ce", "#ca44a3", "#c60065", "#c24429"]);
 
 
-d3.select("#colorbrewer_selection")
+d3.select("#color_bar_span")
   .selectAll(".palette")
   .data(color_data)
   .enter().append("span")
@@ -144,10 +144,7 @@ d3.select("#colorbrewer_selection")
 
     // update ticks.
     barAxis.tickValues(threshold.domain());
-
-    console.log(domain_vals);
     update_color_bar(1);
-    console.log(d3.values(d.value).map(JSON.stringify).join("\n"));
   })
   .selectAll(".swatch")
     .data(function(d) { return d.value[d3.keys(d.value).map(Number).sort(d3.descending)[0]]; })
@@ -223,11 +220,15 @@ function update_color_bar(flag){
     .attr("height", 15)
     .attr("x", function(d) { return xBar(d[0]); })
     .attr("width", function(d) { return xBar(d[1]) - xBar(d[0]); })
+    .on("click",function(){
+      modal.style.display = "block";
+    })
     .style("fill", function(d) {
       // console.log('fill:',d[0]);
       // console.log(threshold(0));
       return threshold(d[0]);
-    });
+    })
+    .style("cursor","pointer");
 
   var ticks = color_gs.call(barAxis)
       .selectAll(".tick")
@@ -1530,5 +1531,13 @@ function normalize(){
   });
   return norData;
 }
+
+var modal = document.getElementById('myModal');;
+
+window.onclick = function(event) {
+    if (event.target == modal) {
+        modal.style.display = "none";
+    }
+};
 
 //document.addEventListener('DOMContentLoaded', init_left, false);
