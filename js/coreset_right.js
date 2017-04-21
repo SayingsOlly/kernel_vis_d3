@@ -1472,6 +1472,7 @@ function set_right_time(time){
 
 function set_right_data_size(size){
   d3.select("#right_sample_value").text(+size);
+  d3.select("#right_full_value").text(full_data_size[current_data]);
 }
 
 

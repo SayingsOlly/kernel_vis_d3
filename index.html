@@ -25,25 +25,25 @@
     <div id="colorbrewer_selection">
     </div>
     <div class="button_div">
-      <table width="100%" height="100%" border="0">
+      <table width="50%" height="100px" border="0">
 
-        <tr height="5%">
-          <td width="33%">
-            <label for="std"
-               style="display: inline-block; width: 50%; text-align: right">
-              Sample Importance = <span id="std-value">0.01</span> (0.002 - 0.02)
-            </label>
-            <input id="std" type="range" min="0.002" max="0.02" step="0.001" value="0.01" />
-          </td>
-          <td>
-       <form id="std_input_form" name="std_form" onSubmit="return handleStdClick()">
-            <input type="text" id="std_input" placeholder="Input std">
-            <input name="std_submit"  type="submit" value="Confirm" >
-       </form>
-          </td>
-        </tr>
+       <!--  <tr height="5%"> -->
+       <!--    <td width="33%"> -->
+       <!--      <label for="std" -->
+       <!--         style="display: inline-block; width: 50%; text-align: right"> -->
+       <!--        Sample Importance = <span id="std-value">0.01</span> (0.002 - 0.02) -->
+       <!--      </label> -->
+       <!--      <input id="std" type="range" min="0.002" max="0.02" step="0.001" value="0.01" /> -->
+       <!--    </td> -->
+       <!--    <td> -->
+       <!-- <form id="std_input_form" name="std_form" onSubmit="return handleStdClick()"> -->
+       <!--      <input type="text" id="std_input" placeholder="Input std"> -->
+       <!--      <input name="std_submit"  type="submit" value="Confirm" > -->
+       <!-- </form> -->
+       <!--    </td> -->
+       <!--  </tr> -->
 
-        <tr width="5%">
+        <tr>
           <td>
             <label for="epsilon"
                    style="display: inline-block; width: 50%; text-align: right">
@@ -146,7 +146,7 @@
 
        </p>
       <p id="full_size">
-        Data size: <span id="full_value">199162</span>
+        Data size: <span id="full_value"></span>
       </p>
 
       <p id="sample_time">
@@ -181,7 +181,7 @@
             </p>
 
             <p id="right_full_size">
-              Data size: <span id="full_value">199162</span>
+              Data size: <span id="right_full_value"></span>
             </p>
 
             <p id="right_sample_time">
@@ -194,9 +194,9 @@
         <select id="map_type_select_right">
           <option>Random Sampling</option>
           <option>Coreset</option>
-          <option>Coreset Relative Diff</option>
+          <option>Coreset Relative Difference</option>
           <option>Coreset Diff</option>
-          <option>Random Sampling Relative Diff</option>
+          <option>Random Sampling Relative Difference</option>
           <option>Random Sampling Diff</option>
           <option>Original</option>
         </select>

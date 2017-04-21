@@ -43,6 +43,7 @@ body{
 
 td{
     border: 0px;
+    width: 30%;
 }
 
 .key .tick{
@@ -109,6 +110,8 @@ td{
 #color_bar_new{
     position: relative;
     z-index:10;
+    top: 37px;
+    left: 10%;
 }
 
 #full .color_bar_svg{

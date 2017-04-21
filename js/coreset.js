@@ -13,6 +13,10 @@ var sorted_data_list = {"Kentucky":"../data/ken_sort.txt",
                         "Philadelphia Crimes":"../data/crime_sort.txt",
                         "Japan": "../data/twitter_sort.txt"};
 
+var full_data_size = {"Kentucky": 199163,
+                "Philadelphia Crimes": 683499,
+                "Japan": 153586};
+
 var STD_list = {"Kentucky": 0.07,
                 "Philadelphia Crimes": 0.003,
                 "Japan": 0.43};
@@ -1341,6 +1345,7 @@ function clickFunction(){
 
 function set_data_size(size){
   d3.select("#sample_value").text(+size);
+  d3.select("#full_value").text(full_data_size[current_data]);
 }
 
 function set_time(time){

@@ -53,7 +53,7 @@ var fullx;
 
 var fully;
 
-init_right("Japan", false, true, false);
+init_right("Philadelphia Crimes", false, true, false);
 
 function init_right(data_select, is_sorted, is_origin, is_left){
   console.log("aaaa");
@@ -123,7 +123,7 @@ function init_right(data_select, is_sorted, is_origin, is_left){
     init_kernel(fileName, is_sorted, false);
   }else{
 
-  d3.csv("../data/twitter_clean_jp.txt", function(error, data){
+  d3.csv("../data/crime_sort.txt", function(error, data){
     if(error) throw error;
     data.forEach(function(d){
       var cordinate = [];
@@ -166,7 +166,7 @@ function fullfill(norData, std, max, x, y){
   var res = 200.0;
   var edge = 500.0;
 
-  var delta = 0.1;
+  var delta = 0.002;
 
   var coresetData = [];
 
@@ -234,7 +234,7 @@ function fullfill(norData, std, max, x, y){
 function full_eval_kernel(norData, std, x, y){
   var count = 0.0;
   var coeff = 1.0;
-  var STD = 0.43;
+  var STD = 0.003;
 
   norData.forEach(function(d){
     var dist = (x-d.x)*(x-d.x) + (y-d.y)*(y-d.y);
