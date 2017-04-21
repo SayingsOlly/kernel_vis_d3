@@ -404,10 +404,10 @@ function map_update(){
   if(mapProjection != undefined){
     var offset = mapProjection.fromLatLngToPoint(canvasLayer.getTopLeft());
     left_context.translate(-offset.x, -offset.y);
+    map_draw();
   }
 
   //draw
-  map_draw();
 }
 
 function map_draw(){
@@ -603,8 +603,8 @@ init_left("Kentucky", false, false, true);
 function randomSample(std, epsilon, flag){
 
   // Update std text.
-  d3.select("#std-value").text(parseFloat(std).toFixed(4));
-  d3.select("#std").property("value", parseFloat(std));
+  // d3.select("#std-value").text(parseFloat(std).toFixed(4));
+  // d3.select("#std").property("value", parseFloat(std));
 
   d3.csv(current_file,function(data){
 
@@ -1122,8 +1122,8 @@ function kde_kernel(norData, std, x, y){
 
 function update(std, radius, tau){
 
-  d3.select("#std-value").text(std);
-  d3.select("#std").property("value", std);
+  // d3.select("#std-value").text(std);
+  // d3.select("#std").property("value", std);
 
   getCore(std, radius, tau);
 
@@ -1352,56 +1352,57 @@ function set_time(time){
   d3.select("#sample_time_value").text((+time).toFixed(1));
 }
 
-d3.select("#std").on("input", function(d){
-  // var tau = d3.select("tau").property("tau");
-  // var radius = d3.select("#radius").property("value");
-  var epsilon = d3.select("#epsilon").property("value");
+// d3.select("#std").on("input", function(d){
+//   // var tau = d3.select("tau").property("tau");
+//   // var radius = d3.select("#radius").property("value");
+//   var epsilon = d3.select("#epsilon").property("value");
 
-  d3.select("#std-value").text(+this.value);
-  d3.select("#std").property("value", +this.value);
-  //update(+this.value, radius, tau);
-  randomSample(+this.value, epsilon, 0);
+//   d3.select("#std-value").text(+this.value);
+//   d3.select("#std").property("value", +this.value);
+//   //update(+this.value, radius, tau);
+//   randomSample(+this.value, epsilon, 0);
 
-});
+// });
 
 d3.select("#epsilon").on("input", function(d){
-  var std = d3.select("#std").property("value");
-
-  d3.select("#epsilon-value").text(+this.value);
+  //var std = d3.select("#std").property("value");
+  //d3.select("#epsilon-value").text(+this.value);
+  d3.select("#epsilon_input").property("value", +this.value);
   d3.select("#epsilon").property("value", +this.value);
-
-  randomSample(std, +this.value, 1);
-
+  // randomSample(0.01, +this.value, 1);
 });
 
 d3.select("#radius").on("input", function(d){
-  var std = d3.select("#std").property("value");
-  var tau = d3.select("#tau").property("value");
+  //var std = d3.select("#std").property("value");
+  // var tau = d3.select("#tau").property("value");
 
-  d3.select("#radius-value").text(xscale(+this.value).toFixed(2));
+  //d3.select("#radius-value").text(xscale(+this.value).toFixed(2));
+  d3.select("#radius_input").property("value", xscale(+this.value).toFixed(2));
   d3.select("#radius").property("value", +this.value);
-  killChaos(std, +this.value, tau);
+  // killChaos(0.01, +this.value, tau);
 });
 
 d3.select("#tau").on("input",function(d){
-  var std = d3.select("#std").property("value");
-  var radius = d3.select("#radius").property("value");
+  // var std = d3.select("#std").property("value");
+  // var radius = d3.select("#radius").property("value");
 
-  d3.select("#tau-value").text(+this.value);
+  // d3.select("#tau-value").text(+this.value);
+  d3.select("#tau_input").property("value", +this.value);
   d3.select("#tau").property("value", +this.value);
 
-  killChaos(std, radius, +this.value);
+  // killChaos(0.01, radius, +this.value);
 });
 
 
 function handleRadiusClick(event){
 
-  var std = d3.select("#std").property("value");
+  // var std = d3.select("#std").property("value");
+  var std = 0.01;
   var value = document.getElementById("radius_input").value;
 
   var tau = d3.select("#tau").property("value");
 
-  d3.select("#radius-value").text(value);
+  // d3.select("#radius-value").text(value);
   d3.select("#radius").property("value", reverseXscale(parseFloat(value)));
   killChaos(std, reverseXscale(parseFloat(value)), tau);
   right_killChaos(std, reverseXscale(parseFloat(value)), tau);
@@ -1410,12 +1411,13 @@ function handleRadiusClick(event){
 
 function handleTauClick(event){
 
-  var std = d3.select("#std").property("value");
+  // var std = d3.select("#std").property("value");
+  var std = 0.01;
   var value = document.getElementById("tau_input").value;
 
   var radius = d3.select("#radius").property("value");
 
-  d3.select("#tau-value").text(value);
+  // d3.select("#tau-value").text(value);
   d3.select("#tau").property("value", +value);
   killChaos(std, radius, +value);
   right_killChaos(std, radius, +value);
@@ -1424,26 +1426,27 @@ function handleTauClick(event){
 
 function handleEpsilonClick(event){
 
-  var std = d3.select("#std").property("value");
+  // var std = d3.select("#std").property("value");
+  var std = 0.01;
   var value = document.getElementById("epsilon_input").value;
 
-  d3.select("#epsilon-value").text(value);
+  // d3.select("#epsilon-value").text(value);
   d3.select("#epsilon").property("value", parseFloat(value));
   randomSample(std, parseFloat(value), 1);
   right_randomSample(std, parseFloat(value), 1);
   return false;
 }
 
-function handleStdClick(event){
+// function handleStdClick(event){
 
-  var epsilon = d3.select("#epsilon-value").text();
-  var value = document.getElementById("std_input").value;
+//   var epsilon = d3.select("#epsilon-value").text();
+//   var value = document.getElementById("std_input").value;
 
-  d3.select("#std-value").text((+value).toFixed(4));
-  d3.select("#std").property("value", parseFloat(value));
-  randomSample(parseFloat(value), +epsilon, 0);
-  return false;
-}
+//   d3.select("#std-value").text((+value).toFixed(4));
+//   d3.select("#std").property("value", parseFloat(value));
+//   randomSample(parseFloat(value), +epsilon, 0);
+//   return false;
+// }
 
 function handleCompare(event){
   var data_value = document.getElementById("data_type_select").value;

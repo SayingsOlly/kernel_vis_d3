@@ -374,10 +374,10 @@ function right_map_update(){
   if(right_mapProjection != undefined){
     var offset = right_mapProjection.fromLatLngToPoint(right_canvasLayer.getTopLeft());
     right_context.translate(-offset.x, -offset.y);
+    right_map_draw();
   }
 
   //draw
-  right_map_draw();
 }
 
 function right_map_draw(){
