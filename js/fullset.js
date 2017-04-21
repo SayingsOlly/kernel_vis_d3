@@ -20,8 +20,6 @@ var STD_list = {"Kentucky": 0.07,
                 "Philadelphia Crimes": 0.003,
                 "Japan": 0.43};
 
-
-
 var delta_list = {"Kentucky": 0.04,
                   "Philadelphia Crimes":0.002,
                   "Japan": 0.1};
