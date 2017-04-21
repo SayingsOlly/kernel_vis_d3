@@ -38,6 +38,7 @@ var full_data_list = {"Kentucky": "../data/kentucky_coreset.csv",
 var fullzoom;
 var STD = 0.43;
 //var std = 0.01;
+var currentData = "Philadelphia Crimes";
 
 //var fullsvg = d3.select("#full_svg");
 //var width = +fullsvg.attr("width");
@@ -57,6 +58,7 @@ init_right("Philadelphia Crimes", false, true, false);
 
 function init_right(data_select, is_sorted, is_origin, is_left){
   console.log("aaaa");
+  currentData = data_select;
 
   width = 700;
   height = 500;
@@ -114,7 +116,8 @@ function init_right(data_select, is_sorted, is_origin, is_left){
     // x = d3.scaleLinear()
     // .range([-1, width+1])
     // .domain([minX, maxX]);
-  }else if(data_select == "Phily"){
+  }else if(data_select == "Philadelphia Crimes"){
+    console.log("Phily");
     minY = -75.2781, maxY = -74.9576, minX = 39.8763, maxX = 40.1372;
   }
 
@@ -123,7 +126,7 @@ function init_right(data_select, is_sorted, is_origin, is_left){
     init_kernel(fileName, is_sorted, false);
   }else{
 
-  d3.csv("../data/crime_sort.txt", function(error, data){
+  d3.csv(data_list[data_select], function(error, data){
     if(error) throw error;
     data.forEach(function(d){
       var cordinate = [];
@@ -163,16 +166,22 @@ var xBar = d3.scaleLinear()
     .range([0, 340]);
 
 function fullfill(norData, std, max, x, y){
+  console.log("fullfill");
   var res = 200.0;
   var edge = 500.0;
 
-  var delta = 0.002;
+  var count = 0;
+  var delta = delta_list[currentData];
 
   var coresetData = [];
 
    var v = 0.0;
   var cur_max = 0.0;
   for(var i=minX; i<=maxX; i+=delta){
+    count = count + 1;
+    if(count%20 == 0 || count == 1){
+      console.log(count);
+    }
     for(var j=minY; j<maxY; j+=delta){
       v = full_eval_kernel(norData, std, i+delta/2.0, j+delta/2.0);
       if (v > cur_max){
@@ -184,7 +193,12 @@ function fullfill(norData, std, max, x, y){
   max = cur_max;
   console.log("max:" + max);
 
+  count = 0;
   for(var i=minX; i<=maxX; i+=delta){
+     count = count + 1;
+    if(count%20 == 0){
+      console.log(count);
+    }
     for(var j=minY; j<=maxY; j+=delta){
       var value = full_eval_kernel(norData, std, i+delta/2.0, j+delta/2.0);
       var percent = parseFloat(value)/max;
@@ -234,8 +248,7 @@ function fullfill(norData, std, max, x, y){
 function full_eval_kernel(norData, std, x, y){
   var count = 0.0;
   var coeff = 1.0;
-  var STD = 0.003;
-
+  var STD = STD_list[currentData];
   norData.forEach(function(d){
     var dist = (x-d.x)*(x-d.x) + (y-d.y)*(y-d.y);
      if (dist <= 8.0*STD/(maxY - minY)){
@@ -354,7 +367,11 @@ function full_update(std, epsilon){
   //   std = d3.select("#std").property("value");
   // }
 
+
+  var d1 = performance.now();
   var coresetData = fullgetCore(std, epsilon);
+  var d2 = performance.now();
+  console.log("time:" + (d2-d1)/1000);
   // console.log("coreset");
   // console.log(coresetData);
 

@@ -17,6 +17,11 @@ var full_data_size = {"Kentucky": 199163,
                 "Philadelphia Crimes": 683499,
                 "Japan": 153586};
 
+var full_data_time = {"Kentucky" : 120.5,
+                      "Japan": 311.6,
+                      "Philadelphia Crimes":1443.3
+                     };
+
 var STD_list = {"Kentucky": 0.07,
                 "Philadelphia Crimes": 0.003,
                 "Japan": 0.43};
@@ -30,7 +35,7 @@ var zoom_list = {"Kentucky": 6,
                  "Japan": 5};
 
 var full_data_list = {"Kentucky": "../data/kentucky_coreset.csv",
-                      "Philadelphia Crimes": "../data/phily_coreset.csv",
+                      "Philadelphia Crimes": "../data/crime_full_new.csv",
                       "Japan": "../data/japan_coreset.csv"};
 
 var last_left_center;
@@ -47,6 +52,10 @@ var coresetData = [];
 
 var left_is_diff = 0;
 var right_is_diff = 0;
+
+var left_is_origin;
+
+var right_is_origin;
 
 // GOOGLE map
 var canvasLayer;
@@ -263,23 +272,25 @@ function update_color_bar(flag){
     d.originColor = threshold(color_value);
   });
 
-    right_coresetData.forEach(function(d){
-    var percent = parseFloat(d.value)/max;
-    var color_value = 0.0;
 
-    threshold.range().map(function(color) {
-      var d = threshold.invertExtent(color);
-      if (d[0] == null) d[0] = xBar.domain()[0];
-      if (d[1] == null) d[1] = xBar.domain()[1];
-      if(percent > d[0] && percent <= d[1]){
-        //console.log(d[0]);
-        color_value = d[0];
-      }
-    });
+  console.log("updata_coloar bar");
+    // right_coresetData.forEach(function(d){
+    // var percent = parseFloat(d.value)/max;
+    // var color_value = 0.0;
 
-    d.color = threshold(color_value);
-    d.originColor = threshold(color_value);
-    });
+    // threshold.range().map(function(color) {
+    //   var d = threshold.invertExtent(color);
+    //   if (d[0] == null) d[0] = xBar.domain()[0];
+    //   if (d[1] == null) d[1] = xBar.domain()[1];
+    //   if(percent > d[0] && percent <= d[1]){
+    //     //console.log(d[0]);
+    //     color_value = d[0];
+    //   }
+    // });
+
+    // d.color = threshold(color_value);
+    // //d.originColor = threshold(color_value);
+    // });
 
   if(flag == 1){
     map_draw();
@@ -564,9 +575,12 @@ function init_left(data_select, is_sorted, is_origin, is_left){
     d3.csv(full_data_list[current_data], function(error, data){
       if(error) throw error;
 
+      set_data_size(1);
+      set_time(1);
       coresetData = data;
 
       init_googlemap();
+      map_draw();
       //right_map_update();
 
     });
@@ -606,9 +620,14 @@ function randomSample(std, epsilon, flag){
   // d3.select("#std-value").text(parseFloat(std).toFixed(4));
   // d3.select("#std").property("value", parseFloat(std));
 
+  if(left_is_origin == true){
+    set_data_size(1);
+    set_time(1);
+    return;
+  }
   d3.csv(current_file,function(data){
 
-    update_color_bar(0);
+    //update_color_bar(0);
     ken = [];
     // var epsilon = 0.03;
 
@@ -1344,12 +1363,21 @@ function clickFunction(){
 
 
 function set_data_size(size){
-  d3.select("#sample_value").text(+size);
+  if(left_is_origin == true){
+    d3.select("#sample_value").text(full_data_size[current_data]);
+  }else{
+    d3.select("#sample_value").text(+size);
+  }
   d3.select("#full_value").text(full_data_size[current_data]);
 }
 
 function set_time(time){
-  d3.select("#sample_time_value").text((+time).toFixed(1));
+  if(left_is_origin == true){
+    d3.select("#sample_time_value").text(full_data_time[current_data]);
+  }else{
+    d3.select("#sample_time_value").text((+time).toFixed(1));
+  }
+  d3.select("#full_time_value").text(full_data_time[current_data]);
 }
 
 // d3.select("#std").on("input", function(d){
@@ -1404,8 +1432,12 @@ function handleRadiusClick(event){
 
   // d3.select("#radius-value").text(value);
   d3.select("#radius").property("value", reverseXscale(parseFloat(value)));
-  killChaos(std, reverseXscale(parseFloat(value)), tau);
-  right_killChaos(std, reverseXscale(parseFloat(value)), tau);
+  if(left_is_origin == false){
+    killChaos(std, reverseXscale(parseFloat(value)), tau);
+  }
+  if(right_is_origin == false){
+    right_killChaos(std, reverseXscale(parseFloat(value)), tau);
+  }
   return false;
 }
 
@@ -1419,8 +1451,13 @@ function handleTauClick(event){
 
   // d3.select("#tau-value").text(value);
   d3.select("#tau").property("value", +value);
-  killChaos(std, radius, +value);
-  right_killChaos(std, radius, +value);
+  if(left_is_origin == false){
+    killChaos(std, radius, +value);
+  }
+
+  if(right_is_origin == false){
+    right_killChaos(std, radius, +value);
+  }
   return false;
 }
 
@@ -1432,8 +1469,15 @@ function handleEpsilonClick(event){
 
   // d3.select("#epsilon-value").text(value);
   d3.select("#epsilon").property("value", parseFloat(value));
-  randomSample(std, parseFloat(value), 1);
-  right_randomSample(std, parseFloat(value), 1);
+  if(left_is_origin == false){
+    randomSample(std, parseFloat(value), 1);
+  }
+
+  console.log(right_is_origin);
+  if(right_is_origin == false){
+    console.log("right is not origin");
+    right_randomSample(std, parseFloat(value), 1);
+  }
   return false;
 }
 
@@ -1462,9 +1506,9 @@ function handleCompare(event){
   var is_sorted = true;
   var right_is_sorted = true;
   var is_origin = false;
-  var right_is_origin = false;
+  var right_origin = false;
 
-  if(left_dropdown_value.includes("Diff")){
+  if(left_dropdown_value.includes("Difference")){
     if(left_dropdown_value.includes("Relative")){
       left_is_diff = 2;
     }else{
@@ -1474,7 +1518,7 @@ function handleCompare(event){
     left_is_diff = 0;
   }
 
-  if(right_dropdown_value.includes("Diff")){
+  if(right_dropdown_value.includes("Difference")){
     if(right_dropdown_value.includes("Relative")){
       right_is_diff = 2;
     }else{
@@ -1496,17 +1540,22 @@ function handleCompare(event){
     right_is_sorted = false;
   }
 
-  if(left_dropdown_value == "Original"){
+  if(left_dropdown_value.includes("Original")){
     is_origin = true;
   }else{
     is_origin = false;
   }
 
-  if(right_dropdown_value == "Original"){
-    right_is_origin = true;
+  left_is_origin = is_origin;
+
+  if(right_dropdown_value.includes("Original")){
+    console.log("is origin");
+    right_origin = true;
   }else{
-    right_is_origin = false;
+    right_origin = false;
   }
+
+  right_is_origin = right_origin;
 
 
   current_data = data_value;
@@ -1518,15 +1567,14 @@ function handleCompare(event){
 
   if(last_data != data_value || right_dropdown_value != right_map_type){
 
+    console.log("comming" + right_origin + " " + right_is_origin);
     right_map_type = right_dropdown_value;
-    init_right(data_value, right_is_sorted, right_is_origin, false);
+    init_right(data_value, right_is_sorted, right_origin, false);
   }
 
   last_data = data_value;
 
 }
-
-
 // function reset(){
 //   svg.transition().duration(500)
 //     .call(zoom.transform, d3.zoomIdentity);

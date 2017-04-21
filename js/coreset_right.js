@@ -374,6 +374,7 @@ function right_map_update(){
   if(right_mapProjection != undefined){
     var offset = right_mapProjection.fromLatLngToPoint(right_canvasLayer.getTopLeft());
     right_context.translate(-offset.x, -offset.y);
+
     right_map_draw();
   }
 
@@ -384,7 +385,7 @@ function right_map_draw(){
   console.log("right");
   right_context.clearRect(0,0, right_canvasWidth, right_canvasHeight);
   right_context.globalAlpha = 0.5;
-  var newpoint;
+  // var newpoint;
   right_coresetData.forEach(function(d){
     var newll = new google.maps.LatLng(parseFloat(d.x), parseFloat(d.y));
     var newpoint = right_mapProjection.fromLatLngToPoint(newll);
@@ -550,9 +551,13 @@ function init_right(data_select, is_sorted, is_origin, is_right){
     d3.csv(full_data_list[current_data], function(error, data){
       if(error) throw error;
 
+      console.log("right full data!!!!!!!!!!");
+      set_right_data_size(1);
+      set_right_time(1);
       right_coresetData = data;
 
       right_init_googlemap();
+      right_map_draw();
       //right_map_update();
     });
   }else{
@@ -591,6 +596,15 @@ function right_randomSample(std, epsilon, flag){
   // Update std text.
   // d3.select("#std-value").text(parseFloat(std).toFixed(4));
   // d3.select("#std").property("value", parseFloat(std));
+
+  console.log("random" + right_is_origin);
+  if(right_is_origin){
+    set_right_data_size(size);
+    set_right_time(1);
+    return;
+  }
+
+  console.log("keep random sampling");
 
   d3.csv(current_file,function(data){
 
@@ -1467,11 +1481,23 @@ function kde_kernel(norData, std, x, y){
 // }
 
 function set_right_time(time){
-  d3.select("#right_sample_time_value").text((+time).toFixed(1));
+  if(right_is_origin == true){
+    console.log("lallala right!");
+    d3.select("#right_sample_time_value").text(full_data_time[current_data]);
+  }else{
+    d3.select("#right_sample_time_value").text((+time).toFixed(1));
+
+  }
+  d3.select("#right_full_time_value").text(full_data_time[current_data]);
 }
 
 function set_right_data_size(size){
-  d3.select("#right_sample_value").text(+size);
+
+  if(right_is_origin == true){
+    d3.select("#right_sample_value").text(full_data_size[current_data]);
+  }else{
+    d3.select("#right_sample_value").text(+size);
+  }
   d3.select("#right_full_value").text(full_data_size[current_data]);
 }
 
