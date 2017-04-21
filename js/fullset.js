@@ -5,11 +5,38 @@ var minY = -89.582541, maxY = -81.960144, minX = 36.3, maxX = 39.3;
 // 0.037657
 var fullData = [];
 
+var centerX = (maxX+minX)/2, centerY = (maxY+minY)/2;
+
+
+var data_list = {"Kentucky":"../data/kentucky_org.txt",
+                 "Philadelphia Crimes":"../data/crime_clean.txt",
+                 "Japan": "../data/twitter_clean_jp.txt"};
+
+var sorted_data_list = {"Kentucky":"../data/ken_sort.txt",
+                        "Philadelphia Crimes":"../data/crime_sort.txt",
+                        "Japan": "../data/twitter_sort.txt"};
+
+var STD_list = {"Kentucky": 0.07,
+                "Philadelphia Crimes": 0.003,
+                "Japan": 0.43};
+
+var delta_list = {"Kentucky": 0.04,
+                  "Philadelphia Crimes":0.002,
+                  "Japan": 0.1};
+
+var zoom_list = {"Kentucky": 6,
+                 "Philadelphia Crimes": 10,
+                 "Japan": 5};
+
+var full_data_list = {"Kentucky": "../data/kentucky_coreset.csv",
+                      "Philadelphia Crimes": "../data/phily_coreset.csv",
+                      "Japan": "../data/japan_coreset.csv"};
+
 // var color_range = {"#c24429":0.95, "#c60065":0.85, "#ca44a3": 0.75,
 //"#b700ce":0.55, ""}
 
 var fullzoom;
-var STD = 0.003;
+var STD = 0.43;
 //var std = 0.01;
 
 //var fullsvg = d3.select("#full_svg");
@@ -29,50 +56,51 @@ var fully;
 init_right("Japan", false, true, false);
 
 function init_right(data_select, is_sorted, is_origin, is_left){
+  console.log("aaaa");
 
   width = 700;
   height = 500;
 
-  fullxscale = d3.scaleLinear()
-    .range([-1,width+1-100])
-    .domain([minX, maxX]);
+  // fullxscale = d3.scaleLinear()
+  //   .range([-1,width+1-100])
+  //   .domain([minX, maxX]);
 
-  fullyscale = d3.scaleLinear()
-    .range([-maxY,-minY])
-    .domain([minY,maxY]);
+  // fullyscale = d3.scaleLinear()
+  //   .range([-maxY,-minY])
+  //   .domain([minY,maxY]);
 
-  fullx = d3.scaleLinear()
-    .range([-1, width+1])
-    .domain([-maxX, -minX]);
+  // fullx = d3.scaleLinear()
+  //   .range([-1, width+1])
+  //   .domain([-maxX, -minX]);
 
-  fully = d3.scaleLinear()
-    .range([-1, height+1])
-    .domain([maxY, minY]);
+  // fully = d3.scaleLinear()
+  //   .range([-1, height+1])
+  //   .domain([maxY, minY]);
 
 
-  svg = d3.select("#full").append('svg')
-    .attr('width',700)
-      .attr('height', 500)
-      .append('g');
+  // svg = d3.select("#full").append('svg')
+  //   .attr('width',700)
+  //     .attr('height', 500)
+  //     .append('g');
 
-  full_xAxis = d3.axisBottom(x)
-      .ticks(width/height*10)
-      .tickSize(height)
-      .tickPadding(8 - height);
+  // full_xAxis = d3.axisBottom(x)
+  //     .ticks(width/height*10)
+  //     .tickSize(height)
+  //     .tickPadding(8 - height);
 
-  full_yAxis = d3.axisRight(y)
-      .ticks(10)
-      .tickSize(width)
-      .tickPadding(8 - width);
+  // full_yAxis = d3.axisRight(y)
+  //     .ticks(10)
+  //     .tickSize(width)
+  //     .tickPadding(8 - width);
 
-  svg.selectAll("g").remove();
-  full_gx = svg.append("g")
-      .attr("class", "axis axis-x")
-      .call(full_xAxis);
+  // svg.selectAll("g").remove();
+  // full_gx = svg.append("g")
+  //     .attr("class", "axis axis-x")
+  //     .call(full_xAxis);
 
-  full_gy = svg.append("g")
-      .attr("class", "axis axis-y")
-      .call(full_yAxis);
+  // full_gy = svg.append("g")
+  //     .attr("class", "axis axis-y")
+  //     .call(full_yAxis);
 
   var fileName = "";
   if(!is_sorted){
@@ -94,6 +122,7 @@ function init_right(data_select, is_sorted, is_origin, is_left){
     console.log("right init kernel!!!!!");
     init_kernel(fileName, is_sorted, false);
   }else{
+
   d3.csv("../data/twitter_clean_jp.txt", function(error, data){
     if(error) throw error;
     data.forEach(function(d){
@@ -123,11 +152,21 @@ function fullgetCore(std, epsilon){
   return fullfill(norData, std, epsilon, x, y);
 }
 
+var domain_vals = [.05, .15 ,.25, .35, .45, .55, .65, .75, .85, .95];
+
+var threshold = d3.scaleThreshold()
+    .domain(domain_vals)
+    .range(["#f7f4f9","#00d0e5", "#0089e1", "#0044dd", "#0001d9", "#3e00d5","#7b00d2", "#b700ce", "#ca44a3", "#c60065", "#c24429"]);
+
+var xBar = d3.scaleLinear()
+    .domain([0, 1])
+    .range([0, 340]);
+
 function fullfill(norData, std, max, x, y){
   var res = 200.0;
   var edge = 500.0;
 
-  var delta = 0.002;
+  var delta = 0.1;
 
   var coresetData = [];
 
@@ -195,7 +234,7 @@ function fullfill(norData, std, max, x, y){
 function full_eval_kernel(norData, std, x, y){
   var count = 0.0;
   var coeff = 1.0;
-  var STD = 0.003;
+  var STD = 0.43;
 
   norData.forEach(function(d){
     var dist = (x-d.x)*(x-d.x) + (y-d.y)*(y-d.y);

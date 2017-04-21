@@ -15,7 +15,7 @@ var sorted_data_list = {"Kentucky":"../data/ken_sort.txt",
 
 var STD_list = {"Kentucky": 0.07,
                 "Philadelphia Crimes": 0.003,
-                "Japan": 0.45};
+                "Japan": 0.43};
 
 var delta_list = {"Kentucky": 0.04,
                   "Philadelphia Crimes":0.002,
@@ -29,6 +29,7 @@ var full_data_list = {"Kentucky": "../data/kentucky_coreset.csv",
                       "Philadelphia Crimes": "../data/phily_coreset.csv",
                       "Japan": "../data/japan_coreset.csv"};
 
+var last_left_center;
 var current_data = "Kentucky";
 var last_data = "Kentucky";
 var left_map_type = "Coreset";
@@ -167,7 +168,6 @@ var others;
 
 var drag = d3.drag()
     .on('start', function(d) {
-      console.log("come in start");
         others = [];
         threshold.domain().forEach(function(v) {
             if ( v == d ) return;
@@ -175,7 +175,6 @@ var drag = d3.drag()
         });
     })
     .on('drag', function(d) {
-      console.log("come in drag");
         var xMin = xBar.domain()[0], xMax = xBar.domain()[1];
         var newValue = xBar.invert(d3.event.x);
         newValue =
@@ -185,16 +184,15 @@ var drag = d3.drag()
       var newDomain = others.slice();
         newDomain.push(newValue);
         newDomain.sort();
-        console.log(newDomain);
         threshold.domain(newDomain);
         barAxis.tickValues(newDomain);
         update_color_bar(1);
     });
 
-var color_svgs = d3.select("#coreset").append("svg")
+var color_svgs = d3.selectAll(".button_div").append("svg")
     .attr("id","color_bar_new")
-    .attr("width", 500)
-    .attr("height", 50);
+    .attr("height", "50px");
+
 
 var color_gs = color_svgs.append("g")
     .attr("class", "key")
@@ -338,11 +336,10 @@ function init_googlemap(){
   d3.select("#map-div-left").remove();
   d3.select("#coreset").append("div")
     .attr("id","map-div-left")
-    .style("width","700px")
-    .style("height", "500px");
+    .style("width","95%")
+    .style("height", "60%");
 
   var mapDiv = document.getElementById('map-div-left');
-  console.log("map-div:" + mapDiv);
 
   left_map = new google.maps.Map(mapDiv, mapOptions);
 
@@ -387,19 +384,30 @@ function map_update(){
   var scale = Math.pow(2, left_map.zoom) * resolutionScale;
   left_context.scale(scale, scale);
 
+  if(right_map != undefined){
+    right_map.setZoom(left_map.zoom);
+    //right_map.setCenter(left_map.getCenter());
+  if(left_map.getCenter()!=right_map.getCenter()){
+    last_left_center = left_map.getCenter();
+    right_map.setCenter(left_map.getCenter());
+  }
+  }
+
    /* If the map was not translated, the topLeft corner would be 0,0 in
     * world coordinates. Our translation is just the vector from the
     * world coordinate of the topLeft corder to 0,0.
     */
-  var offset = mapProjection.fromLatLngToPoint(canvasLayer.getTopLeft());
-  left_context.translate(-offset.x, -offset.y);
+  if(mapProjection != undefined){
+    var offset = mapProjection.fromLatLngToPoint(canvasLayer.getTopLeft());
+    left_context.translate(-offset.x, -offset.y);
+  }
 
   //draw
   map_draw();
 }
 
 function map_draw(){
-
+  console.log("left");
   left_context.clearRect(0,0, canvasWidth, canvasHeight);
   left_context.globalAlpha = 0.5;
 
@@ -510,7 +518,8 @@ function init_kernel(fileName, is_sorted, is_left){
     getCore(is_left, STD, 101, 0.15);
     var d1 = performance.now();
     set_time((d1-d0)/1000);
-    map_draw();
+    map_update();
+    //map_draw();
     //coreset();
     // if(is_left){
     //   d3.select("#std-value").text((STD).toFixed(4));
@@ -547,13 +556,10 @@ function init_left(data_select, is_sorted, is_origin, is_left){
   }
 
   centerX = (maxX+minX)/2, centerY = (maxY+minY)/2;
-  console.log("initiating!!!! left!!!!");
   if(is_origin){
     d3.csv(full_data_list[current_data], function(error, data){
       if(error) throw error;
 
-      console.log(data);
-      console.log("full comming in!");
       coresetData = data;
 
       init_googlemap();
@@ -611,7 +617,7 @@ function randomSample(std, epsilon, flag){
     // if(size > data.length){
     //   size = data.length;
     // }
-    // set_data_size(size);
+    set_data_size(size);
 
     // percent = parseFloat(size)/parseFloat(full_size);
 
@@ -694,13 +700,15 @@ function randomSample(std, epsilon, flag){
 
     full_data_length = ken.length;
     getCore(true, STD, 101, 0.15);
+    var d1 = performance.now();
+    set_time((d1-d0)/1000);
     map_draw();
+    //right_map_draw();
     //coreset();
     // if(is_left){
     //   d3.select("#std-value").text((STD).toFixed(4));
     //   d3.select("#std").property("value", parseFloat(STD));
     //   getCore(is_left, STD, 101, 0.15);
-    //   var d1 = performance.now();
     //   console.log("full_data:" + (d1-d0));
     //   set_time((d1-d0)/1000);
 
@@ -712,7 +720,6 @@ function randomSample(std, epsilon, flag){
     //   getCore(is_left, STD, 101, 0.15);
     //   var d1 = performance.now();
     //   console.log("full_data:" + (d1-d0));
-    //   set_time((d1-d0)/1000);
     //   console.log("im right!!!!!!!!");
     //   draw_full_canvas();
     // }
@@ -906,8 +913,6 @@ function getCore(is_left, std, radius, tau){
 
 function killChaos(std, radius, tau){
 
-  console.log('tau:' + tau);
-  console.log('real Radius' + radius);
   coresetData.forEach(function(d){
     if(d.value >= 0.05*max){
       //console.log(">epsilon");
@@ -960,8 +965,6 @@ function fill(norData, std, x, y, is_left){
   }
 
   max = cur_max;
-  console.log("left max:" + max);
-
 
   // Update the max density.
   // var v = 0.0;
@@ -992,8 +995,6 @@ function fill(norData, std, x, y, is_left){
   //if(error) throw error;
 
    var full_Data = data;
-   console.log("fulldata:",full_Data);
-
    /**
     *  map
     *
@@ -1007,7 +1008,7 @@ function fill(norData, std, x, y, is_left){
       for(var data_i = 0; data_i < full_Data.length; data_i ++){
         if(i == full_Data[data_i].x && j == full_Data[data_i].y){
           value = (full_Data[data_i].value - value);
-          if(left_is_diff == 1){
+          if(left_is_diff == 2){
             value = value/full_Data[data_i];
           }
         }
@@ -1035,7 +1036,6 @@ function fill(norData, std, x, y, is_left){
         }
       }
 
-      spinner_left.stop();
   /**
    *  original
    **/
@@ -1096,8 +1096,8 @@ function fill(norData, std, x, y, is_left){
   }
   //return coresetData;
 
-
-
+   spinner_left.stop();
+   map_draw();
  });
 }
 
@@ -1177,7 +1177,6 @@ function update(std, radius, tau){
 function draw_canvas(flag){
 
 
-  console.log("comming in draw canvas");
   //if(flag == 0){
     var transform = d3.zoomIdentity;
     var zoom = d3.zoom()
@@ -1294,9 +1293,6 @@ function zoomed_rescale(){
     rescale_x = d3.event.transform.rescaleX(x);
     rescale_y = d3.event.transform.rescaleY(y);
 
-    console.log(scale_value);
-    console.log(transform_x);
-    console.log(transform_y);
 
     draw();
     canvas.restore();
@@ -1324,8 +1320,6 @@ function zoomed_rescale(){
 function clickFunction(){
 
   var radius = d3.select("#radius").property("value");
-  console.log(radius);
-  console.log(d3.event.clientX);
 
   d3.select('.coreset_svg').append("circle")
     .attr("cx", d3.event.pageX-8)
@@ -1346,12 +1340,10 @@ function clickFunction(){
 
 
 function set_data_size(size){
-  console.log("set data size");
-  // d3.select("#sample_value").text(+size);
+  d3.select("#sample_value").text(+size);
 }
 
 function set_time(time){
-  console.log("set time size");
   d3.select("#sample_time_value").text((+time).toFixed(1));
 }
 
@@ -1407,6 +1399,7 @@ function handleRadiusClick(event){
   d3.select("#radius-value").text(value);
   d3.select("#radius").property("value", reverseXscale(parseFloat(value)));
   killChaos(std, reverseXscale(parseFloat(value)), tau);
+  right_killChaos(std, reverseXscale(parseFloat(value)), tau);
   return false;
 }
 
@@ -1420,6 +1413,7 @@ function handleTauClick(event){
   d3.select("#tau-value").text(value);
   d3.select("#tau").property("value", +value);
   killChaos(std, radius, +value);
+  right_killChaos(std, radius, +value);
   return false;
 }
 
@@ -1431,6 +1425,7 @@ function handleEpsilonClick(event){
   d3.select("#epsilon-value").text(value);
   d3.select("#epsilon").property("value", parseFloat(value));
   randomSample(std, parseFloat(value), 1);
+  right_randomSample(std, parseFloat(value), 1);
   return false;
 }
 
@@ -1451,34 +1446,43 @@ function handleCompare(event){
   var left_dropdown_value = document.getElementById("map_type_select_left").value;
   var right_dropdown_value = document.getElementById("map_type_select_right").value;
 
+
+  d3.select("#left_coreset_title").html(left_dropdown_value);
+  d3.select("#right_coreset_title").html(right_dropdown_value);
+
+
   var is_sorted = true;
   var right_is_sorted = true;
   var is_origin = false;
   var right_is_origin = false;
 
   if(left_dropdown_value.includes("Diff")){
-    if(left_dropdown_value.includes("Relational")){
+    if(left_dropdown_value.includes("Relative")){
       left_is_diff = 2;
     }else{
       left_is_diff = 1;
     }
+  }else{
+    left_is_diff = 0;
   }
 
   if(right_dropdown_value.includes("Diff")){
-    if(right_dropdown_value.includes("Relational")){
+    if(right_dropdown_value.includes("Relative")){
       right_is_diff = 2;
     }else{
       right_is_diff = 1;
     }
+  }else{
+    right_is_diff = 0;
   }
 
-  if(left_dropdown_value.includes("coreset")){
+  if(left_dropdown_value.includes("Coreset")){
     is_sorted = true;
   }else{
     is_sorted = false;
   }
 
-  if(right_dropdown_value.includes("coreset")){
+  if(right_dropdown_value.includes("Coreset")){
     right_is_sorted = true;
   }else{
     right_is_sorted = false;

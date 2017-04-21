@@ -25,33 +25,121 @@
     <div id="colorbrewer_selection">
     </div>
     <div class="button_div">
+      <table width="100%" height="100%" border="0">
 
-      <!-- <input type="file" id="files" name="files[]" multiple /> -->
-      <!-- <output id="list"></output> -->
+        <tr height="5%">
+          <td width="33%">
+            <label for="std"
+               style="display: inline-block; width: 50%; text-align: right">
+              Sample Importance = <span id="std-value">0.01</span> (0.002 - 0.02)
+            </label>
+            <input id="std" type="range" min="0.002" max="0.02" step="0.001" value="0.01" />
+          </td>
+          <td>
+       <form id="std_input_form" name="std_form" onSubmit="return handleStdClick()">
+            <input type="text" id="std_input" placeholder="Input std">
+            <input name="std_submit"  type="submit" value="Confirm" >
+       </form>
+          </td>
+        </tr>
+
+        <tr width="5%">
+          <td>
+            <label for="epsilon"
+                   style="display: inline-block; width: 50%; text-align: right">
+              Accuracy =  <span id="epsilon-value">0.03</span> (0.01 - 0.1)
+            </label>
+            <input id="epsilon" type="range" min="0.01" max="0.1" step="0.005" value="0.03" />
+          </td>
+          <td>
+      <form id="epsilon_input_form" name="epsilon_form" onSubmit="return handleEpsilonClick()">
+            <input type="text" id="epsilon_input" placeholder="Input Epsilon">
+            <input name="epsilon_submit"  type="submit" value="Confirm" >
+      </form>
+
+       </td>
+        </tr>
+        <tr>
+          <td>
+          <label for="radius"
+                 style="display: inline-block; width: 50%; text-align: right">
+            Radius =  <span id="radius-value">1.5</span> (0.1 - 1.5)
+          </label>
+          <input id="radius" type="range" min="1" max="100" step="5" value="101" /><br /></td>
+          <td>
+      <form id="radius_input_form" name="radius_form" onSubmit="return handleRadiusClick()">
+            <input type="text" id="radius_input" placeholder="Input Radius">
+            <input name="radius_submit"  type="submit" value="Confirm" >
+      </form>
+            </td>
+
+        </tr>
+        <tr>
+          <td>
+            <label for="tau"
+                   style="display: inline-block; width: 50%; text-align: right">
+              Percentage =  <span id="tau-value">0.15</span> (0.15 - 0.95)
+            </label>
+            <input id="tau" type="range" min="0.05" max="0.95" step="0.1" value="0.15" />
+          </td>
+          <td>
+       <form id="tau_input_form" name="tau_form" onSubmit="return handleTauClick()">
+            <input type="text" id="tau_input" placeholder="Input tau">
+            <input name="tau_submit"  type="submit" value="Confirm" >
+       </form>
+          </td>
+        </tr>
+        </table>
+      <!-- <table> -->
+      <!-- <p> -->
+      <!--   <label for="std" -->
+      <!--          style="display: inline-block; width: 300px; text-align: right"> -->
+      <!--     Sample Importance = <span id="std-value">0.01</span> (0.002 - 0.02) -->
+      <!--   </label> -->
+      <!--   <input id="std" type="range" min="0.002" max="0.02" step="0.001" value="0.01" /></p> -->
+
+<!--        <p> -->
+<!--         <label for="radius" -->
+<!--                style="display: inline-block; width: 300px; text-align: right"> -->
+<!--           Radius =  <span id="radius-value">1.5</span> (0.1 - 1.5) -->
+<!--         </label> -->
+<!--         <input id="radius" type="range" min="1" max="100" step="5" value="101" /> -->
+<!-- </p> -->
+
+      <!-- <p> -->
+      <!--   <label for="epsilon" -->
+      <!--          style="display: inline-block; width: 300px; text-align: right"> -->
+      <!--     Accuracy =  <span id="epsilon-value">0.03</span> (0.01 - 0.1) -->
+      <!--   </label> -->
+      <!--   <input id="epsilon" type="range" min="0.01" max="0.1" step="0.005" value="0.03" /> -->
+      <!-- </p> -->
+
+      <!-- <button id="myBtn">Open Modal</button> -->
+      <!-- <p> -->
+      <!--   <label for="tau" -->
+      <!--          style="display: inline-block; width: 300px; text-align: right"> -->
+      <!--     Percentage =  <span id="tau-value">0.15</span> (0.15 - 0.95) -->
+      <!--   </label> -->
+      <!--   <input id="tau" type="range" min="0.05" max="0.95" step="0.1" value="0.15" /> -->
+      <!-- </p> -->
 
 
-      <p>
-        <label for="std"
-               style="display: inline-block; width: 300px; text-align: right">
-          Sample Importance = <span id="std-value">0.01</span> (0.002 - 0.02)
-        </label>
-        <input id="std" type="range" min="0.002" max="0.02" step="0.001" value="0.01" /></p>
 
-       <p>
-        <label for="radius"
-               style="display: inline-block; width: 300px; text-align: right">
-          Radius =  <span id="radius-value">1.5</span> (0.1 - 1.5)
-        </label>
-        <input id="radius" type="range" min="1" max="100" step="5" value="101" />
-</p>
 
-      <p>
-        <label for="epsilon"
-               style="display: inline-block; width: 300px; text-align: right">
-          Accuracy =  <span id="epsilon-value">0.03</span> (0.01 - 0.1)
-        </label>
-        <input id="epsilon" type="range" min="0.01" max="0.1" step="0.005" value="0.03" />
-      </p>
+
+       <button id="compare_btn" onclick="handleCompare()">Compare</button>
+       <select id="data_type_select">
+          <option>Kentucky</option>
+          <option>Philadelphia Crimes</option>
+          <option>Japan</option>
+        </select>
+     </div>
+
+
+    <table width="100%">
+      <tr>
+        <td width="45%">
+          <div id="coreset" class="set_div">
       <p id="sample_size">
         Samples: <span id="sample_value"></span>
       </p>
@@ -70,77 +158,63 @@
         Full Data running time: <span id="full_time_value">301.5</span> seconds.
       </p>
 
-      <!-- <button id="myBtn">Open Modal</button> -->
-      <p>
-        <label for="tau"
-               style="display: inline-block; width: 300px; text-align: right">
-          Percentage =  <span id="tau-value">0.15</span> (0.15 - 0.95)
-        </label>
-        <input id="tau" type="range" min="0.05" max="0.95" step="0.1" value="0.15" />
-      </p>
-
-      <form id="radius_input_form" name="radius_form" onSubmit="return handleRadiusClick()">
-            <input type="text" id="radius_input" placeholder="Input Radius">
-            <input name="radius_submit"  type="submit" value="Confirm" >
-      </form>
-
-      <form id="epsilon_input_form" name="epsilon_form" onSubmit="return handleEpsilonClick()">
-            <input type="text" id="epsilon_input" placeholder="Input Epsilon">
-            <input name="epsilon_submit"  type="submit" value="Confirm" >
-      </form>
-
-       <form id="std_input_form" name="std_form" onSubmit="return handleStdClick()">
-            <input type="text" id="std_input" placeholder="Input std">
-            <input name="std_submit"  type="submit" value="Confirm" >
-       </form>
-
-       <form id="tau_input_form" name="tau_form" onSubmit="return handleTauClick()">
-            <input type="text" id="tau_input" placeholder="Input tau">
-            <input name="tau_submit"  type="submit" value="Confirm" >
-      </form>
-
-       <button id="compare_btn" onclick="handleCompare()">Compare</button>
-       <select id="data_type_select">
-          <option>Kentucky</option>
-          <option>Philadelphia Crimes</option>
-          <option>Japan</option>
-        </select>
-     </div>
-
-      <div id="coreset" class="set_div">
         <select id="map_type_select_left">
           <option>Coreset</option>
           <option>Random Sampling</option>
-          <option>Coreset Relational Diff</option>
+          <option>Coreset Relative Diff</option>
           <option>Coreset Diff</option>
-          <option>Random Sampling Relational Diff</option>
+          <option>Random Sampling Relative Diff</option>
           <option>Random Sampling Diff</option>
           <option>Original</option>
         </select>
-      <h1> Coreset Data </h1>
+      <h1 id="left_coreset_title"> Coreset </h1>
+      <!-- <div id="map-div-left"> -->
 
+      <!-- </div> -->
       </div>
 
-      <div id="full" class="set_div">
+        </td>
+        <td width="45%">
+          <div id="full" class="set_div">
+            <p id="right_sample_size">
+              Samples: <span id="right_sample_value"></span>
+            </p>
+
+            <p id="right_full_size">
+              Data size: <span id="full_value">199162</span>
+            </p>
+
+            <p id="right_sample_time">
+              Running time: <span id="right_sample_time_value"></span> seconds.
+            </p>
+
+            <p id="right_full_time">
+              Full Data running time: <span id="full_time_value">301.5</span> seconds.
+            </p>
         <select id="map_type_select_right">
           <option>Random Sampling</option>
           <option>Coreset</option>
-          <option>Coreset Relational Diff</option>
+          <option>Coreset Relative Diff</option>
           <option>Coreset Diff</option>
-          <option>Random Sampling Relational Diff</option>
+          <option>Random Sampling Relative Diff</option>
           <option>Random Sampling Diff</option>
           <option>Original</option>
         </select>
-      <h1> Full Data </h1>
-      <svg class="color_bar_svg" height="500", width="50"></svg>
-
+      <h1 id="right_coreset_title"> Random Sampling </h1>
+      <!-- <svg class="color_bar_svg" height="500", width="50"></svg> -->
+      <!-- <div id="map-div-right"></div> -->
       </div>
+          </td>
+
+        </tr>
+
+      </table>
+
+      <!-- <script type="application/javascript" src="js/fullset.js"></script> -->
       <script type="application/javascript" src="js/spin.min.js"></script>
       <script type="application/javascript" src="js/constant.js"></script>
-
       <script type="application/javascript" src="js/coreset.js"></script>
-      <!-- <script type="application/javascript" src="js/fullset.js"></script> -->
-    <script type="application/javascript" src="js/coreset_right.js"></script>
+      <script type="application/javascript" src="js/coreset_right.js"></script>
   </body>
 
 

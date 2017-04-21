@@ -34,6 +34,7 @@ var right_coresetData = [];
 
 
 // GOOGLE map
+var last_right_center;
 var right_canvasLayer;
 var right_context;
 var right_map;
@@ -310,11 +311,10 @@ function right_init_googlemap(){
   d3.select("#map-div-right").remove();
   d3.select("#full").append("div")
     .attr("id","map-div-right")
-    .style("width","700px")
-    .style("height", "500px");
+    .style("width","95%")
+    .style("height", "60%");
 
   var mapDiv = document.getElementById('map-div-right');
-  console.log("map-div:" + mapDiv);
 
   right_map = new google.maps.Map(mapDiv, mapOptions);
 
@@ -359,22 +359,32 @@ function right_map_update(){
   var scale = Math.pow(2, right_map.zoom) * right_resolutionScale;
   right_context.scale(scale, scale);
 
+  if(left_map != undefined){
+    left_map.setZoom(right_map.zoom);
+  if(left_map.getCenter()!=right_map.getCenter()){
+    last_right_center = right_map.getCenter();
+     left_map.setCenter(right_map.getCenter());
+  }
+  }
+  //left_map.setCenter(right_map.getCenter());
    /* If the map was not translated, the topLeft corner would be 0,0 in
     * world coordinates. Our translation is just the vector from the
     * world coordinate of the topLeft corder to 0,0.
     */
-  var offset = right_mapProjection.fromLatLngToPoint(right_canvasLayer.getTopLeft());
-  right_context.translate(-offset.x, -offset.y);
+  if(right_mapProjection != undefined){
+    var offset = right_mapProjection.fromLatLngToPoint(right_canvasLayer.getTopLeft());
+    right_context.translate(-offset.x, -offset.y);
+  }
 
   //draw
   right_map_draw();
 }
 
 function right_map_draw(){
-  console.log("right_draw");
+  console.log("right");
   right_context.clearRect(0,0, right_canvasWidth, right_canvasHeight);
   right_context.globalAlpha = 0.5;
-
+  var newpoint;
   right_coresetData.forEach(function(d){
     var newll = new google.maps.LatLng(parseFloat(d.x), parseFloat(d.y));
     var newpoint = right_mapProjection.fromLatLngToPoint(newll);
@@ -406,6 +416,8 @@ function right_init_kernel(fileName, is_sorted, is_right){
 
     // mark data length.
     data_length_mark = size;
+
+    set_right_data_size(size);
 
     //size = 199162;
     // if(size > data.length){
@@ -496,9 +508,9 @@ function right_init_kernel(fileName, is_sorted, is_right){
 
     right_getCore(is_right, STD, 101, 0.15);
     var d1 = performance.now();
-    set_time((d1-d0)/1000);
-    //right_map_update();
+    set_right_time((d1-d0)/1000);
     right_map_draw();
+    map_draw();
     //coreset();
     // if(is_left){
     //   d3.select("#std-value").text((STD).toFixed(4));
@@ -538,8 +550,6 @@ function init_right(data_select, is_sorted, is_origin, is_right){
     d3.csv(full_data_list[current_data], function(error, data){
       if(error) throw error;
 
-      console.log(data);
-      console.log("full comming in!");
       right_coresetData = data;
 
       right_init_googlemap();
@@ -548,7 +558,6 @@ function init_right(data_select, is_sorted, is_origin, is_right){
   }else{
 
 
-  console.log("coreset comming in!");
   delta = delta_list[data_select];
   STD = STD_list[data_select];
   init_zoom = zoom_list[data_select];
@@ -598,7 +607,7 @@ function right_randomSample(std, epsilon, flag){
     // if(size > data.length){
     //   size = data.length;
     // }
-    // set_data_size(size);
+    set_right_data_size(size);
 
     // percent = parseFloat(size)/parseFloat(full_size);
 
@@ -681,13 +690,15 @@ function right_randomSample(std, epsilon, flag){
 
     full_data_length = right_ken.length;
     right_getCore(true, STD, 101, 0.15);
+    var d1 = performance.now();
+    set_right_time((d1-d0)/1000);
     right_map_draw();
+    //map_draw();
     //coreset();
     // if(is_left){
     //   d3.select("#std-value").text((STD).toFixed(4));
     //   d3.select("#std").property("value", parseFloat(STD));
     //   getCore(is_left, STD, 101, 0.15);
-    //   var d1 = performance.now();
     //   console.log("full_data:" + (d1-d0));
     //   set_time((d1-d0)/1000);
 
@@ -885,13 +896,12 @@ function right_getCore(is_left, std, radius, tau){
   right_fill(norData, std, x, y, is_left);
   // kill chaos.
   right_killChaos(std, radius, tau);
+  console.log("finish");
 
 }
 
 function right_killChaos(std, radius, tau){
 
-  console.log('tau:' + tau);
-  console.log('real Radius' + radius);
   right_coresetData.forEach(function(d){
     if(d.value >= 0.05*right_max){
       //console.log(">epsilon");
@@ -944,8 +954,6 @@ function right_fill(norData, std, x, y, is_right){
   }
 
   right_max = cur_max;
-  console.log("max:" + right_max);
-
 
   // Update the max density.
   // var v = 0.0;
@@ -973,11 +981,9 @@ function right_fill(norData, std, x, y, is_right){
    */
 
  d3.csv(full_data_list[current_data], function(error, data){
-  //if(error) throw error;
+   if(error) throw error;
 
    var fullData = data;
-   console.log("fulldata:",fullData);
-
    /**
     *  map
     *
@@ -991,7 +997,7 @@ function right_fill(norData, std, x, y, is_right){
       for(var data_i = 0; data_i < fullData.length; data_i ++){
         if(i == fullData[data_i].x && j == fullData[data_i].y){
           value = (fullData[data_i].value - value);
-          if(right_is_diff == 1){
+          if(right_is_diff == 2){
             value = value/fullData[data_i];
           }
         }
@@ -1018,7 +1024,6 @@ function right_fill(norData, std, x, y, is_right){
 
 
 
-    spinner_right.stop();
   /**
    *  original
    **/
@@ -1078,9 +1083,9 @@ function right_fill(norData, std, x, y, is_right){
     }
   }
   //return coresetData;
-
-
-
+      console.log("finishhhhhhhh");
+   spinner_right.stop();
+   right_map_draw();
  });}
 
 function kde_kernel(norData, std, x, y){
@@ -1461,10 +1466,17 @@ function kde_kernel(norData, std, x, y){
 //     .call(zoom.transform, d3.zoomIdentity);
 // }
 
+function set_right_time(time){
+  d3.select("#right_sample_time_value").text((+time).toFixed(1));
+}
+
+function set_right_data_size(size){
+  d3.select("#right_sample_value").text(+size);
+}
+
+
 function normalize(){
   var diff = maxX - minX > maxY - minY ? maxX - minX : maxY - minY;
-  console.log("??:" + maxX + " " + minX + " " + maxY + " " + minY);
-  console.log("diff:" + diff);
   norData = [];
 
   ken.forEach(function(d){
