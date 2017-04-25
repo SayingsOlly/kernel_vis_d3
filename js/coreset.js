@@ -426,12 +426,92 @@ function map_draw(){
   left_context.clearRect(0,0, canvasWidth, canvasHeight);
   left_context.globalAlpha = 0.5;
 
+
+
+  // if(coresetData.length != 0){
+  //   //for x
+  //   var projection_scale_x = 0;
+  //   var first_y = 0;
+  //   var first_p_x = 0;
+
+  //   //for y
+
+  //   var projection_scale_y = 0;
+  //   var first_x = 0;
+  //   var first_p_y = 0;
+
+    // for(var d of coresetData){
+
+  //     if(projection_scale_y == 0){
+  //       var newll2 = new google.maps.LatLng(parseFloat(d["x"]), parseFloat(d["y"]));
+  //       var newpoint2 = mapProjection.fromLatLngToPoint(newll2);
+
+  //       if(parseFloat(d['x']).toFixed(2) - first_x == parseFloat(d['delta'])){
+  //         console.log("xixi:" + d["x"] + " " + first_x);
+
+  //         console.log(newpoint2.y + " " + first_p_y);
+  //         projection_scale_y = (newpoint2.y - first_p_y)/(parseFloat(d["x"]) - first_x);
+  //       }
+
+  //       if(first_x == 0){
+
+  //         console.log("adada:" + d["x"] + d["y"]);
+  //         first_x = parseFloat(d["x"]).toFixed(2);
+  //         first_p_y = newpoint2.y;
+  //       }
+
+  //     }
+
+  //     if(projection_scale_x == 0){
+
+  //       var newll = new google.maps.LatLng(parseFloat(d["x"]), parseFloat(d["y"]));
+  //       var newpoint = mapProjection.fromLatLngToPoint(newll);
+
+  //       if(parseFloat(d['y']).toFixed(2) - first_y == parseFloat(d['delta'])){
+  //         console.log("xixi:" + d["y"] + " " + first_y);
+  //         console.log(newpoint.x + " " + first_p_x);
+  //         projection_scale_x = (newpoint.x - first_p_x)/(parseFloat(d["y"]) - first_y);
+  //       }
+
+  //       if(first_y == 0){
+
+  //         console.log("adada:" + d["x"] + d["y"]);
+  //         first_y = parseFloat(d["y"]).toFixed(2);
+  //         first_p_x = newpoint.x;
+  //       }
+
+  //     }
+
+  //     if(projection_scale_x != 0 && projection_scale_y != 0){
+  //       break;
+  //     }
+  //   }
+    // }
+
+  var test1 = new google.maps.LatLng(30.00, -100.04);
+  var test2 = new google.maps.LatLng(30.00, -100.08);
+
+  var point1 = mapProjection.fromLatLngToPoint(test1);
+  var point2 = mapProjection.fromLatLngToPoint(test2);
+
+  var pro = (point1.x - point2.x)/0.04;
+
+  var pro_y;
+
   coresetData.forEach(function(d){
     var newll = new google.maps.LatLng(parseFloat(d.x), parseFloat(d.y));
+    var newll_c = new google.maps.LatLng(parseFloat(d.x)+0.04, parseFloat(d.y));
+
     var newpoint = mapProjection.fromLatLngToPoint(newll);
+    var newpoint_c = mapProjection.fromLatLngToPoint(newll_c);
+
+    pro_y = (newpoint_c.y - newpoint.y)/0.04;
+
+//    console.log(pro_y);
+
     //console.log(newpoint);
     left_context.beginPath();
-    left_context.rect(newpoint.x, newpoint.y, parseFloat(delta), parseFloat(delta));
+    left_context.rect(newpoint.x, newpoint.y, pro*parseFloat(delta), pro_y*parseFloat(delta));
     left_context.fillStyle = d.color;
     left_context.fill();
   });
@@ -1023,8 +1103,8 @@ function fill(norData, std, x, y, is_left){
     *
     **/
 
-   for(var i=minX; i<=maxX; i+=delta){
-    for(var j=minY; j<=maxY; j+=delta){
+   for(var i=minX; i<maxX; i+=delta){
+    for(var j=minY; j<maxY; j+=delta){
       var value = kde_kernel(norData, std, i+delta/2.0, j+delta/2.0);
       if(left_is_diff!=0){
 
@@ -1190,7 +1270,7 @@ function update(std, radius, tau){
 
     coresetData.forEach(function(d){
       canvas.beginPath();
-      canvas.rect(parseFloat(d.x)+90, -parseFloat(d.y)+350, parseFloat(d.delta), parseFloat(d.delta));
+      canvas.rect(parseFloat(d.x), -parseFloat(d.y), parseFloat(d.delta), parseFloat(d.delta));
       canvas.fillStyle = d.color;
       canvas.fill();
       //canvas.closePath();

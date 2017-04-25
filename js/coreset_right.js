@@ -386,12 +386,28 @@ function right_map_draw(){
   right_context.clearRect(0,0, right_canvasWidth, right_canvasHeight);
   right_context.globalAlpha = 0.5;
   // var newpoint;
+
+  var test1 = new google.maps.LatLng(30.00, -100.04);
+  var test2 = new google.maps.LatLng(30.00, -100.08);
+
+  var point1 = right_mapProjection.fromLatLngToPoint(test1);
+  var point2 = right_mapProjection.fromLatLngToPoint(test2);
+
+  var pro = (point1.x - point2.x)/0.04;
+
+  var pro_y;
+
   right_coresetData.forEach(function(d){
     var newll = new google.maps.LatLng(parseFloat(d.x), parseFloat(d.y));
+    var newll_c = new google.maps.LatLng(parseFloat(d.x)+0.04, parseFloat(d.y));
+
     var newpoint = right_mapProjection.fromLatLngToPoint(newll);
+    var newpoint_c = mapProjection.fromLatLngToPoint(newll_c);
+
+    pro_y = (newpoint_c.y - newpoint.y)/0.04;
     //console.log(newpoint);
     right_context.beginPath();
-    right_context.rect(newpoint.x, newpoint.y, parseFloat(delta), parseFloat(delta));
+    right_context.rect(newpoint.x, newpoint.y, pro*parseFloat(delta), pro_y*parseFloat(delta));
     right_context.fillStyle = d.color;
     right_context.fill();
 
