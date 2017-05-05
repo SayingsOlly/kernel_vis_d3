@@ -24,7 +24,7 @@ var full_data_time = {"Kentucky" : 120.5,
 
 var STD_list = {"Kentucky": 0.07,
                 "Philadelphia Crimes": 0.003,
-                "Japan": 0.43};
+                "Japan": 0.46};
 
 var delta_list = {"Kentucky": 0.04,
                   "Philadelphia Crimes":0.002,
@@ -39,11 +39,15 @@ var full_data_list = {"Kentucky": "../data/kentucky_coreset.csv",
                       "Japan": "../data/japan_coreset.csv"};
 
 var last_left_center;
+
 var current_data = "Kentucky";
 var last_data = "Kentucky";
 var left_map_type = "Coreset";
 var right_map_type = "Random Sampling";
-var current_file = "../data/kentucky_org.txt";
+var left_current_file = "../data/ken_sort.txt";
+var right_current_file = "../data/kentucky_org.txt";
+
+
 var current_sorted = true;
 var init_zoom = 7;
 var ken = [];
@@ -53,9 +57,9 @@ var coresetData = [];
 var left_is_diff = 0;
 var right_is_diff = 0;
 
-var left_is_origin;
 
-var right_is_origin;
+var left_is_origin = false;
+var right_is_origin = false;
 
 // GOOGLE map
 var canvasLayer;
@@ -99,11 +103,13 @@ var rescale_y = 0;
 var STD = 0.01;
 
 var color_data = d3.entries(colorbrewer).slice(1,18);
+
+
 color_data.splice(0,1);
 color_data.push({key: 'Default',
                  value: {11: ["#f7f4f9","#00d0e5", "#0089e1", "#0044dd", "#0001d9", "#3e00d5","#7b00d2", "#b700ce", "#ca44a3", "#c60065", "#c24429"]}});
 color_data.push({key: 'YlOrBr2',
-                 value: {11: ["#ffffe5",
+                 value: {11: ["#f7f4f9",
                               "#fff7bc",
                               "#fee391",
                               "#fec44f",
@@ -116,12 +122,26 @@ color_data.push({key: 'YlOrBr2',
                               "#804000",
                               "#662506"]}});
 
+
+console.log(color_data);
+
+color_data.forEach(function(d){
+  var color_scheme = d["value"][9];
+  if(color_scheme != undefined){
+  for(var i = color_scheme.length-1; i>=0; i--){
+    color_scheme[i+1] = color_scheme[i];
+  }
+
+    color_scheme[0] = "#f7f4f9";
+  }
+});
+
 // color scale.
 var scale = 'Blues';
 
 var formatPercent = d3.format(".0%");
 
-var domain_vals = [.05, .15 ,.25, .35, .45, .55, .65, .75, .85, .95];
+var domain_vals = [.05, .15 ,.25, .35, .45, .55, .65, .75, .85, .95 ];
 
 var threshold = d3.scaleThreshold()
     .domain(domain_vals)
@@ -145,8 +165,8 @@ d3.select("#color_bar_span")
     new_colorrange = d3.values(d.value)[d3.values(d.value).length-1];
     var length = new_colorrange.length;
 
-    if(length == 9){
-      domain_vals = [.05, .15 ,.25, .35, .55, .65, .85, .95];
+    if(length == 10){
+      domain_vals = [.05, .10 , .35, .45, .55, .65, .75, .85, .95];
     }else{
       domain_vals = [.05, .15 ,.25, .35, .45, .55, .65, .75, .85, .95];
     }
@@ -167,6 +187,13 @@ d3.select("#color_bar_span")
   .style("background-color", function(d) { return d; });
 
 d3.select("#Default").style("background", "#aaa");
+
+
+// Default tau scale.
+
+var radius_scale = d3.scaleLinear()
+    .domain([0,1])
+    .range([0, maxY - minY]);
 
 var xBar = d3.scaleLinear()
     .domain([0, 1])
@@ -204,6 +231,7 @@ var drag = d3.drag()
 
 var color_svgs = d3.selectAll(".button_div").append("svg")
     .attr("id","color_bar_new")
+    .attr("width", "350px")
     .attr("height", "50px");
 
 
@@ -214,6 +242,11 @@ var color_gs = color_svgs.append("g")
 var color_rects = color_gs.append("g");
 
 
+/**
+  *  Update color bar when adjuesting color bar and change of color scheme.
+  *
+  **/
+
 function update_color_bar(flag){
 
   var color_rect = color_rects.selectAll(".range")
@@ -221,6 +254,7 @@ function update_color_bar(flag){
           var d = threshold.invertExtent(color);
           if (d[0] == null) d[0] = xBar.domain()[0];
           if (d[1] == null) d[1] = xBar.domain()[1];
+          console.log("color" + d);
           return d;
         }));
 
@@ -268,29 +302,42 @@ function update_color_bar(flag){
       }
     });
 
-    d.color = threshold(color_value);
+    // if d.color equals #fff, means the the density region has been seen as chaos.
+    // adjusting color bar or color scheme would be seen as unvalid.
+    if(d.color != "#fff"){
+      d.color = threshold(color_value);
+    }
     d.originColor = threshold(color_value);
   });
 
 
-  console.log("updata_coloar bar");
-    // right_coresetData.forEach(function(d){
-    // var percent = parseFloat(d.value)/max;
-    // var color_value = 0.0;
+  right_coresetData.forEach(function(d){
+    var percent = parseFloat(d.value)/right_max;
+    var color_value = 0.0;
 
-    // threshold.range().map(function(color) {
-    //   var d = threshold.invertExtent(color);
-    //   if (d[0] == null) d[0] = xBar.domain()[0];
-    //   if (d[1] == null) d[1] = xBar.domain()[1];
-    //   if(percent > d[0] && percent <= d[1]){
-    //     //console.log(d[0]);
-    //     color_value = d[0];
-    //   }
-    // });
+    threshold.range().map(function(color) {
+      var d = threshold.invertExtent(color);
+      if (d[0] == null) d[0] = xBar.domain()[0];
+      if (d[1] == null) d[1] = xBar.domain()[1];
+      if(percent > d[0] && percent <= d[1]){
+        //console.log(d[0]);
+        color_value = d[0];
+      }
+    });
 
-    // d.color = threshold(color_value);
-    // //d.originColor = threshold(color_value);
-    // });
+    // if d.color equals #fff, means the the density region has been seen as chaos.
+    // adjusting color bar or color scheme would be seen as unvalid.
+    if(d.color != "#fff"){
+      d.color = threshold(color_value);
+    }
+    d.originColor = threshold(color_value);
+
+    console.log("still working!!!!");
+    //d.originColor = threshold(color_value);
+  });
+
+  console.log("-------------------coreset data size:" + coresetData.length);
+  console.log("-------------------right_coreset data size:" + right_coresetData.length);
 
   if(flag == 1){
     map_draw();
@@ -491,6 +538,10 @@ function map_draw(){
   var test1 = new google.maps.LatLng(30.00, -100.04);
   var test2 = new google.maps.LatLng(30.00, -100.08);
 
+
+  if(mapProjection == undefined){
+    mapProjection = right_mapProjection;
+  }
   var point1 = mapProjection.fromLatLngToPoint(test1);
   var point2 = mapProjection.fromLatLngToPoint(test2);
 
@@ -540,8 +591,6 @@ function init_kernel(fileName, is_sorted, is_left){
     set_data_size(size);
 
     percent = parseFloat(size)/parseFloat(full_size);
-
-    var d0 = performance.now();
 
     var sampleList = [];
 
@@ -600,6 +649,7 @@ function init_kernel(fileName, is_sorted, is_left){
        *  Use sorting sampling data
        **/
 
+      console.log("coreset!!!!!left!!!!");
       for(var i=0; i<size; i++){
         var cordinate = [];
         Object.values(data[i]).forEach(function(item){
@@ -610,10 +660,10 @@ function init_kernel(fileName, is_sorted, is_left){
     }
 
     full_data_length = ken.length;
-    getCore(is_left, STD, 101, 0.15);
-    var d1 = performance.now();
-    set_time((d1-d0)/1000);
-    map_update();
+    getCore(is_left, STD, 101, 0.05);
+    // var d1 = performance.now();
+    // set_time((d1-d0)/1000);
+    //map_update();
     //map_draw();
     //coreset();
     // if(is_left){
@@ -644,11 +694,17 @@ function init_left(data_select, is_sorted, is_origin, is_left){
   // current_data = data_select;
   if(data_select == "Japan"){
     minY = 124.16, maxY = 145.571, minX = 24.3471, maxX = 45.4094;
+
   }else if(data_select == "Philadelphia Crimes"){
     minY = -75.2781, maxY = -74.9576, minX = 39.8763, maxX = 40.1372;
   }else if(data_select == "Kentucky"){
     minY = -89.582541, maxY = -81.960144, minX = 36.3, maxX = 39.3;
   }
+
+  // Update tauScale
+  radius_scale = d3.scaleLinear()
+    .domain([0,1])
+    .range([0, maxX - minX > maxY - minY ? maxX - minX : maxY - minY]);
 
   centerX = (maxX+minX)/2, centerY = (maxY+minY)/2;
   if(is_origin){
@@ -678,14 +734,14 @@ function init_left(data_select, is_sorted, is_origin, is_left){
       fileName = sorted_data_list[data_select];
     }
 
-    current_file = fileName;
+    left_current_file = fileName;
 
     init_kernel(fileName, is_sorted, true);
 
   }}
 
 //initiation
-init_left("Kentucky", false, false, true);
+init_left("Kentucky", true, false, true);
 
 
 /**
@@ -705,7 +761,8 @@ function randomSample(std, epsilon, flag){
     set_time(1);
     return;
   }
-  d3.csv(current_file,function(data){
+
+  d3.csv(left_current_file,function(data){
 
     //update_color_bar(0);
     ken = [];
@@ -727,7 +784,7 @@ function randomSample(std, epsilon, flag){
     // if(STD > 0.01){
     //   STD = 0.01;
     // }
-    var d0 = performance.now();
+    //var d0 = performance.now();
 
     var sampleList = [];
 
@@ -802,10 +859,10 @@ function randomSample(std, epsilon, flag){
     }
 
     full_data_length = ken.length;
-    getCore(true, STD, 101, 0.15);
-    var d1 = performance.now();
-    set_time((d1-d0)/1000);
-    map_draw();
+    getCore(true, STD, 101, 0.05);
+    //var d1 = performance.now();
+    //set_time((d1-d0)/1000);
+    //map_draw();
     //right_map_draw();
     //coreset();
     // if(is_left){
@@ -1007,9 +1064,9 @@ function getCore(is_left, std, radius, tau){
   var y = (maxY-minY)/(maxX-minX);
 
   // fill with density rectangles.
-  fill(norData, std, x, y, is_left);
+  fill(norData, radius, tau, std, x, y, is_left);
   // kill chaos.
-  killChaos(std, radius, tau);
+  //killChaos(std, radius, tau);
 
 
   }
@@ -1052,10 +1109,11 @@ function eval_range(qx, qy, xx, xy, std){
  * @param x x boundry.
  * @param y y boundry.
  */
-function fill(norData, std, x, y, is_left){
+function fill(norData, radius, tau, std, x, y, is_left){
 
   coresetData = [];
 
+  var d0 = performance.now();
   var v = 0.0;
   var cur_max = 0.0;
   for(var i=minX; i<=maxX; i+=delta){
@@ -1103,20 +1161,21 @@ function fill(norData, std, x, y, is_left){
     *
     **/
 
+   //var count = 1;
    for(var i=minX; i<maxX; i+=delta){
     for(var j=minY; j<maxY; j+=delta){
       var value = kde_kernel(norData, std, i+delta/2.0, j+delta/2.0);
       if(left_is_diff!=0){
 
-      for(var data_i = 0; data_i < full_Data.length; data_i ++){
-        if(i == full_Data[data_i].x && j == full_Data[data_i].y){
-          value = (full_Data[data_i].value - value);
-          if(left_is_diff == 2){
-            value = value/full_Data[data_i];
-          }
+        for(var data_i = 0; data_i < full_Data.length; data_i ++){
+          if(i == full_Data[data_i].x && j == full_Data[data_i].y){
+            value = (full_Data[data_i].value - value);
+            if(left_is_diff == 2){
+              value = value/full_Data[data_i];
+            }
         }
       }
-
+        //count += 1;
       }
       var percent = parseFloat(value)/max;
 
@@ -1134,8 +1193,6 @@ function fill(norData, std, x, y, is_left){
       if(color_value >= 0.05){
         if(is_left){
           coresetData.push({"x":i, "y":j, "color": threshold(color_value), "originColor": threshold(color_value) ,"delta":delta, "value":value});
-        }else{
-          fullData.push({"x":i, "y":j, "color": threshold(color_value), "originColor": threshold(color_value) ,"delta":delta, "value":value});
         }
       }
 
@@ -1200,7 +1257,11 @@ function fill(norData, std, x, y, is_left){
   //return coresetData;
 
    spinner_left.stop();
-   map_draw();
+   //map_update();
+   killChaos(std, radius, tau);
+   //map_draw();
+   var d1 = performance.now();
+   set_time((d1-d0)/1000);
  });
 }
 
@@ -1485,7 +1546,7 @@ d3.select("#radius").on("input", function(d){
   // var tau = d3.select("#tau").property("value");
 
   //d3.select("#radius-value").text(xscale(+this.value).toFixed(2));
-  d3.select("#radius_input").property("value", xscale(+this.value).toFixed(2));
+  d3.select("#radius_input").property("value", +this.value);
   d3.select("#radius").property("value", +this.value);
   // killChaos(0.01, +this.value, tau);
 });
@@ -1511,12 +1572,14 @@ function handleRadiusClick(event){
   var tau = d3.select("#tau").property("value");
 
   // d3.select("#radius-value").text(value);
-  d3.select("#radius").property("value", reverseXscale(parseFloat(value)));
+  d3.select("#radius").property("value", +value);
+
+
   if(left_is_origin == false){
-    killChaos(std, reverseXscale(parseFloat(value)), tau);
+    killChaos(std, radius_scale(parseFloat(value)), tau);
   }
   if(right_is_origin == false){
-    right_killChaos(std, reverseXscale(parseFloat(value)), tau);
+    right_killChaos(std, radius_scale(parseFloat(value)), tau);
   }
   return false;
 }
@@ -1531,12 +1594,14 @@ function handleTauClick(event){
 
   // d3.select("#tau-value").text(value);
   d3.select("#tau").property("value", +value);
+
+
   if(left_is_origin == false){
-    killChaos(std, radius, +value);
+    killChaos(std, radius_scale(radius), +value);
   }
 
   if(right_is_origin == false){
-    right_killChaos(std, radius, +value);
+    right_killChaos(std, radius_scale(radius), +value);
   }
   return false;
 }
@@ -1572,6 +1637,9 @@ function handleEpsilonClick(event){
 //   return false;
 // }
 
+/**
+  *   Callback of compare button.
+  **/
 function handleCompare(event){
   var data_value = document.getElementById("data_type_select").value;
 
@@ -1637,7 +1705,6 @@ function handleCompare(event){
 
   right_is_origin = right_origin;
 
-
   current_data = data_value;
   // init left and right
   if(last_data != data_value || left_dropdown_value != left_map_type){
@@ -1653,8 +1720,8 @@ function handleCompare(event){
   }
 
   last_data = data_value;
-
 }
+
 // function reset(){
 //   svg.transition().duration(500)
 //     .call(zoom.transform, d3.zoomIdentity);

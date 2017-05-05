@@ -111,7 +111,7 @@ td{
     position: relative;
     z-index:10;
     top: 37px;
-    left: 10%;
+    left: 8%;
 }
 
 #full .color_bar_svg{
@@ -197,7 +197,7 @@ td{
   vertical-align: bottom;
   margin: 1% 1% 0.5% 0.5%;
   padding: 0.2%;
-  width: 3%;
+  width: 3.3%;
   background: #fff;
   border: solid 1px #aaa;
 }

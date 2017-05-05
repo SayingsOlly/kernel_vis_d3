@@ -53,7 +53,7 @@
           </td>
           <td>
       <form id="epsilon_input_form" name="epsilon_form" onSubmit="return handleEpsilonClick()">
-            <input type="text" id="epsilon_input" placeholder="Input Epsilon">
+            <input type="text" id="epsilon_input" placeholder="0.03">
             <input name="epsilon_submit"  type="submit" value="Confirm" >
       </form>
 
@@ -63,12 +63,12 @@
           <td>
           <label for="radius"
                  style="display: inline-block; width: 50%; text-align: right">
-            Radius (0.1 - 1.5):
+            Radius (0.01 - 1):
           </label>
-          <input id="radius" type="range" min="1" max="100" step="5" value="101" /><br /></td>
+          <input id="radius" type="range" min="0.01" max="1" step="0.01" value="1" /><br /></td>
           <td>
       <form id="radius_input_form" name="radius_form" onSubmit="return handleRadiusClick()">
-            <input type="text" id="radius_input" placeholder="Input Radius">
+            <input type="text" id="radius_input" placeholder="1">
             <input name="radius_submit"  type="submit" value="Confirm" >
       </form>
             </td>
@@ -78,13 +78,13 @@
           <td>
             <label for="tau"
                    style="display: inline-block; width: 50%; text-align: right">
-              Percentage (0.15 - 0.95):
+              Percentage (0.05 - 0.95):
             </label>
-            <input id="tau" type="range" min="0.05" max="0.95" step="0.1" value="0.15" />
+            <input id="tau" type="range" min="0.05" max="0.95" step="0.1" value="0.05" />
           </td>
           <td>
        <form id="tau_input_form" name="tau_form" onSubmit="return handleTauClick()">
-            <input type="text" id="tau_input" placeholder="Input tau">
+            <input type="text" id="tau_input" placeholder="0.05">
             <input name="tau_submit"  type="submit" value="Confirm" >
        </form>
           </td>
