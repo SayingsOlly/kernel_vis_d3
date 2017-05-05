@@ -48,6 +48,8 @@ var left_current_file = "../data/ken_sort.txt";
 var right_current_file = "../data/kentucky_org.txt";
 
 
+var is_right_update = false;
+
 var current_sorted = true;
 var init_zoom = 7;
 var ken = [];
@@ -254,7 +256,7 @@ function update_color_bar(flag){
           var d = threshold.invertExtent(color);
           if (d[0] == null) d[0] = xBar.domain()[0];
           if (d[1] == null) d[1] = xBar.domain()[1];
-          console.log("color" + d);
+          //console.log("color" + d);
           return d;
         }));
 
@@ -332,12 +334,8 @@ function update_color_bar(flag){
     }
     d.originColor = threshold(color_value);
 
-    console.log("still working!!!!");
     //d.originColor = threshold(color_value);
   });
-
-  console.log("-------------------coreset data size:" + coresetData.length);
-  console.log("-------------------right_coreset data size:" + right_coresetData.length);
 
   if(flag == 1){
     map_draw();
@@ -550,22 +548,37 @@ function map_draw(){
   var pro_y;
 
   coresetData.forEach(function(d){
-    var newll = new google.maps.LatLng(parseFloat(d.x), parseFloat(d.y));
-    var newll_c = new google.maps.LatLng(parseFloat(d.x)+0.04, parseFloat(d.y));
 
-    var newpoint = mapProjection.fromLatLngToPoint(newll);
-    var newpoint_c = mapProjection.fromLatLngToPoint(newll_c);
+    if(d.color != "#f7f4f9"){
+      var newll = new google.maps.LatLng(parseFloat(d.x), parseFloat(d.y));
+      var newll_c = new google.maps.LatLng(parseFloat(d.x)+0.04, parseFloat(d.y));
 
-    pro_y = (newpoint_c.y - newpoint.y)/0.04;
+      var newpoint = mapProjection.fromLatLngToPoint(newll);
+      var newpoint_c = mapProjection.fromLatLngToPoint(newll_c);
+
+      pro_y = (newpoint_c.y - newpoint.y)/0.04;
 
 //    console.log(pro_y);
 
     //console.log(newpoint);
-    left_context.beginPath();
-    left_context.rect(newpoint.x, newpoint.y, pro*parseFloat(delta), pro_y*parseFloat(delta));
-    left_context.fillStyle = d.color;
-    left_context.fill();
+      left_context.beginPath();
+
+      left_context.rect(newpoint.x, newpoint.y, pro*parseFloat(delta), pro_y*parseFloat(delta));
+      if(d.color == "#f7f4f9"){
+        left_context.fillStyle = "rgba(0, 0, 0, 0)";
+      }else{
+        left_context.fillStyle = d.color;
+      }
+      left_context.fill();
+    }
   });
+
+  if(is_right_update == false){
+    document.getElementById("compare_btn").disabled = false;
+    document.getElementById("tau_confirm").disabled = false;
+    document.getElementById("epsilon_confirm").disabled = false;
+    document.getElementById("radius_confirm").disabled = false;
+  }
 }
 
 /**
@@ -1074,7 +1087,7 @@ function getCore(is_left, std, radius, tau){
 function killChaos(std, radius, tau){
 
   coresetData.forEach(function(d){
-    if(d.value >= 0.05*max){
+    if(d.color !="#f7f4f9"){
       //console.log(">epsilon");
       var flag = false;
       coresetData.forEach(function(k){
@@ -1190,7 +1203,7 @@ function fill(norData, radius, tau, std, x, y, is_left){
         }
       });
 
-      if(color_value >= 0.05){
+      if(color_value >= -0.05){
         if(is_left){
           coresetData.push({"x":i, "y":j, "color": threshold(color_value), "originColor": threshold(color_value) ,"delta":delta, "value":value});
         }
@@ -1272,7 +1285,7 @@ function kde_kernel(norData, std, x, y){
 
   norData.forEach(function(d){
     var dist = (x-d.x)*(x-d.x) + (y-d.y)*(y-d.y);
-   if (dist <= 8.0*STD/(maxY - minY)){
+   if (dist <= 5.0*STD/(maxY - minY)){
     count += coeff*parseFloat(Math.exp(-dist/(2.0*STD*STD)));
    }
   });
@@ -1566,6 +1579,11 @@ d3.select("#tau").on("input",function(d){
 function handleRadiusClick(event){
 
   // var std = d3.select("#std").property("value");
+  document.getElementById("compare_btn").disabled = true;
+  document.getElementById("tau_confirm").disabled = true;
+  document.getElementById("epsilon_confirm").disabled = true;
+  document.getElementById("radius_confirm").disabled = true;
+
   var std = 0.01;
   var value = document.getElementById("radius_input").value;
 
@@ -1587,6 +1605,10 @@ function handleRadiusClick(event){
 function handleTauClick(event){
 
   // var std = d3.select("#std").property("value");
+  document.getElementById("compare_btn").disabled = true;
+  document.getElementById("tau_confirm").disabled = true;
+  document.getElementById("epsilon_confirm").disabled = true;
+  document.getElementById("radius_confirm").disabled = true;
   var std = 0.01;
   var value = document.getElementById("tau_input").value;
 
@@ -1609,6 +1631,10 @@ function handleTauClick(event){
 function handleEpsilonClick(event){
 
   // var std = d3.select("#std").property("value");
+  document.getElementById("compare_btn").disabled = true;
+  document.getElementById("tau_confirm").disabled = true;
+  document.getElementById("epsilon_confirm").disabled = true;
+  document.getElementById("radius_confirm").disabled = true;
   var std = 0.01;
   var value = document.getElementById("epsilon_input").value;
 
@@ -1641,6 +1667,8 @@ function handleEpsilonClick(event){
   *   Callback of compare button.
   **/
 function handleCompare(event){
+
+
   var data_value = document.getElementById("data_type_select").value;
 
   var left_dropdown_value = document.getElementById("map_type_select_left").value;
@@ -1708,11 +1736,26 @@ function handleCompare(event){
   current_data = data_value;
   // init left and right
   if(last_data != data_value || left_dropdown_value != left_map_type){
+    if(last_data != data_value || right_dropdown_value != right_map_type){
+      is_right_update = true;
+    }else{
+      is_right_update = false;
+    }
+    document.getElementById("compare_btn").disabled = true;
+    document.getElementById("tau_confirm").disabled = true;
+    document.getElementById("epsilon_confirm").disabled = true;
+    document.getElementById("radius_confirm").disabled = true;
+
     left_map_type = left_dropdown_value;
     init_left(data_value, is_sorted, is_origin, true);
   }
 
   if(last_data != data_value || right_dropdown_value != right_map_type){
+
+    document.getElementById("compare_btn").disabled = true;
+    document.getElementById("tau_confirm").disabled = true;
+    document.getElementById("epsilon_confirm").disabled = true;
+    document.getElementById("radius_confirm").disabled = true;
 
     console.log("comming" + right_origin + " " + right_is_origin);
     right_map_type = right_dropdown_value;

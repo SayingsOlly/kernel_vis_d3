@@ -382,7 +382,7 @@ function right_map_update(){
 }
 
 function right_map_draw(){
-  console.log("right");
+
   right_context.clearRect(0,0, right_canvasWidth, right_canvasHeight);
   right_context.globalAlpha = 0.5;
   // var newpoint;
@@ -400,6 +400,8 @@ function right_map_draw(){
     var pro_y;
 
   right_coresetData.forEach(function(d){
+
+    if(d.color != "#f7f4f9"){
     var newll = new google.maps.LatLng(parseFloat(d.x), parseFloat(d.y));
     var newll_c = new google.maps.LatLng(parseFloat(d.x)+0.04, parseFloat(d.y));
 
@@ -410,10 +412,19 @@ function right_map_draw(){
     //console.log(newpoint);
     right_context.beginPath();
     right_context.rect(newpoint.x, newpoint.y, pro*parseFloat(delta), pro_y*parseFloat(delta));
-    right_context.fillStyle = d.color;
+    if(d.color == "#f7f4f9"){
+      right_context.fillStyle = "rgba(0, 0, 0, 0)";
+    }else{
+      right_context.fillStyle = d.color;
+    }
     right_context.fill();
+    }
+  });
 
-   });
+    document.getElementById("compare_btn").disabled = false;
+    document.getElementById("tau_confirm").disabled = false;
+    document.getElementById("epsilon_confirm").disabled = false;
+    document.getElementById("radius_confirm").disabled = false;
 }
 
 /**
@@ -931,7 +942,7 @@ function right_getCore(is_left, std, radius, tau){
 function right_killChaos(std, radius, tau){
 
   right_coresetData.forEach(function(d){
-    if(d.value >= 0.05*right_max){
+    if(d.color !="#f7f4f9"){
       //console.log(">epsilon");
       var flag = false;
       right_coresetData.forEach(function(k){
@@ -941,7 +952,7 @@ function right_killChaos(std, radius, tau){
         }
       });
       if(!flag){
-        d.color = "#fff";
+        d.color ="#fff";
       }
     }
   });
@@ -1050,7 +1061,7 @@ function right_fill(norData, radius, tau, std, x, y, is_right){
         }
       });
 
-      if(color_value >= 0.05){
+      if(color_value >= -0.05){
           right_coresetData.push({"x":i, "y":j, "color": threshold(color_value), "originColor": threshold(color_value) ,"delta":delta, "value":value});
       }
 
@@ -1132,7 +1143,7 @@ function right_kde_kernel(norData, std, x, y){
 
   norData.forEach(function(d){
     var dist = (x-d.x)*(x-d.x) + (y-d.y)*(y-d.y);
-   if (dist <= 8.0*STD/(maxY - minY)){
+   if (dist <= 5.0*STD/(maxY - minY)){
     count += coeff*parseFloat(Math.exp(-dist/(2.0*STD*STD)));
    }
   });
