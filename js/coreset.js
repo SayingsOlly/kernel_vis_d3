@@ -449,8 +449,8 @@ function init_googlemap(){
 
     var max_tau = pre_kill_chaos();
 
-    max_tau = parseFloat(max_tau.toFixed(3))+0.002;
-    var contentString = '<b>' + max_tau*max + '</b><br>' +
+    max_tau = parseFloat(max_tau.toFixed(3))+0.001;
+    var contentString = '<b>Max value:' + max_tau*max + '</b><br>' +
         'Recommend min percentage: ' + max_tau + '<br>' +
         'Recommend min radius: 0.01';
 
@@ -1875,10 +1875,10 @@ function handleTauClick(event){
 function handleEpsilonClick(event){
 
   // var std = d3.select("#std").property("value");
-  document.getElementById("compare_btn").disabled = true;
-  document.getElementById("tau_confirm").disabled = true;
-  document.getElementById("epsilon_confirm").disabled = true;
-  document.getElementById("radius_confirm").disabled = true;
+  // document.getElementById("compare_btn").disabled = true;
+  // document.getElementById("tau_confirm").disabled = true;
+  // document.getElementById("epsilon_confirm").disabled = true;
+  // document.getElementById("radius_confirm").disabled = true;
   var std = 0.01;
   var value = document.getElementById("epsilon_input").value;
 

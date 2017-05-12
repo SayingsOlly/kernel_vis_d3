@@ -414,7 +414,7 @@ function right_init_googlemap(){
 
     var max_tau = right_pre_kill_chaos();
 
-    max_tau = parseFloat(max_tau.toFixed(3))+0.002;
+    max_tau = parseFloat(max_tau.toFixed(3))+0.001;
     var contentString = '<b>Max value: ' + max_tau*right_max + '</b><br>' +
         'Recommend min percentage: ' + max_tau + '<br>' +
         'Recommend min radius: 0.01';
@@ -492,10 +492,10 @@ function right_map_draw(){
   var test1 = new google.maps.LatLng(30.00, -100.04);
   var test2 = new google.maps.LatLng(30.00, -100.08);
 
-  // if(right_mapProjection == undefined){
-  //   right_mapProjection = mapProjection;
-  // }
   right_mapProjection = right_map.getProjection();
+  if(right_mapProjection == undefined){
+    right_mapProjection = mapProjection;
+  }
     var point1 = right_mapProjection.fromLatLngToPoint(test1);
     var point2 = right_mapProjection.fromLatLngToPoint(test2);
 
