@@ -30,12 +30,12 @@ var delta_list = {"Kentucky": 0.04,
                   "Philadelphia Crimes":0.002,
                   "Japan": 0.1};
 
-var zoom_list = {"Kentucky": 6,
-                 "Philadelphia Crimes": 10,
-                 "Japan": 5};
+var zoom_list = {"Kentucky": 7,
+                 "Philadelphia Crimes": 11,
+                 "Japan": 6};
 
-var full_data_list = {"Kentucky": "../data/kentucky_coreset.csv",
-                      "Philadelphia Crimes": "../data/crime_full_new.csv",
+var full_data_list = {"Kentucky": "../data/kentucky_coreset_full.csv",
+                      "Philadelphia Crimes": "../data/crime_full_new2.csv",
                       "Japan": "../data/japan_coreset.csv"};
 
 var last_left_center;
@@ -47,6 +47,10 @@ var right_map_type = "Random Sampling";
 var left_current_file = "../data/ken_sort.txt";
 var right_current_file = "../data/kentucky_org.txt";
 
+
+var ne, sw;
+
+var left_click_latlng = 0;
 
 var is_right_update = false;
 
@@ -108,8 +112,11 @@ var color_data = d3.entries(colorbrewer).slice(1,18);
 
 
 color_data.splice(0,1);
+// color_data.push({key: 'Default',
+//                  value: {11: ["#f7f4f9","#00d0e5", "#0089e1", "#0044dd", "#0001d9", "#3e00d5","#7b00d2", "#b700ce", "#ca44a3", "#c60065", "#c24429"]}});
 color_data.push({key: 'Default',
-                 value: {11: ["#f7f4f9","#00d0e5", "#0089e1", "#0044dd", "#0001d9", "#3e00d5","#7b00d2", "#b700ce", "#ca44a3", "#c60065", "#c24429"]}});
+                 value: {11: ["#f7f4f9","#00d0e5", "#0089e1", "#0044dd", "#0001d9", "#3e00d5","#7b00d2", "#b700ce","#ef3b2c", "#cb181d", "#a50f15"]}});
+
 color_data.push({key: 'YlOrBr2',
                  value: {11: ["#f7f4f9",
                               "#fff7bc",
@@ -313,6 +320,7 @@ function update_color_bar(flag){
   });
 
 
+  console.log("update right");
   right_coresetData.forEach(function(d){
     var percent = parseFloat(d.value)/right_max;
     var color_value = 0.0;
@@ -414,6 +422,78 @@ function init_googlemap(){
   canvasLayer = new CanvasLayer(canvasLayerOptions);
   left_context = canvasLayer.canvas.getContext('2d');
 
+  // Rectangle, pre kill chaos.
+
+  var bounds = {
+          north: centerX,
+          south: centerX+0.001,
+          east:  centerY,
+          west:  centerY-0.001
+  };
+
+  var rectangle = new google.maps.Rectangle({
+          bounds: bounds,
+          editable: true,
+          draggable: true
+  });
+
+  rectangle.setMap(left_map);
+
+  // Add an event listener on the rectangle.
+  rectangle.addListener('bounds_changed', showNewRect);
+  var infoWindow = new google.maps.InfoWindow();
+
+  rectangle.addListener('dragend', function(){
+    ne = rectangle.getBounds().getNorthEast();
+    sw = rectangle.getBounds().getSouthWest();
+
+    var max_tau = pre_kill_chaos();
+
+    max_tau = parseFloat(max_tau.toFixed(3))+0.002;
+    var contentString = '<b>' + max_tau*max + '</b><br>' +
+        'Recommend min percentage: ' + max_tau + '<br>' +
+        'Recommend min radius: 0.01';
+
+        // Set the info window's content and position.
+    infoWindow.setContent(contentString);
+    infoWindow.setPosition(ne);
+
+    infoWindow.open(left_map);
+  });
+
+  // Define an info window on the map.
+
+  function showNewRect(event) {
+  }
+
+  // left_map.addListener("click", function(e){
+  //   mapProjection = left_map.getProjection();
+  //   console.log(mapProjection.fromLatLngToPoint(e.latLng));
+  //   left_click_latlng = e.latLng;
+
+  //   d3.select("#map-div-left").selectAll(".tool-tip").remove();
+
+
+  //   // TODO: check if there is a denser point around this point.
+
+  //   map_draw();
+
+    // console.log("done");
+    // d3.select("#map-div-left").append("div")
+    //   .attr("class", "tool-tip")
+    //   .style("position", "absolute")
+    //   .style("left", e.pixel.x + "px")
+    //   .style("top", e.pixel.y + "px")
+    //   .style("z-index", "10")
+    //   .style("fill", "red")
+    //   .text("a simple tooltip")
+    //   .transition()
+    //   .delay(750)
+    //   .style("visibility", "hidden");
+
+
+    // console.log(e.pixel);
+ // });
 }
 
 function map_resize(){
@@ -465,6 +545,61 @@ function map_update(){
 
   //draw
 }
+
+/**
+ *  Pre calculate and recommand the percentage and radius to users if they try to
+ *  kill the chaos in the choosen range.
+ **/
+
+
+function pre_kill_chaos(){
+
+  var chaos_list = [];
+  var max_tau = 0;
+  coresetData.forEach(function(d){
+
+    if(d.color != "#f7f4f9"){
+      var newll = new google.maps.LatLng(parseFloat(d.x), parseFloat(d.y));
+      var newll_c = new google.maps.LatLng(parseFloat(d.x)+0.04, parseFloat(d.y));
+
+      var newpoint = mapProjection.fromLatLngToPoint(newll);
+      var newpoint_c = mapProjection.fromLatLngToPoint(newll_c);
+
+      // pro_y = (newpoint_c.y - newpoint.y)/0.04;
+
+      // pro_y = Math.abs(pro_y);
+//    console.log(pro_y);
+
+    //console.log(newpoint);
+      //left_context.beginPath();
+
+      //left_context.rect(newpoint.x, newpoint.y, pro*parseFloat(delta), pro_y*parseFloat(delta));
+      if(d.color == "#f7f4f9"){
+
+        //left_context.fillStyle = "rgba(0, 0, 0, 0)";
+      }else{
+
+        //        var ne = new google.maps.LatLng(ne.lat(), ne.lng())
+        if((sw.lat() <= d.x && ne.lat() >= d.x + delta)
+            && (ne.lng() >= d.y && sw.lng() <= d.y + delta)
+          )
+        {
+          chaos_list.push(d);
+          var cur_tau = d.value/max;
+          console.log(cur_tau);
+          if(cur_tau > max_tau){
+            max_tau = cur_tau;
+          }
+        }else{
+          //left_context.fillStyle = d.color;
+        }
+      }
+      //left_context.fill();
+    }
+  });
+  return max_tau;
+}
+
 
 function map_draw(){
   console.log("left");
@@ -537,6 +672,8 @@ function map_draw(){
   var test2 = new google.maps.LatLng(30.00, -100.08);
 
 
+  mapProjection = left_map.getProjection();
+
   if(mapProjection == undefined){
     mapProjection = right_mapProjection;
   }
@@ -558,6 +695,7 @@ function map_draw(){
 
       pro_y = (newpoint_c.y - newpoint.y)/0.04;
 
+      pro_y = Math.abs(pro_y);
 //    console.log(pro_y);
 
     //console.log(newpoint);
@@ -567,7 +705,20 @@ function map_draw(){
       if(d.color == "#f7f4f9"){
         left_context.fillStyle = "rgba(0, 0, 0, 0)";
       }else{
-        left_context.fillStyle = d.color;
+        if(left_click_latlng != 0){
+          var left_click_point = mapProjection.fromLatLngToPoint(left_click_latlng);
+        }
+
+        if(left_click_latlng != 0
+           && (left_click_point.x >= newpoint.x && left_click_point.x <= newpoint.x + pro* parseFloat(delta))
+           && (left_click_point.y >= newpoint.y && left_click_point.y <= newpoint.y + pro_y*parseFloat(delta))
+          )
+        {
+          left_context.fillStyle = "#000";
+          console.log(pro*parseFloat(delta));
+        }else{
+          left_context.fillStyle = d.color;
+        }
       }
       left_context.fill();
     }
@@ -728,6 +879,14 @@ function init_left(data_select, is_sorted, is_origin, is_left){
       set_time(1);
       coresetData = data;
 
+      var cur_max = 0;
+      coresetData.forEach(function(d){
+        if(d.value > cur_max){
+          cur_max = d.value;
+        }
+      });
+
+      max = cur_max;
       init_googlemap();
       map_draw();
       //right_map_update();
@@ -1087,13 +1246,19 @@ function getCore(is_left, std, radius, tau){
 function killChaos(std, radius, tau){
 
   coresetData.forEach(function(d){
-    if(d.color !="#f7f4f9"){
+    d.color = d.originColor;
+  });
+
+  coresetData.forEach(function(d){
+    if(d.color !="#f7f4f9" && d.value < tau*max){
       //console.log(">epsilon");
       var flag = false;
       coresetData.forEach(function(k){
-        if(k.value >= tau*max && eval_range(d.x, d.y, k.x, k.y, std) < radius){
-          flag = true;
-          d.color = d.originColor;
+        if(k.value >= tau*max){
+          if(eval_range(d.x, d.y, k.x, k.y, std) < radius){
+            flag = true;
+            d.color = d.originColor;
+          }
         }
       });
       if(!flag){
@@ -1103,7 +1268,8 @@ function killChaos(std, radius, tau){
   });
   //updateHeapMap();
   //draw_canvas();
-  map_draw();
+  //map_draw();
+  map_update();
   //zoomed_rescale();
   //return coresetData;
 }
@@ -1124,21 +1290,6 @@ function eval_range(qx, qy, xx, xy, std){
  */
 function fill(norData, radius, tau, std, x, y, is_left){
 
-  coresetData = [];
-
-  var d0 = performance.now();
-  var v = 0.0;
-  var cur_max = 0.0;
-  for(var i=minX; i<=maxX; i+=delta){
-    for(var j=minY; j<=maxY; j+=delta){
-      v = kde_kernel(norData, std, i+delta/2.0, j+delta/2.0);
-      if (v > cur_max){
-        cur_max = v;
-      }
-    }
-  }
-
-  max = cur_max;
 
   // Update the max density.
   // var v = 0.0;
@@ -1168,29 +1319,121 @@ function fill(norData, radius, tau, std, x, y, is_left){
  d3.csv(full_data_list[current_data], function(error, data){
   //if(error) throw error;
 
+  coresetData = [];
    var full_Data = data;
+   var sum = 0.0;
+   var count = 0;
+  var d0 = performance.now();
+  var v = 0.0;
+  var cur_max = 0.0;
+  for(var i=minX; i<=maxX; i+=delta){
+    for(var j=minY; j<=maxY; j+=delta){
+      v = kde_kernel(norData, std, i+delta/2.0, j+delta/2.0);
+
+      if(left_is_diff!=0){
+
+        // console.log("coreset position: x:" + i + "y:" + j);
+        // console.log("full data position : x:" + full_Data[count].x + "y:" + full_Data[count].y);
+        // console.log("full data value:" + full_Data[count].value + " data value:" + value);
+        v = (parseFloat(full_Data[count].value) - v);
+
+        v = Math.abs(v);
+        if(left_is_diff == 2){
+          if(full_Data[count].value != 0){
+            v = v/parseFloat(full_Data[count].value);
+            if (v > 1){
+              console.log("coreset position: x:" + i + "y:" + j);
+              console.log("full data position : x:" + full_Data[count].x + "y:" + full_Data[count].y);
+              console.log("full data value:" + full_Data[count].value + " data value:" + v*parseFloat(full_Data[count].value));
+            }
+          }else{
+            v = 0;
+          }
+        }
+        // for(var data_i = 0; data_i < full_Data.length; data_i ++){
+        //   if(i == full_Data[data_i].x && j == full_Data[data_i].y){
+        //     value = (full_Data[data_i].value - value);
+        //     if(value < 0){
+        //       console.log("value < 0", value);
+        //       console.log("value > 0", Math.abs(value));
+        //     }
+        //     value = Math.abs(value);
+        //     if(left_is_diff == 2){
+        //       value = value/full_Data[data_i];
+        //     }
+        // }
+        // }
+
+        // if(value > max_diff){
+        //   max_diff = value;
+        // }
+        count += 1;
+      }
+
+      sum += v;
+      if (v > cur_max){
+        cur_max = v;
+      }
+    }
+  }
+
+   console.log("left average difference:" + sum/parseFloat(count));
+  max = cur_max;
    /**
     *  map
     *
     **/
 
-   //var count = 1;
-   for(var i=minX; i<maxX; i+=delta){
-    for(var j=minY; j<maxY; j+=delta){
+   var max_diff = 0;
+   count = 0;
+   for(var i=minX; i<=maxX; i+=delta){
+    for(var j=minY; j<=maxY; j+=delta){
       var value = kde_kernel(norData, std, i+delta/2.0, j+delta/2.0);
       if(left_is_diff!=0){
 
-        for(var data_i = 0; data_i < full_Data.length; data_i ++){
-          if(i == full_Data[data_i].x && j == full_Data[data_i].y){
-            value = (full_Data[data_i].value - value);
-            if(left_is_diff == 2){
-              value = value/full_Data[data_i];
-            }
+        // console.log("coreset position: x:" + i + "y:" + j);
+        // console.log("full data position : x:" + full_Data[count].x + "y:" + full_Data[count].y);
+        // console.log("full data value:" + full_Data[count].value + " data value:" + value);
+        value = (parseFloat(full_Data[count].value) - value);
+
+        // if(value < 0){
+        //       console.log("value < 0", value);
+        //       console.log("value > 0", Math.abs(value));
+        // }
+        value = Math.abs(value);
+        if(left_is_diff == 2){
+          if(full_Data[count].value != 0){
+            value = value/parseFloat(full_Data[count].value);
+          }else{
+            value = 0;
+          }
         }
+        // console.log(value);
+        // console.log(max);
+        // for(var data_i = 0; data_i < full_Data.length; data_i ++){
+        //   if(i == full_Data[data_i].x && j == full_Data[data_i].y){
+        //     value = (full_Data[data_i].value - value);
+        //     if(value < 0){
+        //       console.log("value < 0", value);
+        //       console.log("value > 0", Math.abs(value));
+        //     }
+        //     value = Math.abs(value);
+        //     if(left_is_diff == 2){
+        //       value = value/full_Data[data_i];
+        //     }
+        // }
+        // }
+
+        if(value > max_diff){
+          max_diff = value;
+        }
+        count += 1;
       }
-        //count += 1;
+      if(parseFloat(value) > max){
+        value = max;
       }
       var percent = parseFloat(value)/max;
+
 
       var color_value = 0.0;
 
@@ -1269,6 +1512,7 @@ function fill(norData, radius, tau, std, x, y, is_left){
   }
   //return coresetData;
 
+   console.log("max diff:" + max_diff);
    spinner_left.stop();
    //map_update();
    killChaos(std, radius, tau);
@@ -1587,11 +1831,11 @@ function handleRadiusClick(event){
   var std = 0.01;
   var value = document.getElementById("radius_input").value;
 
-  var tau = d3.select("#tau").property("value");
+  var tau = document.getElementById("tau_input").value;
+  //var tau = d3.select("#tau").property("value");
 
   // d3.select("#radius-value").text(value);
   d3.select("#radius").property("value", +value);
-
 
   if(left_is_origin == false){
     killChaos(std, radius_scale(parseFloat(value)), tau);
@@ -1612,7 +1856,7 @@ function handleTauClick(event){
   var std = 0.01;
   var value = document.getElementById("tau_input").value;
 
-  var radius = d3.select("#radius").property("value");
+  var radius = document.getElementById("radius_input").value;
 
   // d3.select("#tau-value").text(value);
   d3.select("#tau").property("value", +value);

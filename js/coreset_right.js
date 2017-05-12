@@ -33,6 +33,8 @@ var right_ken = [];
 var right_coresetData = [];
 
 
+var right_ne, right_sw;
+
 // GOOGLE map
 var last_right_center;
 var right_canvasLayer;
@@ -288,6 +290,62 @@ var STD = 0.01;
 // }
 
 /**
+ *  Pre calculate and recommand the percentage and radius to users if they try to
+ *  kill the chaos in the choosen range.
+ **/
+
+
+function right_pre_kill_chaos(){
+
+  var chaos_list = [];
+  var max_tau = 0;
+  right_coresetData.forEach(function(d){
+
+    if(d.color != "#f7f4f9"){
+      var newll = new google.maps.LatLng(parseFloat(d.x), parseFloat(d.y));
+      var newll_c = new google.maps.LatLng(parseFloat(d.x)+0.04, parseFloat(d.y));
+
+      var newpoint = right_mapProjection.fromLatLngToPoint(newll);
+      var newpoint_c = right_mapProjection.fromLatLngToPoint(newll_c);
+
+      // pro_y = (newpoint_c.y - newpoint.y)/0.04;
+
+      // pro_y = Math.abs(pro_y);
+//    console.log(pro_y);
+
+    //console.log(newpoint);
+      //left_context.beginPath();
+
+      //left_context.rect(newpoint.x, newpoint.y, pro*parseFloat(delta), pro_y*parseFloat(delta));
+      if(d.color == "#f7f4f9"){
+
+        //left_context.fillStyle = "rgba(0, 0, 0, 0)";
+      }else{
+
+        //        var ne = new google.maps.LatLng(ne.lat(), ne.lng())
+        if((right_sw.lat() <= d.x && right_ne.lat() >= d.x + delta)
+            && (right_ne.lng() >= d.y && right_sw.lng() <= d.y + delta)
+          )
+        {
+          chaos_list.push(d);
+          var cur_tau = d.value/right_max;
+          console.log(cur_tau);
+          if(cur_tau > max_tau){
+            max_tau = cur_tau;
+          }
+        }else{
+          //left_context.fillStyle = d.color;
+        }
+      }
+      //left_context.fill();
+    }
+  });
+  return max_tau;
+}
+
+
+
+/**
   * -----------------------------------------------
   * Create Google map
   * -----------------------------------------------
@@ -328,6 +386,50 @@ function right_init_googlemap(){
 
   right_canvasLayer = new CanvasLayer(canvasLayerOptions);
   right_context = right_canvasLayer.canvas.getContext('2d');
+
+    // Rectangle, pre kill chaos.
+
+  var bounds = {
+          north: centerX,
+          south: centerX+0.001,
+          east:  centerY,
+          west:  centerY-0.001
+  };
+
+  var rectangle = new google.maps.Rectangle({
+          bounds: bounds,
+          editable: true,
+          draggable: true
+  });
+
+  rectangle.setMap(right_map);
+
+  // Add an event listener on the rectangle.
+  rectangle.addListener('bounds_changed', showNewRect);
+  var infoWindow = new google.maps.InfoWindow();
+
+  rectangle.addListener('dragend', function(){
+    right_ne = rectangle.getBounds().getNorthEast();
+    right_sw = rectangle.getBounds().getSouthWest();
+
+    var max_tau = right_pre_kill_chaos();
+
+    max_tau = parseFloat(max_tau.toFixed(3))+0.002;
+    var contentString = '<b>Max value: ' + max_tau*right_max + '</b><br>' +
+        'Recommend min percentage: ' + max_tau + '<br>' +
+        'Recommend min radius: 0.01';
+
+        // Set the info window's content and position.
+    infoWindow.setContent(contentString);
+    infoWindow.setPosition(right_ne);
+
+    infoWindow.open(right_map);
+  });
+
+  // Define an info window on the map.
+
+  function showNewRect(event) {
+  }
 
 }
 
@@ -390,9 +492,10 @@ function right_map_draw(){
   var test1 = new google.maps.LatLng(30.00, -100.04);
   var test2 = new google.maps.LatLng(30.00, -100.08);
 
-  if(right_mapProjection == undefined){
-    right_mapProjection = mapProjection;
-  }
+  // if(right_mapProjection == undefined){
+  //   right_mapProjection = mapProjection;
+  // }
+  right_mapProjection = right_map.getProjection();
     var point1 = right_mapProjection.fromLatLngToPoint(test1);
     var point2 = right_mapProjection.fromLatLngToPoint(test2);
 
@@ -406,7 +509,7 @@ function right_map_draw(){
     var newll_c = new google.maps.LatLng(parseFloat(d.x)+0.04, parseFloat(d.y));
 
     var newpoint = right_mapProjection.fromLatLngToPoint(newll);
-    var newpoint_c = mapProjection.fromLatLngToPoint(newll_c);
+    var newpoint_c = right_mapProjection.fromLatLngToPoint(newll_c);
 
     pro_y = (newpoint_c.y - newpoint.y)/0.04;
     //console.log(newpoint);
@@ -583,6 +686,17 @@ function init_right(data_select, is_sorted, is_origin, is_right){
       set_right_data_size(1);
       set_right_time(1);
       right_coresetData = data;
+
+      var cur_max = 0;
+      console.log("init right!!!!!");
+      right_coresetData.forEach(function(d){
+        if(parseFloat(d.value) > cur_max){
+          cur_max = d.value;
+        }
+      });
+
+      right_max = cur_max;
+      console.log("current max:" + right_max);
 
       right_init_googlemap();
       right_map_draw();
@@ -942,13 +1056,19 @@ function right_getCore(is_left, std, radius, tau){
 function right_killChaos(std, radius, tau){
 
   right_coresetData.forEach(function(d){
-    if(d.color !="#f7f4f9"){
+    d.color = d.originColor;
+  });
+
+  right_coresetData.forEach(function(d){
+    if(d.color !="#f7f4f9" && d.value < tau*right_max){
       //console.log(">epsilon");
       var flag = false;
       right_coresetData.forEach(function(k){
-        if(k.value >= tau*right_max && eval_range(d.x, d.y, k.x, k.y, std) < radius){
-          flag = true;
-          d.color = d.originColor;
+        if(k.value >= tau*right_max){
+          if(eval_range(d.x, d.y, k.x, k.y, std) < radius){
+            flag = true;
+            d.color = d.originColor;
+          }
         }
       });
       if(!flag){
@@ -960,6 +1080,7 @@ function right_killChaos(std, radius, tau){
   //draw_canvas();
   console.log("right coreset data in killing", + right_coresetData.length);
   right_map_draw();
+  //right_map_update();
   //zoomed_rescale();
   //return coresetData;
 }
@@ -980,22 +1101,6 @@ function eval_range(qx, qy, xx, xy, std){
  */
 function right_fill(norData, radius, tau, std, x, y, is_right){
 
-  var d2 = performance.now();
-  console.log("d2:::::" + d2);
-  right_coresetData = [];
-
-  var v = 0.0;
-  var cur_max = 0.0;
-  for(var i=minX; i<=maxX; i+=delta){
-    for(var j=minY; j<=maxY; j+=delta){
-      v = right_kde_kernel(norData, std, i+delta/2.0, j+delta/2.0);
-      if (v > cur_max){
-        cur_max = v;
-      }
-    }
-  }
-
-  right_max = cur_max;
 
   // Update the max density.
   // var v = 0.0;
@@ -1023,28 +1128,127 @@ function right_fill(norData, radius, tau, std, x, y, is_right){
    */
 
  d3.csv(full_data_list[current_data], function(error, data){
+   var d2 = performance.now();
    if(error) throw error;
 
-   console.log("full data list");
    var fullData = data;
    /**
     *  map
     *
     **/
+   right_coresetData = [];
+   var sum = 0.0;
+   var count = 0;
+  var v = 0.0;
+  var cur_max = 0.0;
+  for(var i=minX; i<=maxX; i+=delta){
+    for(var j=minY; j<=maxY; j+=delta){
+      v = right_kde_kernel(norData, std, i+delta/2.0, j+delta/2.0);
 
+      if(right_is_diff!=0){
+
+        v = (parseFloat(fullData[count].value) - v);
+
+        v = Math.abs(v);
+        if(right_is_diff == 2){
+          if(fullData[count].value != 0){
+            v = v/parseFloat(fullData[count].value);
+            if (v > 1){
+              console.log("coreset position: x:" + i + "y:" + j);
+              console.log("full data position : x:" + fullData[count].x + "y:" + fullData[count].y);
+              console.log("full data value:" + fullData[count].value + " data value:" + v*parseFloat(fullData[count].value));
+            }
+          }else{
+            v = 0;
+          }
+        }
+        // for(var data_i = 0; data_i < full_Data.length; data_i ++){
+        //   if(i == full_Data[data_i].x && j == full_Data[data_i].y){
+        //     value = (full_Data[data_i].value - value);
+        //     if(value < 0){
+        //       console.log("value < 0", value);
+        //       console.log("value > 0", Math.abs(value));
+        //     }
+        //     value = Math.abs(value);
+        //     if(left_is_diff == 2){
+        //       value = value/full_Data[data_i];
+        //     }
+        // }
+        // }
+
+        // if(value > max_diff){
+        //   max_diff = value;
+        // }
+        count += 1;
+      }
+
+      sum += v;
+      if (v > cur_max){
+        cur_max = v;
+      }
+    }
+  }
+
+   console.log("right average difference: " + sum/parseFloat(count));
+   right_max = cur_max;
+   console.log("right max no origin:" + right_max);
+
+   count = 0;
+   var max_diff = 0;
    for(var i=minX; i<=maxX; i+=delta){
     for(var j=minY; j<=maxY; j+=delta){
       var value = right_kde_kernel(norData, std, i+delta/2.0, j+delta/2.0);
        if(right_is_diff!=0){
 
-         for(var data_i = 0; data_i < fullData.length; data_i ++){
-           if(i == fullData[data_i].x && j == fullData[data_i].y){
-             value = (fullData[data_i].value - value);
-             if(right_is_diff == 2){
-               value = value/fullData[data_i];
-             }
-           }
+         // for(var data_i = 0; data_i < fullData.length; data_i ++){
+         //   if(i == fullData[data_i].x && j == fullData[data_i].y){
+         //     value = (fullData[data_i].value - value);
+         //     value = Math.abs(value);
+
+         //     if(right_is_diff == 2){
+         //       value = value/fullData[data_i];
+         //     }
+         //   }
+         // }
+
+         // console.log("coreset position: x:" + i + "y:" + j);
+        // console.log("full data position : x:" + full_Data[count].x + "y:" + full_Data[count].y);
+        // console.log("full data value:" + full_Data[count].value + " data value:" + value);
+        value = (parseFloat(fullData[count].value) - value);
+
+        // if(value < 0){
+        //       console.log("value < 0", value);
+        //       console.log("value > 0", Math.abs(value));
+        // }
+        value = Math.abs(value);
+        if(right_is_diff == 2){
+          if(fullData[count].value != 0){
+            value = value/parseFloat(fullData[count].value);
+          }else{
+            value = 0;
+          }
+        }
+        // console.log(value);
+        // console.log(max);
+        // for(var data_i = 0; data_i < full_Data.length; data_i ++){
+        //   if(i == full_Data[data_i].x && j == full_Data[data_i].y){
+        //     value = (full_Data[data_i].value - value);
+        //     if(value < 0){
+        //       console.log("value < 0", value);
+        //       console.log("value > 0", Math.abs(value));
+        //     }
+        //     value = Math.abs(value);
+        //     if(left_is_diff == 2){
+        //       value = value/full_Data[data_i];
+        //     }
+        // }
+        // }
+
+         if(value > max_diff){
+           max_diff = value;
          }
+
+         count += 1;
 
        }
 
@@ -1125,7 +1329,8 @@ function right_fill(norData, radius, tau, std, x, y, is_right){
       // }
     }
   }
-  //return coresetData;
+   //return coresetData;
+   console.log("max_diff_right:" + max_diff);
    spinner_right.stop();
    //right_map_update();
    right_killChaos(std, radius, tau);

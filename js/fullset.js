@@ -18,15 +18,15 @@ var sorted_data_list = {"Kentucky":"../data/ken_sort.txt",
 
 var STD_list = {"Kentucky": 0.07,
                 "Philadelphia Crimes": 0.003,
-                "Japan": 0.43};
+                "Japan": 0.46};
 
 var delta_list = {"Kentucky": 0.04,
                   "Philadelphia Crimes":0.002,
                   "Japan": 0.1};
 
-var zoom_list = {"Kentucky": 6,
-                 "Philadelphia Crimes": 10,
-                 "Japan": 5};
+var zoom_list = {"Kentucky": 7,
+                 "Philadelphia Crimes": 12,
+                 "Japan": 6};
 
 var full_data_list = {"Kentucky": "../data/kentucky_coreset.csv",
                       "Philadelphia Crimes": "../data/phily_coreset.csv",
@@ -38,7 +38,7 @@ var full_data_list = {"Kentucky": "../data/kentucky_coreset.csv",
 var fullzoom;
 var STD = 0.43;
 //var std = 0.01;
-var currentData = "Philadelphia Crimes";
+var currentData = "Japan";
 
 //var fullsvg = d3.select("#full_svg");
 //var width = +fullsvg.attr("width");
@@ -54,10 +54,9 @@ var fullx;
 
 var fully;
 
-init_right("Philadelphia Crimes", false, true, false);
+init_right("Japan", false, true, false);
 
 function init_right(data_select, is_sorted, is_origin, is_left){
-  console.log("aaaa");
   currentData = data_select;
 
   width = 700;
@@ -182,7 +181,7 @@ function fullfill(norData, std, max, x, y){
     if(count%20 == 0 || count == 1){
       console.log(count);
     }
-    for(var j=minY; j<maxY; j+=delta){
+    for(var j=minY; j<=maxY; j+=delta){
       v = full_eval_kernel(norData, std, i+delta/2.0, j+delta/2.0);
       if (v > cur_max){
         cur_max = v;
@@ -201,6 +200,7 @@ function fullfill(norData, std, max, x, y){
     }
     for(var j=minY; j<=maxY; j+=delta){
       var value = full_eval_kernel(norData, std, i+delta/2.0, j+delta/2.0);
+      value = Math.abs(value);
       var percent = parseFloat(value)/max;
       var color_value = 0.0;
 
@@ -214,7 +214,7 @@ function fullfill(norData, std, max, x, y){
         }
       });
 
-      if(color_value >= 0.05){
+      if(color_value >= -0.05){
         coresetData.push({"x":i, "y":j, "color":threshold(color_value), "delta":delta, "value": value});
         // console.log(i);
         // console.log(j);
@@ -251,7 +251,7 @@ function full_eval_kernel(norData, std, x, y){
   var STD = STD_list[currentData];
   norData.forEach(function(d){
     var dist = (x-d.x)*(x-d.x) + (y-d.y)*(y-d.y);
-     if (dist <= 8.0*STD/(maxY - minY)){
+     if (dist <= 5.0*STD/(maxY - minY)){
        count += coeff*parseFloat(Math.exp(-dist/(2.0*STD*STD)));
      }
   });
@@ -390,6 +390,7 @@ function full_update(std, epsilon){
 
   });
 
+  console.log(csvContent);
   var encodedUri = encodeURI(csvContent);
   window.open(encodedUri);
 }
