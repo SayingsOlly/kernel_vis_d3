@@ -59,7 +59,6 @@ var colorRange = ["rgba(194,68,41, 1.0)", "rgba(198,0,101, 1.0)","rgba(202,68,16
 var data_length_mark = 0;
 
 var right_max = 0.037657;
-var o_max = 0.037657;
 
 var full_size = 199162;
 var full_data_length = 0;
@@ -77,217 +76,6 @@ var rescale_x = 0;
 var rescale_y = 0;
 
 var STD = 0.01;
-
-// var color_data = d3.entries(colorbrewer).slice(1,18);
-// color_data.splice(0,1);
-// color_data.push({key: 'Default',
-//                  value: {11: ["#f7f4f9","#00d0e5", "#0089e1", "#0044dd", "#0001d9", "#3e00d5","#7b00d2", "#b700ce", "#ca44a3", "#c60065", "#c24429"]}});
-// color_data.push({key: 'YlOrBr2',
-//                  value: {11: ["#ffffe5",
-//                               "#fff7bc",
-//                               "#fee391",
-//                               "#fec44f",
-//                               "#fe9929",
-//                               "#f28000",
-//                               "#ec7014",
-//                               "#cc4c02",
-//                               "#b35900",
-//                               //                              "#993404",
-//                               "#804000",
-//                               "#662506"]}});
-
-// // color scale.
-// var scale = 'Blues';
-
-// var formatPercent = d3.format(".0%");
-
-// var domain_vals = [.05, .15 ,.25, .35, .45, .55, .65, .75, .85, .95];
-
-// var threshold = d3.scaleThreshold()
-//     .domain(domain_vals)
-//     .range(["#f7f4f9","#00d0e5", "#0089e1", "#0044dd", "#0001d9", "#3e00d5","#7b00d2", "#b700ce", "#ca44a3", "#c60065", "#c24429"]);
-
-
-// d3.select("#colorbrewer_selection")
-//   .selectAll(".palette")
-//   .data(color_data)
-//   .enter().append("span")
-//   .attr("class", "palette")
-//   .attr("id",function(d){
-//     return d.key;
-//   })
-//   .attr("title", function(d) { return d.key; })
-//   .on("click", function(d) {
-
-//     d3.selectAll(".palette").style("background", "#fff");
-//     d3.select(this).style("background", "#aaa");
-
-//     new_colorrange = d3.values(d.value)[d3.values(d.value).length-1];
-//     var length = new_colorrange.length;
-
-//     if(length == 9){
-//       domain_vals = [.05, .15 ,.25, .35, .55, .65, .85, .95];
-//     }else{
-//       domain_vals = [.05, .15 ,.25, .35, .45, .55, .65, .75, .85, .95];
-//     }
-
-//     // update threshold
-//     threshold = d3.scaleThreshold()
-//       .domain(domain_vals)
-//       .range(new_colorrange);
-
-//     // update ticks.
-//     barAxis.tickValues(threshold.domain());
-
-//     console.log(domain_vals);
-//     update_color_bar(1);
-//     console.log(d3.values(d.value).map(JSON.stringify).join("\n"));
-//   })
-//   .selectAll(".swatch")
-//     .data(function(d) { return d.value[d3.keys(d.value).map(Number).sort(d3.descending)[0]]; })
-//   .enter().append("span")
-//   .attr("class", "swatch")
-//   .style("background-color", function(d) { return d; });
-
-// d3.select("#Default").style("background", "#aaa");
-
-// var xBar = d3.scaleLinear()
-//     .domain([0, 1])
-//     .range([0, 340]);
-
-// var barAxis = d3.axisBottom(xBar)
-//     .tickSize(20)
-//     .tickValues(threshold.domain())
-//     .tickFormat(function(d) { return formatPercent(d); });
-
-// var others;
-
-// var drag = d3.drag()
-//     .on('start', function(d) {
-//       console.log("come in start");
-//         others = [];
-//         threshold.domain().forEach(function(v) {
-//             if ( v == d ) return;
-//             others.push(v);
-//         });
-//     })
-//     .on('drag', function(d) {
-//       console.log("come in drag");
-//         var xMin = xBar.domain()[0], xMax = xBar.domain()[1];
-//         var newValue = xBar.invert(d3.event.x);
-//         newValue =
-//             newValue < xMin ? xMin :
-//             xMax < newValue ? xMax :
-//             newValue;
-//       var newDomain = others.slice();
-//         newDomain.push(newValue);
-//         newDomain.sort();
-//         console.log(newDomain);
-//         threshold.domain(newDomain);
-//         barAxis.tickValues(newDomain);
-//         update_color_bar(1);
-//     });
-
-// var color_svgs = d3.select("#coreset").append("svg")
-//     .attr("id","color_bar_new")
-//     .attr("width", 500)
-//     .attr("height", 50);
-
-// var color_gs = color_svgs.append("g")
-//     .attr("class", "key")
-//     .attr("transform", "translate(" + 1 + "," + 2 + ")");
-
-// var color_rects = color_gs.append("g");
-
-
-// function update_color_bar(flag){
-
-//   var color_rect = color_rects.selectAll(".range")
-//         .data(threshold.range().map(function(color) {
-//           var d = threshold.invertExtent(color);
-//           if (d[0] == null) d[0] = xBar.domain()[0];
-//           if (d[1] == null) d[1] = xBar.domain()[1];
-//           console.log(d);
-//           return d;
-//         }));
-
-//   color_rect.exit().remove();
-
-//   color_rect.enter().append("rect").merge(color_rect)
-//     .attr("class", "range")
-//     .attr("height", 15)
-//     .attr("x", function(d) { return xBar(d[0]); })
-//     .attr("width", function(d) { return xBar(d[1]) - xBar(d[0]); })
-//     .style("fill", function(d) {
-//       // console.log('fill:',d[0]);
-//       // console.log(threshold(0));
-//       return threshold(d[0]);
-//     });
-
-//   var ticks = color_gs.call(barAxis)
-//       .selectAll(".tick")
-//       .style("cursor", "ew-resize");
-
-//   ticks.call(drag)
-//             .append("rect")
-//             .attr("x", -3)
-//             .attr("width", 6)
-//             .attr("height", 13)
-//     .attr("fill-opacity", 0);
-
-
-//   // update coreset data color
-//   coresetData.forEach(function(d){
-//     var percent = parseFloat(d.value)/max;
-//     var color_value = 0.0;
-
-//     threshold.range().map(function(color) {
-//       var d = threshold.invertExtent(color);
-//       if (d[0] == null) d[0] = xBar.domain()[0];
-//       if (d[1] == null) d[1] = xBar.domain()[1];
-//       if(percent > d[0] && percent <= d[1]){
-//         //console.log(d[0]);
-//         color_value = d[0];
-//       }
-//     });
-
-//     d.color = threshold(color_value);
-//     d.originColor = threshold(color_value);
-//   });
-
-//   if(flag == 1){
-//     map_draw();
-//   }
-//   // if(flag == 1){
-//   //   draw();
-//   // }else{
-//   //   draw_canvas();
-//   // }
-
-//   //update fullset data color
-//   fullData.forEach(function(d){
-//     var percent = parseFloat(d.value)/0.037657;
-//     var color_value = 0.0;
-
-//     threshold.range().map(function(color) {
-//       var d = threshold.invertExtent(color);
-//       if (d[0] == null) d[0] = xBar.domain()[0];
-//       if (d[1] == null) d[1] = xBar.domain()[1];
-//       if(percent > d[0] && percent <= d[1]){
-//         color_value = d[0];
-//       }
-//     });
-
-//     d.color = threshold(color_value);
-//   });
-
-//    if(flag == 1){
-//     draw_full();
-//     //zoomed_rescale();
-//   }else{
-//     draw_full_canvas();
-//   }
-// }
 
 /**
  *  Pre calculate and recommand the percentage and radius to users if they try to
@@ -329,7 +117,7 @@ function right_pre_kill_chaos(){
         {
           chaos_list.push(d);
           var cur_tau = d.value/right_max;
-          console.log(cur_tau);
+          // console.log(cur_tau);
           if(cur_tau > max_tau){
             max_tau = cur_tau;
           }
@@ -415,7 +203,8 @@ function right_init_googlemap(){
     var max_tau = right_pre_kill_chaos();
 
     max_tau = parseFloat(max_tau.toFixed(3))+0.001;
-    var contentString = '<b>Max value: ' + max_tau*right_max + '</b><br>' +
+    var max_value =  (max_tau*right_max).toFixed(6);
+    var contentString = '<b>Max value: ' + max_value + '</b><br>' +
         'Recommend min percentage: ' + max_tau + '<br>' +
         'Recommend min radius: 0.01';
 
@@ -468,7 +257,7 @@ function right_map_update(){
      left_map.setCenter(right_map.getCenter());
   }
   }
-  //left_map.setCenter(right_map.getCenter());
+
    /* If the map was not translated, the topLeft corner would be 0,0 in
     * world coordinates. Our translation is just the vector from the
     * world coordinate of the topLeft corder to 0,0.
@@ -485,6 +274,7 @@ function right_map_update(){
 
 function right_map_draw(){
 
+  console.log("**************** right draw ****************");
   right_context.clearRect(0,0, right_canvasWidth, right_canvasHeight);
   right_context.globalAlpha = 0.5;
   // var newpoint;
@@ -682,13 +472,13 @@ function init_right(data_select, is_sorted, is_origin, is_right){
     d3.csv(full_data_list[current_data], function(error, data){
       if(error) throw error;
 
-      console.log("right full data!!!!!!!!!!");
+      // console.log("right full data!!!!!!!!!!");
       set_right_data_size(1);
       set_right_time(1);
       right_coresetData = data;
 
       var cur_max = 0;
-      console.log("init right!!!!!");
+      // console.log("init right!!!!!");
       right_coresetData.forEach(function(d){
         if(parseFloat(d.value) > cur_max){
           cur_max = d.value;
@@ -696,7 +486,7 @@ function init_right(data_select, is_sorted, is_origin, is_right){
       });
 
       right_max = cur_max;
-      console.log("current max:" + right_max);
+      // console.log("current max:" + right_max);
 
       right_init_googlemap();
       right_map_draw();
@@ -746,7 +536,7 @@ function right_randomSample(std, epsilon, flag){
     return;
   }
 
-  console.log("keep random sampling");
+  //console.log("keep random sampling");
 
   d3.csv(right_current_file,function(data){
 
@@ -1036,6 +826,7 @@ function right_randomSample(std, epsilon, flag){
  */
 function right_getCore(is_left, std, radius, tau){
 
+  console.log("-------------------right get core --------------------");
   //no norData
   var target_right = document.getElementById("full");
 
@@ -1054,6 +845,9 @@ function right_getCore(is_left, std, radius, tau){
 }
 
 function right_killChaos(std, radius, tau){
+
+  lock2 = true;
+  console.log("lock2:" + lock2);
 
   right_coresetData.forEach(function(d){
     d.color = d.originColor;
@@ -1078,8 +872,11 @@ function right_killChaos(std, radius, tau){
   });
   //updateHeapMap();
   //draw_canvas();
-  console.log("right coreset data in killing", + right_coresetData.length);
-  right_map_draw();
+  //console.log("right coreset data in killing", + right_coresetData.length);
+  if(lock){
+    right_map_draw();
+    lock = false;
+  }
   //right_map_update();
   //zoomed_rescale();
   //return coresetData;
@@ -1154,31 +951,15 @@ function right_fill(norData, radius, tau, std, x, y, is_right){
           if(fullData[count].value != 0){
             v = v/parseFloat(fullData[count].value);
             if (v > 1){
-              console.log("coreset position: x:" + i + "y:" + j);
-              console.log("full data position : x:" + fullData[count].x + "y:" + fullData[count].y);
-              console.log("full data value:" + fullData[count].value + " data value:" + v*parseFloat(fullData[count].value));
+              // console.log("coreset position: x:" + i + "y:" + j);
+              // console.log("full data position : x:" + fullData[count].x + "y:" + fullData[count].y);
+              // console.log("full data value:" + fullData[count].value + " data value:" + v*parseFloat(fullData[count].value));
             }
           }else{
             v = 0;
           }
         }
-        // for(var data_i = 0; data_i < full_Data.length; data_i ++){
-        //   if(i == full_Data[data_i].x && j == full_Data[data_i].y){
-        //     value = (full_Data[data_i].value - value);
-        //     if(value < 0){
-        //       console.log("value < 0", value);
-        //       console.log("value > 0", Math.abs(value));
-        //     }
-        //     value = Math.abs(value);
-        //     if(left_is_diff == 2){
-        //       value = value/full_Data[data_i];
-        //     }
-        // }
-        // }
 
-        // if(value > max_diff){
-        //   max_diff = value;
-        // }
         count += 1;
       }
 
@@ -1191,7 +972,7 @@ function right_fill(norData, radius, tau, std, x, y, is_right){
 
    console.log("right average difference: " + sum/parseFloat(count));
    right_max = cur_max;
-   console.log("right max no origin:" + right_max);
+   //console.log("right max no origin:" + right_max);
 
    count = 0;
    var max_diff = 0;

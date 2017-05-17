@@ -1,3 +1,10 @@
+/**
+  *   Left map main function.
+  **/
+
+var lock = false;
+var lock2 = false;
+
 //var minX = -89.582541, maxX = -81.960144, minY = 36.3, maxY = 39.3;
 //var minX = -75.2781, maxX = -74.9576, minY = 39.8763, maxY = 40.1372;
 //var minX = 124.16, maxX = 145.571, minY = 24.3471, maxY = 45.4094;
@@ -47,7 +54,6 @@ var right_map_type = "Random Sampling";
 var left_current_file = "../data/ken_sort.txt";
 var right_current_file = "../data/kentucky_org.txt";
 
-
 var ne, sw;
 
 var left_click_latlng = 0;
@@ -79,8 +85,8 @@ var canvasHeight;
 var rectLatLng = new google.maps.LatLng(40,-95);
 var resolutionScale = window.devicePixelRatio || 1;
 
-// Color Range
-var colorRange = ["rgba(194,68,41, 1.0)", "rgba(198,0,101, 1.0)","rgba(202,68,163, 1.0)", "rgba(183,0,206, 1.0)", "rgba(123,0,210, 1.0)", "rgba(62,0,213, 1.0)", "rgba(0,1,217, 1.0)", "rgba(0,68,221, 1.0)", "rgba(0,137,225, 1.0)", "rgba(0,208,229, 1.0)"];
+// // Color Range
+// var colorRange = ["rgba(194,68,41, 1.0)", "rgba(198,0,101, 1.0)","rgba(202,68,163, 1.0)", "rgba(183,0,206, 1.0)", "rgba(123,0,210, 1.0)", "rgba(62,0,213, 1.0)", "rgba(0,1,217, 1.0)", "rgba(0,68,221, 1.0)", "rgba(0,137,225, 1.0)", "rgba(0,208,229, 1.0)"];
 
 // var res = 200.0;
 // var edge = 500.0;
@@ -88,8 +94,9 @@ var delta = 0.0016;
 
 var data_length_mark = 0;
 
+
+var max_max = 0;
 var max = 0.037657;
-var o_max = 0.037657;
 
 var full_size = 199162;
 var full_data_length = 0;
@@ -108,95 +115,7 @@ var rescale_y = 0;
 
 var STD = 0.01;
 
-var color_data = d3.entries(colorbrewer).slice(1,18);
-
-
-color_data.splice(0,1);
-// color_data.push({key: 'Default',
-//                  value: {11: ["#f7f4f9","#00d0e5", "#0089e1", "#0044dd", "#0001d9", "#3e00d5","#7b00d2", "#b700ce", "#ca44a3", "#c60065", "#c24429"]}});
-color_data.push({key: 'Default',
-                 value: {11: ["#f7f4f9","#00d0e5", "#0089e1", "#0044dd", "#0001d9", "#3e00d5","#7b00d2", "#b700ce","#ef3b2c", "#cb181d", "#a50f15"]}});
-
-color_data.push({key: 'YlOrBr2',
-                 value: {11: ["#f7f4f9",
-                              "#fff7bc",
-                              "#fee391",
-                              "#fec44f",
-                              "#fe9929",
-                              "#f28000",
-                              "#ec7014",
-                              "#cc4c02",
-                              "#b35900",
-                              //                              "#993404",
-                              "#804000",
-                              "#662506"]}});
-
-
-console.log(color_data);
-
-color_data.forEach(function(d){
-  var color_scheme = d["value"][9];
-  if(color_scheme != undefined){
-  for(var i = color_scheme.length-1; i>=0; i--){
-    color_scheme[i+1] = color_scheme[i];
-  }
-
-    color_scheme[0] = "#f7f4f9";
-  }
-});
-
-// color scale.
-var scale = 'Blues';
-
 var formatPercent = d3.format(".0%");
-
-var domain_vals = [.05, .15 ,.25, .35, .45, .55, .65, .75, .85, .95 ];
-
-var threshold = d3.scaleThreshold()
-    .domain(domain_vals)
-    .range(["#f7f4f9","#00d0e5", "#0089e1", "#0044dd", "#0001d9", "#3e00d5","#7b00d2", "#b700ce", "#ca44a3", "#c60065", "#c24429"]);
-
-
-d3.select("#color_bar_span")
-  .selectAll(".palette")
-  .data(color_data)
-  .enter().append("span")
-  .attr("class", "palette")
-  .attr("id",function(d){
-    return d.key;
-  })
-  .attr("title", function(d) { return d.key; })
-  .on("click", function(d) {
-
-    d3.selectAll(".palette").style("background", "#fff");
-    d3.select(this).style("background", "#aaa");
-
-    new_colorrange = d3.values(d.value)[d3.values(d.value).length-1];
-    var length = new_colorrange.length;
-
-    if(length == 10){
-      domain_vals = [.05, .10 , .35, .45, .55, .65, .75, .85, .95];
-    }else{
-      domain_vals = [.05, .15 ,.25, .35, .45, .55, .65, .75, .85, .95];
-    }
-
-    // update threshold
-    threshold = d3.scaleThreshold()
-      .domain(domain_vals)
-      .range(new_colorrange);
-
-    // update ticks.
-    barAxis.tickValues(threshold.domain());
-    update_color_bar(1);
-  })
-  .selectAll(".swatch")
-    .data(function(d) { return d.value[d3.keys(d.value).map(Number).sort(d3.descending)[0]]; })
-  .enter().append("span")
-  .attr("class", "swatch")
-  .style("background-color", function(d) { return d; });
-
-d3.select("#Default").style("background", "#aaa");
-
 
 // Default tau scale.
 
@@ -215,170 +134,6 @@ var barAxis = d3.axisBottom(xBar)
 
 var others;
 
-var drag = d3.drag()
-    .on('start', function(d) {
-        others = [];
-        threshold.domain().forEach(function(v) {
-            if ( v == d ) return;
-            others.push(v);
-        });
-    })
-    .on('drag', function(d) {
-        var xMin = xBar.domain()[0], xMax = xBar.domain()[1];
-        var newValue = xBar.invert(d3.event.x);
-        newValue =
-            newValue < xMin ? xMin :
-            xMax < newValue ? xMax :
-            newValue;
-      var newDomain = others.slice();
-        newDomain.push(newValue);
-        newDomain.sort();
-        threshold.domain(newDomain);
-        barAxis.tickValues(newDomain);
-        update_color_bar(1);
-    });
-
-var color_svgs = d3.selectAll(".button_div").append("svg")
-    .attr("id","color_bar_new")
-    .attr("width", "350px")
-    .attr("height", "50px");
-
-
-var color_gs = color_svgs.append("g")
-    .attr("class", "key")
-    .attr("transform", "translate(" + 1 + "," + 2 + ")");
-
-var color_rects = color_gs.append("g");
-
-
-/**
-  *  Update color bar when adjuesting color bar and change of color scheme.
-  *
-  **/
-
-function update_color_bar(flag){
-
-  var color_rect = color_rects.selectAll(".range")
-        .data(threshold.range().map(function(color) {
-          var d = threshold.invertExtent(color);
-          if (d[0] == null) d[0] = xBar.domain()[0];
-          if (d[1] == null) d[1] = xBar.domain()[1];
-          //console.log("color" + d);
-          return d;
-        }));
-
-  color_rect.exit().remove();
-
-  color_rect.enter().append("rect").merge(color_rect)
-    .attr("class", "range")
-    .attr("height", 15)
-    .attr("x", function(d) { return xBar(d[0]); })
-    .attr("width", function(d) { return xBar(d[1]) - xBar(d[0]); })
-    .on("click",function(){
-      modal.style.display = "block";
-    })
-    .style("fill", function(d) {
-      // console.log('fill:',d[0]);
-      // console.log(threshold(0));
-      return threshold(d[0]);
-    })
-    .style("cursor","pointer");
-
-  var ticks = color_gs.call(barAxis)
-      .selectAll(".tick")
-      .style("cursor", "ew-resize");
-
-  ticks.call(drag)
-            .append("rect")
-            .attr("x", -3)
-            .attr("width", 6)
-            .attr("height", 13)
-    .attr("fill-opacity", 0);
-
-
-  // update coreset data color
-  coresetData.forEach(function(d){
-    var percent = parseFloat(d.value)/max;
-    var color_value = 0.0;
-
-    threshold.range().map(function(color) {
-      var d = threshold.invertExtent(color);
-      if (d[0] == null) d[0] = xBar.domain()[0];
-      if (d[1] == null) d[1] = xBar.domain()[1];
-      if(percent > d[0] && percent <= d[1]){
-        //console.log(d[0]);
-        color_value = d[0];
-      }
-    });
-
-    // if d.color equals #fff, means the the density region has been seen as chaos.
-    // adjusting color bar or color scheme would be seen as unvalid.
-    if(d.color != "#fff"){
-      d.color = threshold(color_value);
-    }
-    d.originColor = threshold(color_value);
-  });
-
-
-  console.log("update right");
-  right_coresetData.forEach(function(d){
-    var percent = parseFloat(d.value)/right_max;
-    var color_value = 0.0;
-
-    threshold.range().map(function(color) {
-      var d = threshold.invertExtent(color);
-      if (d[0] == null) d[0] = xBar.domain()[0];
-      if (d[1] == null) d[1] = xBar.domain()[1];
-      if(percent > d[0] && percent <= d[1]){
-        //console.log(d[0]);
-        color_value = d[0];
-      }
-    });
-
-    // if d.color equals #fff, means the the density region has been seen as chaos.
-    // adjusting color bar or color scheme would be seen as unvalid.
-    if(d.color != "#fff"){
-      d.color = threshold(color_value);
-    }
-    d.originColor = threshold(color_value);
-
-    //d.originColor = threshold(color_value);
-  });
-
-  if(flag == 1){
-    map_draw();
-    right_map_draw();
-  }
-  // if(flag == 1){
-  //   draw();
-  // }else{
-  //   draw_canvas();
-  // }
-
-  // //update fullset data color
-  // fullData.forEach(function(d){
-  //   var percent = parseFloat(d.value)/0.037657;
-  //   var color_value = 0.0;
-
-  //   threshold.range().map(function(color) {
-  //     var d = threshold.invertExtent(color);
-  //     if (d[0] == null) d[0] = xBar.domain()[0];
-  //     if (d[1] == null) d[1] = xBar.domain()[1];
-  //     if(percent > d[0] && percent <= d[1]){
-  //       color_value = d[0];
-  //     }
-  //   });
-
-  //   d.color = threshold(color_value);
-  // });
-
-  //  if(flag == 1){
-  //   draw_full();
-  //   //zoomed_rescale();
-  // }else{
-  //   draw_full_canvas();
-  // }
-}
 
 /**
   * -----------------------------------------------
@@ -386,11 +141,6 @@ function update_color_bar(flag){
   * -----------------------------------------------
  **/
 
-// var map = new google.maps.Map(d3.select("#map").node(),{
-//   zoom: 8,
-//   center: new google.maps.LatLng(37.548834, -85.200017),
-//   mapTypeId: google.maps.MapTypeId.COORDINATE
-// });
 
 function init_googlemap(){
 
@@ -450,7 +200,8 @@ function init_googlemap(){
     var max_tau = pre_kill_chaos();
 
     max_tau = parseFloat(max_tau.toFixed(3))+0.001;
-    var contentString = '<b>Max value:' + max_tau*max + '</b><br>' +
+    var max_value =  (max_tau*max).toFixed(6);
+    var contentString = '<b>Max value:' + max_value + '</b><br>' +
         'Recommend min percentage: ' + max_tau + '<br>' +
         'Recommend min radius: 0.01';
 
@@ -465,35 +216,6 @@ function init_googlemap(){
 
   function showNewRect(event) {
   }
-
-  // left_map.addListener("click", function(e){
-  //   mapProjection = left_map.getProjection();
-  //   console.log(mapProjection.fromLatLngToPoint(e.latLng));
-  //   left_click_latlng = e.latLng;
-
-  //   d3.select("#map-div-left").selectAll(".tool-tip").remove();
-
-
-  //   // TODO: check if there is a denser point around this point.
-
-  //   map_draw();
-
-    // console.log("done");
-    // d3.select("#map-div-left").append("div")
-    //   .attr("class", "tool-tip")
-    //   .style("position", "absolute")
-    //   .style("left", e.pixel.x + "px")
-    //   .style("top", e.pixel.y + "px")
-    //   .style("z-index", "10")
-    //   .style("fill", "red")
-    //   .text("a simple tooltip")
-    //   .transition()
-    //   .delay(750)
-    //   .style("visibility", "hidden");
-
-
-    // console.log(e.pixel);
- // });
 }
 
 function map_resize(){
@@ -501,6 +223,7 @@ function map_resize(){
 }
 
 function map_update(){
+  console.log("map_left_update");
   canvasWidth = canvasLayer.canvas.width;
   canvasHeight = canvasLayer.canvas.height;
   left_context.clearRect(0,0, canvasWidth, canvasHeight);
@@ -565,109 +288,33 @@ function pre_kill_chaos(){
       var newpoint = mapProjection.fromLatLngToPoint(newll);
       var newpoint_c = mapProjection.fromLatLngToPoint(newll_c);
 
-      // pro_y = (newpoint_c.y - newpoint.y)/0.04;
+      if(d.color != "#f7f4f9"){
 
-      // pro_y = Math.abs(pro_y);
-//    console.log(pro_y);
-
-    //console.log(newpoint);
-      //left_context.beginPath();
-
-      //left_context.rect(newpoint.x, newpoint.y, pro*parseFloat(delta), pro_y*parseFloat(delta));
-      if(d.color == "#f7f4f9"){
-
-        //left_context.fillStyle = "rgba(0, 0, 0, 0)";
-      }else{
-
-        //        var ne = new google.maps.LatLng(ne.lat(), ne.lng())
+        // if the rect in chosen range.
         if((sw.lat() <= d.x && ne.lat() >= d.x + delta)
-            && (ne.lng() >= d.y && sw.lng() <= d.y + delta)
-          )
-        {
+           && (ne.lng() >= d.y && sw.lng() <= d.y + delta)){
+
           chaos_list.push(d);
           var cur_tau = d.value/max;
-          console.log(cur_tau);
+
           if(cur_tau > max_tau){
             max_tau = cur_tau;
           }
-        }else{
-          //left_context.fillStyle = d.color;
+
         }
       }
-      //left_context.fill();
     }
   });
+
   return max_tau;
 }
 
-
 function map_draw(){
-  console.log("left");
+
+
+  console.log("************* left draw **************");
   left_context.clearRect(0,0, canvasWidth, canvasHeight);
   left_context.globalAlpha = 0.5;
-
-
-
-  // if(coresetData.length != 0){
-  //   //for x
-  //   var projection_scale_x = 0;
-  //   var first_y = 0;
-  //   var first_p_x = 0;
-
-  //   //for y
-
-  //   var projection_scale_y = 0;
-  //   var first_x = 0;
-  //   var first_p_y = 0;
-
-    // for(var d of coresetData){
-
-  //     if(projection_scale_y == 0){
-  //       var newll2 = new google.maps.LatLng(parseFloat(d["x"]), parseFloat(d["y"]));
-  //       var newpoint2 = mapProjection.fromLatLngToPoint(newll2);
-
-  //       if(parseFloat(d['x']).toFixed(2) - first_x == parseFloat(d['delta'])){
-  //         console.log("xixi:" + d["x"] + " " + first_x);
-
-  //         console.log(newpoint2.y + " " + first_p_y);
-  //         projection_scale_y = (newpoint2.y - first_p_y)/(parseFloat(d["x"]) - first_x);
-  //       }
-
-  //       if(first_x == 0){
-
-  //         console.log("adada:" + d["x"] + d["y"]);
-  //         first_x = parseFloat(d["x"]).toFixed(2);
-  //         first_p_y = newpoint2.y;
-  //       }
-
-  //     }
-
-  //     if(projection_scale_x == 0){
-
-  //       var newll = new google.maps.LatLng(parseFloat(d["x"]), parseFloat(d["y"]));
-  //       var newpoint = mapProjection.fromLatLngToPoint(newll);
-
-  //       if(parseFloat(d['y']).toFixed(2) - first_y == parseFloat(d['delta'])){
-  //         console.log("xixi:" + d["y"] + " " + first_y);
-  //         console.log(newpoint.x + " " + first_p_x);
-  //         projection_scale_x = (newpoint.x - first_p_x)/(parseFloat(d["y"]) - first_y);
-  //       }
-
-  //       if(first_y == 0){
-
-  //         console.log("adada:" + d["x"] + d["y"]);
-  //         first_y = parseFloat(d["y"]).toFixed(2);
-  //         first_p_x = newpoint.x;
-  //       }
-
-  //     }
-
-  //     if(projection_scale_x != 0 && projection_scale_y != 0){
-  //       break;
-  //     }
-  //   }
-    // }
-
   var test1 = new google.maps.LatLng(30.00, -100.04);
   var test2 = new google.maps.LatLng(30.00, -100.08);
 
@@ -696,9 +343,7 @@ function map_draw(){
       pro_y = (newpoint_c.y - newpoint.y)/0.04;
 
       pro_y = Math.abs(pro_y);
-//    console.log(pro_y);
 
-    //console.log(newpoint);
       left_context.beginPath();
 
       left_context.rect(newpoint.x, newpoint.y, pro*parseFloat(delta), pro_y*parseFloat(delta));
@@ -730,6 +375,8 @@ function map_draw(){
     document.getElementById("epsilon_confirm").disabled = false;
     document.getElementById("radius_confirm").disabled = false;
   }
+
+  lock = true;
 }
 
 /**
@@ -813,7 +460,7 @@ function init_kernel(fileName, is_sorted, is_left){
        *  Use sorting sampling data
        **/
 
-      console.log("coreset!!!!!left!!!!");
+      //console.log("coreset!!!!!left!!!!");
       for(var i=0; i<size; i++){
         var cordinate = [];
         Object.values(data[i]).forEach(function(item){
@@ -914,6 +561,14 @@ function init_left(data_select, is_sorted, is_origin, is_left){
 
 //initiation
 init_left("Kentucky", true, false, true);
+
+// function cal_left_max(STD, radius, tau){
+//   var norData = ken;
+//   var x = 1.0;
+//   var y = (maxY-minY)/(maxX-minX);
+
+
+// }
 
 
 /**
@@ -1223,6 +878,8 @@ var y = d3.scaleLinear()
  */
 function getCore(is_left, std, radius, tau){
 
+
+  console.log("---------------- left get core -----------------");
   //no norData
 
   // pre_loading spinner.
@@ -1241,7 +898,7 @@ function getCore(is_left, std, radius, tau){
   //killChaos(std, radius, tau);
 
 
-  }
+}
 
 function killChaos(std, radius, tau){
 
@@ -1269,7 +926,11 @@ function killChaos(std, radius, tau){
   //updateHeapMap();
   //draw_canvas();
   //map_draw();
-  map_update();
+  console.log("----- lock2" + lock2);
+  if(lock2){
+    map_update();
+    lock2 = false;
+  }
   //zoomed_rescale();
   //return coresetData;
 }
@@ -1332,9 +993,6 @@ function fill(norData, radius, tau, std, x, y, is_left){
 
       if(left_is_diff!=0){
 
-        // console.log("coreset position: x:" + i + "y:" + j);
-        // console.log("full data position : x:" + full_Data[count].x + "y:" + full_Data[count].y);
-        // console.log("full data value:" + full_Data[count].value + " data value:" + value);
         v = (parseFloat(full_Data[count].value) - v);
 
         v = Math.abs(v);
@@ -1350,23 +1008,6 @@ function fill(norData, radius, tau, std, x, y, is_left){
             v = 0;
           }
         }
-        // for(var data_i = 0; data_i < full_Data.length; data_i ++){
-        //   if(i == full_Data[data_i].x && j == full_Data[data_i].y){
-        //     value = (full_Data[data_i].value - value);
-        //     if(value < 0){
-        //       console.log("value < 0", value);
-        //       console.log("value > 0", Math.abs(value));
-        //     }
-        //     value = Math.abs(value);
-        //     if(left_is_diff == 2){
-        //       value = value/full_Data[data_i];
-        //     }
-        // }
-        // }
-
-        // if(value > max_diff){
-        //   max_diff = value;
-        // }
         count += 1;
       }
 
@@ -1378,7 +1019,7 @@ function fill(norData, radius, tau, std, x, y, is_left){
   }
 
    console.log("left average difference:" + sum/parseFloat(count));
-  max = cur_max;
+   max = cur_max;
    /**
     *  map
     *
@@ -1823,10 +1464,10 @@ d3.select("#tau").on("input",function(d){
 function handleRadiusClick(event){
 
   // var std = d3.select("#std").property("value");
-  document.getElementById("compare_btn").disabled = true;
-  document.getElementById("tau_confirm").disabled = true;
-  document.getElementById("epsilon_confirm").disabled = true;
-  document.getElementById("radius_confirm").disabled = true;
+  // document.getElementById("compare_btn").disabled = true;
+  // document.getElementById("tau_confirm").disabled = true;
+  // document.getElementById("epsilon_confirm").disabled = true;
+  // document.getElementById("radius_confirm").disabled = true;
 
   var std = 0.01;
   var value = document.getElementById("radius_input").value;
@@ -1849,10 +1490,10 @@ function handleRadiusClick(event){
 function handleTauClick(event){
 
   // var std = d3.select("#std").property("value");
-  document.getElementById("compare_btn").disabled = true;
-  document.getElementById("tau_confirm").disabled = true;
-  document.getElementById("epsilon_confirm").disabled = true;
-  document.getElementById("radius_confirm").disabled = true;
+  // document.getElementById("compare_btn").disabled = true;
+  // document.getElementById("tau_confirm").disabled = true;
+  // document.getElementById("epsilon_confirm").disabled = true;
+  // document.getElementById("radius_confirm").disabled = true;
   var std = 0.01;
   var value = document.getElementById("tau_input").value;
 
