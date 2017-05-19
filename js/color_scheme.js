@@ -3,7 +3,7 @@
   **/
 
 // Get color scheme from color brewer, slice(1, 18) only get the sequential ones.
-var color_data = d3.entries(colorbrewer).slice(1,18);
+var color_data = d3.entries(colorbrewer).slice(1,36);
 
 var default_color_scheme = ["#f7f4f9",
                               "#00d0e5",
@@ -47,6 +47,18 @@ color_data.forEach(function(d){
   }
     color_scheme[0] = "#f7f4f9";
   }
+});
+
+color_data.forEach(function(d){
+  var color_scheme = d["value"][11];
+  // if(color_scheme != undefined){
+  // for(var i = color_scheme.length-1; i>=0; i--){
+  //   color_scheme[i+1] = color_scheme[i];
+  // }
+  if(color_scheme != undefined){
+    color_scheme[0] = "#f7f4f9";
+  }
+  //}
 });
 
 // Default domain.
@@ -189,6 +201,7 @@ function update_color_bar(flag){
 
 
   // update coreset data color
+  console.log("update color left max" + max);
   coresetData.forEach(function(d){
     var percent = parseFloat(d.value)/max;
     var color_value = 0.0;
@@ -213,6 +226,7 @@ function update_color_bar(flag){
 
 
   // update right coreset data color
+  console.log("update color right max:" + right_max);
   right_coresetData.forEach(function(d){
     var percent = parseFloat(d.value)/right_max;
     var color_value = 0.0;

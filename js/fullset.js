@@ -10,28 +10,43 @@ var centerX = (maxX+minX)/2, centerY = (maxY+minY)/2;
 
 var data_list = {"Kentucky":"../data/kentucky_org.txt",
                  "Philadelphia Crimes":"../data/crime_clean.txt",
-                 "Japan": "../data/twitter_clean_jp.txt"};
+                 "Japan": "../data/twitter_clean_jp.txt",
+                 "Synthetic": "../data/nonuniform_2D.txt"};
 
 var sorted_data_list = {"Kentucky":"../data/ken_sort.txt",
                         "Philadelphia Crimes":"../data/crime_sort.txt",
-                        "Japan": "../data/twitter_sort.txt"};
+                        "Japan": "../data/twitter_sort.txt",
+                        "Synthetic" : "../data/nonuniform_2D_Zorder_sort.txt"};
+
+var full_data_size = {"Kentucky": 199163,
+                      "Philadelphia Crimes": 683499,
+                      "Japan": 153586,
+                      "Synthetic": 532899};
+
+var full_data_time = {"Kentucky" : 120.5,
+                      "Japan": 311.6,
+                      "Philadelphia Crimes":1443.3,
+                      "Synthetic": 1000.0};
 
 var STD_list = {"Kentucky": 0.07,
                 "Philadelphia Crimes": 0.003,
-                "Japan": 0.46};
+                "Japan": 0.46,
+                "Synthetic": 0.008};
 
 var delta_list = {"Kentucky": 0.04,
                   "Philadelphia Crimes":0.002,
-                  "Japan": 0.1};
+                  "Japan": 0.1,
+                  "Synthetic": 0.008};
 
 var zoom_list = {"Kentucky": 7,
-                 "Philadelphia Crimes": 12,
-                 "Japan": 6};
+                 "Philadelphia Crimes": 11,
+                 "Japan": 6,
+                 "Synthetic": 9};
 
-var full_data_list = {"Kentucky": "../data/kentucky_coreset.csv",
-                      "Philadelphia Crimes": "../data/phily_coreset.csv",
-                      "Japan": "../data/japan_coreset.csv"};
-
+var full_data_list = {"Kentucky": "../data/kentucky_coreset_full.csv",
+                      "Philadelphia Crimes": "../data/crime_full_new2.csv",
+                      "Japan": "../data/japan_coreset.csv",
+                      "Synthetic": '../data/kentucky_coreset_full.csv'};
 // var color_range = {"#c24429":0.95, "#c60065":0.85, "#ca44a3": 0.75,
 //"#b700ce":0.55, ""}
 
@@ -111,6 +126,7 @@ function init_right(data_select, is_sorted, is_origin, is_left){
   }
 
   if(data_select == "Japan"){
+    console.log("Japan");
     minY = 124.16, maxY = 145.571, minX = 24.3471, maxX = 45.4094;
     // x = d3.scaleLinear()
     // .range([-1, width+1])
@@ -118,6 +134,8 @@ function init_right(data_select, is_sorted, is_origin, is_left){
   }else if(data_select == "Philadelphia Crimes"){
     console.log("Phily");
     minY = -75.2781, maxY = -74.9576, minX = 39.8763, maxX = 40.1372;
+  }else if(data_select == "Synthetic"){
+    minY = 0.0, maxY = 1.0, minX = 0.0, maxX = 1.0;
   }
 
   if(!is_origin){

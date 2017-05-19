@@ -2,48 +2,45 @@
   *   Left map main function.
   **/
 
-var lock = false;
-var lock2 = false;
-
-//var minX = -89.582541, maxX = -81.960144, minY = 36.3, maxY = 39.3;
-//var minX = -75.2781, maxX = -74.9576, minY = 39.8763, maxY = 40.1372;
-//var minX = 124.16, maxX = 145.571, minY = 24.3471, maxY = 45.4094;
-var minY = -89.582541, maxY = -81.960144, minX = 36.3, maxX = 39.3;
-var centerX = (maxX+minX)/2, centerY = (maxY+minY)/2;
+// //var minX = -89.582541, maxX = -81.960144, minY = 36.3, maxY = 39.3;
+// //var minX = -75.2781, maxX = -74.9576, minY = 39.8763, maxY = 40.1372;
+// //var minX = 124.16, maxX = 145.571, minY = 24.3471, maxY = 45.4094;
+// var minY = -89.582541, maxY = -81.960144, minX = 36.3, maxX = 39.3;
+// var centerX = (maxX+minX)/2, centerY = (maxY+minY)/2;
 
 
-var data_list = {"Kentucky":"../data/kentucky_org.txt",
-                 "Philadelphia Crimes":"../data/crime_clean.txt",
-                 "Japan": "../data/twitter_clean_jp.txt"};
+// var data_list = {"Kentucky":"../data/kentucky_org.txt",
+//                  "Philadelphia Crimes":"../data/crime_clean.txt",
+//                  "Japan": "../data/twitter_clean_jp.txt"};
 
-var sorted_data_list = {"Kentucky":"../data/ken_sort.txt",
-                        "Philadelphia Crimes":"../data/crime_sort.txt",
-                        "Japan": "../data/twitter_sort.txt"};
+// var sorted_data_list = {"Kentucky":"../data/ken_sort.txt",
+//                         "Philadelphia Crimes":"../data/crime_sort.txt",
+//                         "Japan": "../data/twitter_sort.txt"};
 
-var full_data_size = {"Kentucky": 199163,
-                "Philadelphia Crimes": 683499,
-                "Japan": 153586};
+// var full_data_size = {"Kentucky": 199163,
+//                 "Philadelphia Crimes": 683499,
+//                 "Japan": 153586};
 
-var full_data_time = {"Kentucky" : 120.5,
-                      "Japan": 311.6,
-                      "Philadelphia Crimes":1443.3
-                     };
+// var full_data_time = {"Kentucky" : 120.5,
+//                       "Japan": 311.6,
+//                       "Philadelphia Crimes":1443.3
+//                      };
 
-var STD_list = {"Kentucky": 0.07,
-                "Philadelphia Crimes": 0.003,
-                "Japan": 0.46};
+// var STD_list = {"Kentucky": 0.07,
+//                 "Philadelphia Crimes": 0.003,
+//                 "Japan": 0.46};
 
-var delta_list = {"Kentucky": 0.04,
-                  "Philadelphia Crimes":0.002,
-                  "Japan": 0.1};
+// var delta_list = {"Kentucky": 0.04,
+//                   "Philadelphia Crimes":0.002,
+//                   "Japan": 0.1};
 
-var zoom_list = {"Kentucky": 7,
-                 "Philadelphia Crimes": 11,
-                 "Japan": 6};
+// var zoom_list = {"Kentucky": 7,
+//                  "Philadelphia Crimes": 11,
+//                  "Japan": 6};
 
-var full_data_list = {"Kentucky": "../data/kentucky_coreset_full.csv",
-                      "Philadelphia Crimes": "../data/crime_full_new2.csv",
-                      "Japan": "../data/japan_coreset.csv"};
+// var full_data_list = {"Kentucky": "../data/kentucky_coreset_full.csv",
+//                       "Philadelphia Crimes": "../data/crime_full_new2.csv",
+//                       "Japan": "../data/japan_coreset.csv"};
 
 var last_left_center;
 
@@ -96,7 +93,7 @@ var data_length_mark = 0;
 
 
 var max_max = 0;
-var max = 0.037657;
+var max = 0;
 
 var full_size = 199162;
 var full_data_length = 0;
@@ -223,7 +220,7 @@ function map_resize(){
 }
 
 function map_update(){
-  console.log("map_left_update");
+  //console.log("map_left_update");
   canvasWidth = canvasLayer.canvas.width;
   canvasHeight = canvasLayer.canvas.height;
   left_context.clearRect(0,0, canvasWidth, canvasHeight);
@@ -260,7 +257,7 @@ function map_update(){
     * world coordinates. Our translation is just the vector from the
     * world coordinate of the topLeft corder to 0,0.
     */
-  if(mapProjection != undefined){
+  if(mapProjection != undefined && coresetData.length != 0){
     var offset = mapProjection.fromLatLngToPoint(canvasLayer.getTopLeft());
     left_context.translate(-offset.x, -offset.y);
     map_draw();
@@ -312,7 +309,7 @@ function pre_kill_chaos(){
 function map_draw(){
 
 
-  console.log("************* left draw **************");
+  //console.log("************* left draw **************");
   left_context.clearRect(0,0, canvasWidth, canvasHeight);
   left_context.globalAlpha = 0.5;
   var test1 = new google.maps.LatLng(30.00, -100.04);
@@ -331,6 +328,8 @@ function map_draw(){
 
   var pro_y;
 
+  console.log("coresetData:");
+  console.log(coresetData);
   coresetData.forEach(function(d){
 
     if(d.color != "#f7f4f9"){
@@ -347,7 +346,7 @@ function map_draw(){
       left_context.beginPath();
 
       left_context.rect(newpoint.x, newpoint.y, pro*parseFloat(delta), pro_y*parseFloat(delta));
-      if(d.color == "#f7f4f9"){
+      if(d.color == "#f7f4f9" || d.color == "#fff"){
         left_context.fillStyle = "rgba(0, 0, 0, 0)";
       }else{
         if(left_click_latlng != 0){
@@ -376,7 +375,7 @@ function map_draw(){
     document.getElementById("radius_confirm").disabled = false;
   }
 
-  lock = true;
+//  lock = true;
 }
 
 /**
@@ -388,8 +387,8 @@ function map_draw(){
 function init_kernel(fileName, is_sorted, is_left){
 
   d3.csv(fileName,function(data){
-    init_googlemap();
 
+    console.log("full data length:" + data.length);
     update_color_bar(0);
     ken = [];
     var epsilon = 0.03;
@@ -470,8 +469,9 @@ function init_kernel(fileName, is_sorted, is_left){
       }
     }
 
+    console.log(ken);
     full_data_length = ken.length;
-    getCore(is_left, STD, 101, 0.05);
+    //getCore(is_left, STD, 101, 0.05);
     // var d1 = performance.now();
     // set_time((d1-d0)/1000);
     //map_update();
@@ -494,11 +494,563 @@ function init_kernel(fileName, is_sorted, is_left){
     //   console.log("im right!!!!!!!!");
     //   draw_full_canvas();
     // }
+
+    console.log("init kernel done!");
+
+    if(right_is_origin){
+
+     getMax(101, 0.1, STD);
+
+
+     var x = 1.0;
+     var y = (maxY-minY)/(maxX-minX);
+
+    // left fill
+
+    fill(0, 101, 0.1, 0.01, x, y, true);
+
+    // right fill
+
+    //right_fill(0, 101, 0.1, 0.01, x, y, true);
+    }
+    init_googlemap();
+    //init_googlemap();
   });
 
 
 }
 
+
+function init(data_select, left_is_sorted, right_is_sorted, left_is_origin, right_is_origin){
+
+  current_data = data_select;
+  if(data_select == "Japan"){
+    minY = 124.16, maxY = 145.571, minX = 24.3471, maxX = 45.4094;
+  }else if(data_select == "Philadelphia Crimes"){
+    minY = -75.2781, maxY = -74.9576, minX = 39.8763, maxX = 40.1372;
+  }else if(data_select == "Kentucky"){
+    minY = -89.582541, maxY = -81.960144, minX = 36.3, maxX = 39.3;
+  }else if(data_select == "Synthetic"){
+    minY = 0.0, maxY = 1.0, minX = 0.0, maxX = 1.0;
+  }
+
+  // Update tauScale
+  radius_scale = d3.scaleLinear()
+    .domain([0,1])
+    .range([0, maxX - minX > maxY - minY ? maxX - minX : maxY - minY]);
+
+  centerX = (maxX+minX)/2, centerY = (maxY+minY)/2;
+
+
+  // ------------------  Left map initiation. -------------------
+
+  if(left_is_origin){
+    d3.csv(full_data_list[current_data], function(error, data){
+      if(error) throw error;
+
+      set_data_size(1);
+      set_time(1);
+      coresetData = data;
+
+      var cur_max = 0;
+      coresetData.forEach(function(d){
+        if(parseFloat(d.value) > cur_max){
+          cur_max = d.value;
+        }
+      });
+
+      max = cur_max;
+      console.log("left origin max:", max);
+      init_googlemap();
+      map_draw();
+      //right_map_update();
+
+    });
+  }else{
+
+    console.log("left is not origin" + left_is_diff);
+    delta = delta_list[data_select];
+    STD = STD_list[data_select];
+    init_zoom = zoom_list[data_select];
+    current_sorted = left_is_sorted;
+
+    var left_fileName = "";
+    if(!left_is_sorted){
+      left_fileName = data_list[data_select];
+    }else{
+      left_fileName = sorted_data_list[data_select];
+    }
+
+    left_current_file = left_fileName;
+
+    console.log("init_kernel");
+    init_kernel(left_fileName, left_is_sorted, true);
+  }
+
+
+  // ------------------ right map initiation. -----------------
+
+  if(right_is_origin){
+    d3.csv(full_data_list[current_data], function(error, data){
+      if(error) throw error;
+
+      // console.log("right full data!!!!!!!!!!");
+      set_right_data_size(1);
+      set_right_time(1);
+
+      right_coresetData = data;
+
+      var cur_max = 0;
+      // console.log("init right!!!!!");
+      right_coresetData.forEach(function(d){
+        if(parseFloat(d.value) > cur_max){
+          cur_max = d.value;
+        }
+      });
+
+      right_max = cur_max;
+
+      console.log("right origin max:" + right_max);
+      right_init_googlemap();
+      right_map_draw();
+      //right_current_file = fileName;
+      //right_map_update();
+    });
+  }else{
+
+    delta = delta_list[data_select];
+    STD = STD_list[data_select];
+    init_zoom = zoom_list[data_select];
+    right_current_sorted = right_is_sorted;
+
+    var right_fileName = "";
+    if(!right_is_sorted){
+      right_fileName = data_list[data_select];
+    }else{
+      right_fileName = sorted_data_list[data_select];
+    }
+
+    right_current_file = right_fileName;
+
+    console.log("right_init_kernel");
+    right_init_kernel(right_fileName, right_is_sorted, true);
+  }
+
+
+  // Get max max_value.
+  // getMax(101, 0.1, STD);
+
+
+  // var x = 1.0;
+  // var y = (maxY-minY)/(maxX-minX);
+
+  // // left fill
+
+  // fill(0, 101, 0.1, 0.01, x, y, true);
+
+  // // right fill
+
+  // right_fill(0, 101, 0.1, 0.01, x, y, true);
+}
+
+
+function random_sampling(std, epsilon){
+
+
+  if(left_is_origin == true){
+    d3.csv(full_data_list[current_data], function(error, data){
+      if(error) throw error;
+
+      set_data_size(1);
+      set_time(1);
+      coresetData = data;
+
+      var cur_max = 0;
+      coresetData.forEach(function(d){
+        if(d.value > cur_max){
+          cur_max = d.value;
+        }
+      });
+
+      max = cur_max;
+      init_googlemap();
+      map_draw();
+      //right_map_update();
+
+    });
+  }else{
+
+  d3.csv(left_current_file,function(data){
+
+    //update_color_bar(0);
+    ken = [];
+    // var epsilon = 0.03;
+
+    var size = Math.floor(1/(epsilon*epsilon)*Math.log(1000));
+
+    // mark data length.
+    data_length_mark = size;
+
+    set_data_size(size);
+
+    var sampleList = [];
+
+    var tmpMinX = 10000;
+    var tmpMaxX = -10000;
+
+    var tmpMinY = 10000;
+    var tmpMaxY = -10000;
+
+    if (!current_sorted){
+      data.forEach(function(d,i){
+        //nothing
+        var tmpX;
+        var tmpY;
+        Object.values(d).forEach(function(item){
+          var items = item.split(" ");
+          tmpX = parseFloat(items[0]);
+          tmpY = parseFloat(items[1]);
+        });
+
+        if (tmpX < tmpMinX){
+          tmpMinX = tmpX;
+        }
+        if (tmpX > tmpMaxX){
+          tmpMaxX = tmpX;
+        }
+
+        if(tmpY < tmpMinY){
+          tmpMinY = tmpY;
+        }
+
+        if(tmpY > tmpMaxY){
+          tmpMaxY = tmpY;
+        }
+
+        // if(i<size){
+        //   sampleList.push(d);
+        // }
+        if(i<size){
+          sampleList.push(d);
+        }else{
+          var j = Math.floor((Math.random() * i));
+          if(j<size){
+            sampleList[j] = d;
+          }
+        }
+      });
+      // var formatedList = [];
+      // console.log(tmpMinX + " " + tmpMaxX);
+      // console.log(tmpMinY + " " + tmpMaxY);
+
+      sampleList.forEach(function(d){
+        var cordinate = [];
+        Object.values(d).forEach(function(item){
+          var items = item.split(" ");
+          ken.push({'y':parseFloat(items[0]), 'x':parseFloat(items[1])});
+        });
+      });
+
+    }else{
+      /**
+       *  Use sorting sampling data
+       **/
+
+      for(var i=0; i<size; i++){
+        var cordinate = [];
+        Object.values(data[i]).forEach(function(item){
+          var items = item.split(" ");
+          ken.push({'y':parseFloat(items[0]), 'x':parseFloat(items[1])});
+        });
+      }
+    }
+
+    full_data_length = ken.length;
+
+    if(right_is_origin){
+
+      getMax(101, 0.05, std);
+
+      var x = 1.0;
+      var y = (maxY-minY)/(maxX-minX);
+
+      // left fill
+
+      fill(0, 101, 0.1, 0.01, x, y, true);
+
+     d3.csv(full_data_list[current_data], function(error, data){
+      if(error) throw error;
+
+      // console.log("right full data!!!!!!!!!!");
+      set_right_data_size(1);
+      set_right_time(1);
+      right_coresetData = data;
+
+      var cur_max = 0;
+      // console.log("init right!!!!!");
+      right_coresetData.forEach(function(d){
+        if(parseFloat(d.value) > cur_max){
+          cur_max = d.value;
+        }
+      });
+
+       console.log("rs right max:", right_max);
+      right_max = cur_max;
+
+      right_init_googlemap();
+       right_map_draw();
+     });
+      // right fill
+
+      //right_fill(0, 101, 0.1, 0.01, x, y, true);
+    }
+  });
+  }
+
+
+
+  // random sampling right.
+  if(right_is_origin){
+
+    console.log("right is origin!!!!!");
+    // do nothing.
+  }else{
+  //console.log("keep random sampling");
+
+  d3.csv(right_current_file,function(data){
+
+    //update_color_bar(0);
+    right_ken = [];
+    // var epsilon = 0.03;
+
+    var size = Math.floor(1/(epsilon*epsilon)*Math.log(1000));
+
+    // mark data length.
+    data_length_mark = size;
+
+    //size = 199162;
+    // if(size > data.length){
+    //   size = data.length;
+    // }
+    set_right_data_size(size);
+
+    // percent = parseFloat(size)/parseFloat(full_size);
+
+    // if(STD > 0.01){
+    //   STD = 0.01;
+    // }
+    var sampleList = [];
+
+    var tmpMinX = 10000;
+    var tmpMaxX = -10000;
+
+    var tmpMinY = 10000;
+    var tmpMaxY = -10000;
+
+    if (!right_current_sorted){
+      data.forEach(function(d,i){
+        //nothing
+        var tmpX;
+        var tmpY;
+        Object.values(d).forEach(function(item){
+          var items = item.split(" ");
+          tmpX = parseFloat(items[0]);
+          tmpY = parseFloat(items[1]);
+        });
+
+        if (tmpX < tmpMinX){
+          tmpMinX = tmpX;
+        }
+        if (tmpX > tmpMaxX){
+          tmpMaxX = tmpX;
+        }
+
+        if(tmpY < tmpMinY){
+          tmpMinY = tmpY;
+        }
+
+        if(tmpY > tmpMaxY){
+          tmpMaxY = tmpY;
+        }
+
+        // if(i<size){
+        //   sampleList.push(d);
+        // }
+        if(i<size){
+          sampleList.push(d);
+        }else{
+          var j = Math.floor((Math.random() * i));
+          if(j<size){
+            sampleList[j] = d;
+          }
+        }
+      });
+      // var formatedList = [];
+      // console.log(tmpMinX + " " + tmpMaxX);
+      // console.log(tmpMinY + " " + tmpMaxY);
+
+      sampleList.forEach(function(d){
+        var cordinate = [];
+        Object.values(d).forEach(function(item){
+          var items = item.split(" ");
+          right_ken.push({'y':parseFloat(items[0]), 'x':parseFloat(items[1])});
+        });
+      });
+
+    }else{
+      /**
+       *  Use sorting sampling data
+       **/
+
+      for(var i=0; i<size; i++){
+        var cordinate = [];
+        Object.values(data[i]).forEach(function(item){
+          var items = item.split(" ");
+          right_ken.push({'y':parseFloat(items[0]), 'x':parseFloat(items[1])});
+        });
+      }
+    }
+
+    full_data_length = right_ken.length;
+
+    getMax(101, 0.05, std);
+
+    var x = 1.0;
+    var y = (maxY-minY)/(maxX-minX);
+
+    // left fill
+
+    if(!left_is_origin){
+      fill(0, 101, 0.1, 0.05, x, y, true);
+    }
+    // right fill
+
+    right_fill(0, 101, 0.1, 0.05, x, y, true);
+  });
+
+  }
+
+}
+
+
+function getMax(radius, tau, std){
+
+  var x = 1.0;
+  var y = (maxY-minY)/(maxX-minX);
+
+
+  // ------------------ Get left max. -----------------
+  if(left_is_origin){
+    max_max = max;
+  }else{
+
+    d3.csv(full_data_list[current_data], function(error, data){
+      if(error) throw error;
+
+  //coresetData = [];
+   var full_Data = data;
+   var sum = 0.0;
+   var count = 0;
+  // var d0 = performance.now();
+   var v = 0.0;
+   var cur_max = 0.0;
+   for(var i=minX; i<=maxX; i+=delta){
+     for(var j=minY; j<=maxY; j+=delta){
+       v = kde_kernel(ken, std, i+delta/2.0, j+delta/2.0);
+       if(left_is_diff!=0){
+
+         v = (parseFloat(full_Data[count].value) - v);
+
+         v = Math.abs(v);
+         if(left_is_diff == 2){
+           if(full_Data[count].value != 0){
+             v = v/parseFloat(full_Data[count].value);
+           }else{
+             v = 0;
+           }
+         }
+         count += 1;
+       }
+
+       sum += v;
+       if (v > cur_max){
+         cur_max = v;
+       }
+     }
+   }
+
+   console.log("left average difference:" + sum/parseFloat(count));
+   max = cur_max;
+   max_max = max;
+ });
+
+  }
+
+  // ------------------ Get right max. -----------------
+  if(right_is_origin){
+
+    max_max = max > right_max ? max : right_max;
+    console.log(max_max);
+
+  }else{
+ d3.csv(full_data_list[current_data], function(error, data){
+  //var d2 = performance.now();
+   if(error) throw error;
+
+   var fullData = data;
+   /**
+    *  map
+    *
+    **/
+   //right_coresetData = [];
+
+   var sum = 0.0;
+   var count = 0;
+   var v = 0.0;
+   var cur_max = 0.0;
+
+   for(var i=minX; i<=maxX; i+=delta){
+     for(var j=minY; j<=maxY; j+=delta){
+       v = right_kde_kernel(right_ken, std, i+delta/2.0, j+delta/2.0);
+
+       if(right_is_diff!=0){
+
+         v = (parseFloat(fullData[count].value) - v);
+
+         v = Math.abs(v);
+         if(right_is_diff == 2){
+           if(fullData[count].value != 0){
+             v = v/parseFloat(fullData[count].value);
+           }else{
+             v = 0;
+           }
+         }
+         count += 1;
+       }
+
+      sum += v;
+      if (v > cur_max){
+        cur_max = v;
+      }
+    }
+  }
+
+   console.log("right average difference: " + sum/parseFloat(count));
+   right_max = cur_max;
+   //console.log("right max no origin:" + right_max);
+   max_max = max > right_max ? max : right_max;
+   console.log(max_max);
+ });
+  }
+
+  // console.log(max);
+  // console.log(right_max);
+
+  // // max_max = max > right_max ? max : right_max;
+
+  // console.log(max_max);
+
+}
 
 function init_left(data_select, is_sorted, is_origin, is_left){
 
@@ -557,10 +1109,12 @@ function init_left(data_select, is_sorted, is_origin, is_left){
 
     init_kernel(fileName, is_sorted, true);
 
-  }}
+  }
+}
 
 //initiation
-init_left("Kentucky", true, false, true);
+//init_left("Kentucky", true, false, true);
+init("Kentucky", true, false, false, false);
 
 // function cal_left_max(STD, radius, tau){
 //   var norData = ken;
@@ -926,11 +1480,11 @@ function killChaos(std, radius, tau){
   //updateHeapMap();
   //draw_canvas();
   //map_draw();
-  console.log("----- lock2" + lock2);
-  if(lock2){
-    map_update();
-    lock2 = false;
-  }
+
+
+  map_update();
+
+
   //zoomed_rescale();
   //return coresetData;
 }
@@ -979,57 +1533,64 @@ function fill(norData, radius, tau, std, x, y, is_left){
 
  d3.csv(full_data_list[current_data], function(error, data){
   //if(error) throw error;
-
-  coresetData = [];
-   var full_Data = data;
-   var sum = 0.0;
-   var count = 0;
   var d0 = performance.now();
-  var v = 0.0;
-  var cur_max = 0.0;
-  for(var i=minX; i<=maxX; i+=delta){
-    for(var j=minY; j<=maxY; j+=delta){
-      v = kde_kernel(norData, std, i+delta/2.0, j+delta/2.0);
+  coresetData = [];
+  var full_Data = data;
+  //  var sum = 0.0;
+  //  var count = 0;
+  // var d0 = performance.now();
+  // var v = 0.0;
+  // var cur_max = 0.0;
+  // for(var i=minX; i<=maxX; i+=delta){
+  //   for(var j=minY; j<=maxY; j+=delta){
+  //     v = kde_kernel(norData, std, i+delta/2.0, j+delta/2.0);
 
-      if(left_is_diff!=0){
+  //     if(left_is_diff!=0){
 
-        v = (parseFloat(full_Data[count].value) - v);
+  //       v = (parseFloat(full_Data[count].value) - v);
 
-        v = Math.abs(v);
-        if(left_is_diff == 2){
-          if(full_Data[count].value != 0){
-            v = v/parseFloat(full_Data[count].value);
-            if (v > 1){
-              console.log("coreset position: x:" + i + "y:" + j);
-              console.log("full data position : x:" + full_Data[count].x + "y:" + full_Data[count].y);
-              console.log("full data value:" + full_Data[count].value + " data value:" + v*parseFloat(full_Data[count].value));
-            }
-          }else{
-            v = 0;
-          }
-        }
-        count += 1;
-      }
+  //       v = Math.abs(v);
+  //       if(left_is_diff == 2){
+  //         if(full_Data[count].value != 0){
+  //           v = v/parseFloat(full_Data[count].value);
+  //           if (v > 1){
+  //             console.log("coreset position: x:" + i + "y:" + j);
+  //             console.log("full data position : x:" + full_Data[count].x + "y:" + full_Data[count].y);
+  //             console.log("full data value:" + full_Data[count].value + " data value:" + v*parseFloat(full_Data[count].value));
+  //           }
+  //         }else{
+  //           v = 0;
+  //         }
+  //       }
+  //       count += 1;
+  //     }
 
-      sum += v;
-      if (v > cur_max){
-        cur_max = v;
-      }
-    }
-  }
+  //     sum += v;
+  //     if (v > cur_max){
+  //       cur_max = v;
+  //     }
+  //   }
+  // }
 
-   console.log("left average difference:" + sum/parseFloat(count));
-   max = cur_max;
+  //  console.log("left average difference:" + sum/parseFloat(count));
+   //  max = cur_max;
+
+   if(!right_is_origin){
+     max = max_max;
+   }
+
+   console.log("left_max:" + max);
    /**
     *  map
     *
     **/
 
+   console.log("fill----:" + left_is_diff);
    var max_diff = 0;
-   count = 0;
+   var count = 0;
    for(var i=minX; i<=maxX; i+=delta){
     for(var j=minY; j<=maxY; j+=delta){
-      var value = kde_kernel(norData, std, i+delta/2.0, j+delta/2.0);
+      var value = kde_kernel(ken, std, i+delta/2.0, j+delta/2.0);
       if(left_is_diff!=0){
 
         // console.log("coreset position: x:" + i + "y:" + j);
@@ -1049,21 +1610,6 @@ function fill(norData, radius, tau, std, x, y, is_left){
             value = 0;
           }
         }
-        // console.log(value);
-        // console.log(max);
-        // for(var data_i = 0; data_i < full_Data.length; data_i ++){
-        //   if(i == full_Data[data_i].x && j == full_Data[data_i].y){
-        //     value = (full_Data[data_i].value - value);
-        //     if(value < 0){
-        //       console.log("value < 0", value);
-        //       console.log("value > 0", Math.abs(value));
-        //     }
-        //     value = Math.abs(value);
-        //     if(left_is_diff == 2){
-        //       value = value/full_Data[data_i];
-        //     }
-        // }
-        // }
 
         if(value > max_diff){
           max_diff = value;
@@ -1151,10 +1697,10 @@ function fill(norData, radius, tau, std, x, y, is_left){
       // }
     }
   }
-  //return coresetData;
+   //return coresetData;
 
    console.log("max diff:" + max_diff);
-   spinner_left.stop();
+   //spinner_left.stop();
    //map_update();
    killChaos(std, radius, tau);
    //map_draw();
@@ -1525,15 +2071,17 @@ function handleEpsilonClick(event){
 
   // d3.select("#epsilon-value").text(value);
   d3.select("#epsilon").property("value", parseFloat(value));
-  if(left_is_origin == false){
-    randomSample(std, parseFloat(value), 1);
-  }
+  // if(left_is_origin == false){
+  //   randomSample(std, parseFloat(value), 1);
+  // }
 
-  console.log(right_is_origin);
-  if(right_is_origin == false){
-    console.log("right is not origin");
-    right_randomSample(std, parseFloat(value), 1);
-  }
+  console.log("left origin? :" + left_is_origin);
+  console.log("right origin? :" + right_is_origin);
+  random_sampling(std, parseFloat(value));
+  // if(right_is_origin == false){
+  //   console.log("right is not origin");
+  //   right_randomSample(std, parseFloat(value), 1);
+  // }
   return false;
 }
 
@@ -1620,32 +2168,38 @@ function handleCompare(event){
 
   current_data = data_value;
   // init left and right
-  if(last_data != data_value || left_dropdown_value != left_map_type){
-    if(last_data != data_value || right_dropdown_value != right_map_type){
-      is_right_update = true;
-    }else{
-      is_right_update = false;
-    }
-    document.getElementById("compare_btn").disabled = true;
-    document.getElementById("tau_confirm").disabled = true;
-    document.getElementById("epsilon_confirm").disabled = true;
-    document.getElementById("radius_confirm").disabled = true;
+  // if(last_data != data_value || left_dropdown_value != left_map_type){
+  //   if(last_data != data_value || right_dropdown_value != right_map_type){
+  //     is_right_update = true;
+  //   }else{
+  //     is_right_update = false;
+  //   }
+  //   document.getElementById("compare_btn").disabled = true;
+  //   document.getElementById("tau_confirm").disabled = true;
+  //   document.getElementById("epsilon_confirm").disabled = true;
+  //   document.getElementById("radius_confirm").disabled = true;
 
-    left_map_type = left_dropdown_value;
-    init_left(data_value, is_sorted, is_origin, true);
-  }
+  //   left_map_type = left_dropdown_value;
+  //   init_left(data_value, is_sorted, is_origin, true);
+  // }
 
-  if(last_data != data_value || right_dropdown_value != right_map_type){
+  // if(last_data != data_value || right_dropdown_value != right_map_type){
 
-    document.getElementById("compare_btn").disabled = true;
-    document.getElementById("tau_confirm").disabled = true;
-    document.getElementById("epsilon_confirm").disabled = true;
-    document.getElementById("radius_confirm").disabled = true;
+  //   document.getElementById("compare_btn").disabled = true;
+  //   document.getElementById("tau_confirm").disabled = true;
+  //   document.getElementById("epsilon_confirm").disabled = true;
+  //   document.getElementById("radius_confirm").disabled = true;
 
-    console.log("comming" + right_origin + " " + right_is_origin);
-    right_map_type = right_dropdown_value;
-    init_right(data_value, right_is_sorted, right_origin, false);
-  }
+  //   console.log("comming" + right_origin + " " + right_is_origin);
+  //   right_map_type = right_dropdown_value;
+  //   init_right(data_value, right_is_sorted, right_origin, false);
+  // }
+
+
+  left_map_type = left_dropdown_value;
+  right_map_type = right_dropdown_value;
+
+  init(data_value, is_sorted, right_is_sorted, is_origin, right_is_origin);
 
   last_data = data_value;
 }

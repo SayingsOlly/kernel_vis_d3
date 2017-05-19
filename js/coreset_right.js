@@ -58,7 +58,7 @@ var colorRange = ["rgba(194,68,41, 1.0)", "rgba(198,0,101, 1.0)","rgba(202,68,16
 
 var data_length_mark = 0;
 
-var right_max = 0.037657;
+var right_max = 0;
 
 var full_size = 199162;
 var full_data_length = 0;
@@ -265,7 +265,6 @@ function right_map_update(){
   if(right_mapProjection != undefined){
     var offset = right_mapProjection.fromLatLngToPoint(right_canvasLayer.getTopLeft());
     right_context.translate(-offset.x, -offset.y);
-
     right_map_draw();
   }
 
@@ -274,7 +273,7 @@ function right_map_update(){
 
 function right_map_draw(){
 
-  console.log("**************** right draw ****************");
+  //console.log("**************** right draw ****************");
   right_context.clearRect(0,0, right_canvasWidth, right_canvasHeight);
   right_context.globalAlpha = 0.5;
   // var newpoint;
@@ -329,7 +328,8 @@ function right_map_draw(){
 function right_init_kernel(fileName, is_sorted, is_right){
 
   d3.csv(fileName,function(data){
-  right_init_googlemap();
+  //right_init_googlemap();
+    right_init_googlemap();
 
     // update_color_bar(0);
     //update_color_bar(0);
@@ -365,28 +365,28 @@ function right_init_kernel(fileName, is_sorted, is_right){
     if (!is_sorted){
       data.forEach(function(d,i){
         //nothing
-        var tmpX;
-        var tmpY;
-        Object.values(d).forEach(function(item){
-          var items = item.split(" ");
-          tmpX = parseFloat(items[0]);
-          tmpY = parseFloat(items[1]);
-        });
+        // var tmpX;
+        // var tmpY;
+        // Object.values(d).forEach(function(item){
+        //   var items = item.split(" ");
+        //   tmpX = parseFloat(items[0]);
+        //   tmpY = parseFloat(items[1]);
+        // });
 
-        if (tmpX < tmpMinX){
-          tmpMinX = tmpX;
-        }
-        if (tmpX > tmpMaxX){
-          tmpMaxX = tmpX;
-        }
+        // if (tmpX < tmpMinX){
+        //   tmpMinX = tmpX;
+        // }
+        // if (tmpX > tmpMaxX){
+        //   tmpMaxX = tmpX;
+        // }
 
-        if(tmpY < tmpMinY){
-          tmpMinY = tmpY;
-        }
+        // if(tmpY < tmpMinY){
+        //   tmpMinY = tmpY;
+        // }
 
-        if(tmpY > tmpMaxY){
-          tmpMaxY = tmpY;
-        }
+        // if(tmpY > tmpMaxY){
+        //   tmpMaxY = tmpY;
+        // }
 
         // if(i<size){
         //   sampleList.push(d);
@@ -428,7 +428,7 @@ function right_init_kernel(fileName, is_sorted, is_right){
 
     full_data_length = right_ken.length;
 
-    right_getCore(is_right, STD, 101, 0.05);
+    //right_getCore(is_right, STD, 101, 0.05);
     // var d1 = performance.now();
     // set_right_time((d1-d0)/1000);
     //right_map_draw();
@@ -451,6 +451,22 @@ function right_init_kernel(fileName, is_sorted, is_right){
     //   console.log("im right!!!!!!!!");
     //   draw_full_canvas();
     // }
+
+     getMax(101, 0.1, STD);
+
+
+    var x = 1.0;
+    var y = (maxY-minY)/(maxX-minX);
+
+    // left fill
+
+    if(!left_is_origin){
+      fill(0, 101, 0.1, 0.01, x, y, true);
+    }
+
+    // right fill
+
+    right_fill(0, 101, 0.1, 0.01, x, y, true);
   });
 
 }
@@ -496,26 +512,26 @@ function init_right(data_select, is_sorted, is_origin, is_right){
   }else{
 
 
-  delta = delta_list[data_select];
-  STD = STD_list[data_select];
-  init_zoom = zoom_list[data_select];
-  right_current_sorted = is_sorted;
+    delta = delta_list[data_select];
+    STD = STD_list[data_select];
+    init_zoom = zoom_list[data_select];
+    right_current_sorted = is_sorted;
 
-  var fileName = "";
-  if(!is_sorted){
-    fileName = data_list[data_select];
-  }else{
-    fileName = sorted_data_list[data_select];
-  }
+    var fileName = "";
+    if(!is_sorted){
+      fileName = data_list[data_select];
+    }else{
+      fileName = sorted_data_list[data_select];
+    }
 
-  right_current_file = fileName;
+    right_current_file = fileName;
 
     right_init_kernel(fileName, is_sorted, true);
   }
 }
 
 //initiation
-init_right("Kentucky", false, false, true);
+//init_right("Kentucky", false, false, true);
 
 
 /**
@@ -846,9 +862,6 @@ function right_getCore(is_left, std, radius, tau){
 
 function right_killChaos(std, radius, tau){
 
-  lock2 = true;
-  console.log("lock2:" + lock2);
-
   right_coresetData.forEach(function(d){
     d.color = d.originColor;
   });
@@ -873,10 +886,8 @@ function right_killChaos(std, radius, tau){
   //updateHeapMap();
   //draw_canvas();
   //console.log("right coreset data in killing", + right_coresetData.length);
-  if(lock){
-    right_map_draw();
-    lock = false;
-  }
+  right_map_draw();
+
   //right_map_update();
   //zoomed_rescale();
   //return coresetData;
@@ -934,51 +945,56 @@ function right_fill(norData, radius, tau, std, x, y, is_right){
     *
     **/
    right_coresetData = [];
-   var sum = 0.0;
-   var count = 0;
-  var v = 0.0;
-  var cur_max = 0.0;
-  for(var i=minX; i<=maxX; i+=delta){
-    for(var j=minY; j<=maxY; j+=delta){
-      v = right_kde_kernel(norData, std, i+delta/2.0, j+delta/2.0);
+  //  var sum = 0.0;
+  //  var count = 0;
+  // var v = 0.0;
+  // var cur_max = 0.0;
+  // for(var i=minX; i<=maxX; i+=delta){
+  //   for(var j=minY; j<=maxY; j+=delta){
+  //     v = right_kde_kernel(right_ken, std, i+delta/2.0, j+delta/2.0);
 
-      if(right_is_diff!=0){
+  //     if(right_is_diff!=0){
 
-        v = (parseFloat(fullData[count].value) - v);
+  //       v = (parseFloat(fullData[count].value) - v);
 
-        v = Math.abs(v);
-        if(right_is_diff == 2){
-          if(fullData[count].value != 0){
-            v = v/parseFloat(fullData[count].value);
-            if (v > 1){
-              // console.log("coreset position: x:" + i + "y:" + j);
-              // console.log("full data position : x:" + fullData[count].x + "y:" + fullData[count].y);
-              // console.log("full data value:" + fullData[count].value + " data value:" + v*parseFloat(fullData[count].value));
-            }
-          }else{
-            v = 0;
-          }
-        }
+  //       v = Math.abs(v);
+  //       if(right_is_diff == 2){
+  //         if(fullData[count].value != 0){
+  //           v = v/parseFloat(fullData[count].value);
+  //           if (v > 1){
+  //             // console.log("coreset position: x:" + i + "y:" + j);
+  //             // console.log("full data position : x:" + fullData[count].x + "y:" + fullData[count].y);
+  //             // console.log("full data value:" + fullData[count].value + " data value:" + v*parseFloat(fullData[count].value));
+  //           }
+  //         }else{
+  //           v = 0;
+  //         }
+  //       }
 
-        count += 1;
-      }
+  //       count += 1;
+  //     }
 
-      sum += v;
-      if (v > cur_max){
-        cur_max = v;
-      }
-    }
-  }
+  //     sum += v;
+  //     if (v > cur_max){
+  //       cur_max = v;
+  //     }
+  //   }
+  // }
 
-   console.log("right average difference: " + sum/parseFloat(count));
-   right_max = cur_max;
+  //  console.log("right average difference: " + sum/parseFloat(count));
+  //  right_max = cur_max;
    //console.log("right max no origin:" + right_max);
 
-   count = 0;
+   if(!left_is_origin){
+     right_max = max_max;
+   }
+
+   console.log("right_max:" + right_max);
+   var count = 0;
    var max_diff = 0;
    for(var i=minX; i<=maxX; i+=delta){
     for(var j=minY; j<=maxY; j+=delta){
-      var value = right_kde_kernel(norData, std, i+delta/2.0, j+delta/2.0);
+      var value = right_kde_kernel(right_ken, std, i+delta/2.0, j+delta/2.0);
        if(right_is_diff!=0){
 
          // for(var data_i = 0; data_i < fullData.length; data_i ++){
@@ -1112,7 +1128,7 @@ function right_fill(norData, radius, tau, std, x, y, is_right){
   }
    //return coresetData;
    console.log("max_diff_right:" + max_diff);
-   spinner_right.stop();
+   //spinner_right.stop();
    //right_map_update();
    right_killChaos(std, radius, tau);
    var d3 = performance.now();

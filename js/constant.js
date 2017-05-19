@@ -202,3 +202,53 @@ var opts_right = {
   trail: 40, // Afterglow percentage
   className: 'spinner' // The CSS class to assign to the spinner
 };
+
+
+
+
+
+//
+
+var minY = -89.582541, maxY = -81.960144, minX = 36.3, maxX = 39.3;
+var centerX = (maxX+minX)/2, centerY = (maxY+minY)/2;
+
+
+var data_list = {"Kentucky":"../data/kentucky_org.txt",
+                 "Philadelphia Crimes":"../data/crime_clean.txt",
+                 "Japan": "../data/twitter_clean_jp.txt",
+                 "Synthetic": "../data/nonuniform_2D.txt"};
+
+var sorted_data_list = {"Kentucky":"../data/ken_sort.txt",
+                        "Philadelphia Crimes":"../data/crime_sort.txt",
+                        "Japan": "../data/twitter_sort.txt",
+                        "Synthetic" : "../data/nonuniform_2D_Zorder_sort.txt"};
+
+var full_data_size = {"Kentucky": 199163,
+                      "Philadelphia Crimes": 683499,
+                      "Japan": 153586,
+                      "Synthetic": 532899};
+
+var full_data_time = {"Kentucky" : 120.5,
+                      "Japan": 311.6,
+                      "Philadelphia Crimes":1443.3,
+                      "Synthetic": 1000.0};
+
+var STD_list = {"Kentucky": 0.07,
+                "Philadelphia Crimes": 0.003,
+                "Japan": 0.46,
+                "Synthetic": 0.008};
+
+var delta_list = {"Kentucky": 0.04,
+                  "Philadelphia Crimes":0.002,
+                  "Japan": 0.1,
+                  "Synthetic": 0.008};
+
+var zoom_list = {"Kentucky": 7,
+                 "Philadelphia Crimes": 11,
+                 "Japan": 6,
+                 "Synthetic": 9};
+
+var full_data_list = {"Kentucky": "../data/kentucky_coreset_full.csv",
+                      "Philadelphia Crimes": "../data/crime_full_new2.csv",
+                      "Japan": "../data/japan_coreset.csv",
+                      "Synthetic": '../data/synthetic_full.csv'};
