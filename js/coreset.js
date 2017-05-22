@@ -2,56 +2,22 @@
   *   Left map main function.
   **/
 
-// //var minX = -89.582541, maxX = -81.960144, minY = 36.3, maxY = 39.3;
-// //var minX = -75.2781, maxX = -74.9576, minY = 39.8763, maxY = 40.1372;
-// //var minX = 124.16, maxX = 145.571, minY = 24.3471, maxY = 45.4094;
-// var minY = -89.582541, maxY = -81.960144, minX = 36.3, maxX = 39.3;
-// var centerX = (maxX+minX)/2, centerY = (maxY+minY)/2;
-
-
-// var data_list = {"Kentucky":"../data/kentucky_org.txt",
-//                  "Philadelphia Crimes":"../data/crime_clean.txt",
-//                  "Japan": "../data/twitter_clean_jp.txt"};
-
-// var sorted_data_list = {"Kentucky":"../data/ken_sort.txt",
-//                         "Philadelphia Crimes":"../data/crime_sort.txt",
-//                         "Japan": "../data/twitter_sort.txt"};
-
-// var full_data_size = {"Kentucky": 199163,
-//                 "Philadelphia Crimes": 683499,
-//                 "Japan": 153586};
-
-// var full_data_time = {"Kentucky" : 120.5,
-//                       "Japan": 311.6,
-//                       "Philadelphia Crimes":1443.3
-//                      };
-
-// var STD_list = {"Kentucky": 0.07,
-//                 "Philadelphia Crimes": 0.003,
-//                 "Japan": 0.46};
-
-// var delta_list = {"Kentucky": 0.04,
-//                   "Philadelphia Crimes":0.002,
-//                   "Japan": 0.1};
-
-// var zoom_list = {"Kentucky": 7,
-//                  "Philadelphia Crimes": 11,
-//                  "Japan": 6};
-
-// var full_data_list = {"Kentucky": "../data/kentucky_coreset_full.csv",
-//                       "Philadelphia Crimes": "../data/crime_full_new2.csv",
-//                       "Japan": "../data/japan_coreset.csv"};
 
 var last_left_center;
 
+// Default Data and file path.
 var current_data = "Kentucky";
 var last_data = "Kentucky";
+
 var left_map_type = "Coreset";
 var right_map_type = "Random Sampling";
+
 var left_current_file = "../data/ken_sort.txt";
 var right_current_file = "../data/kentucky_org.txt";
 
+// northeast and southwest corner of rectangle frame.
 var ne, sw;
+
 
 var left_click_latlng = 0;
 
@@ -59,6 +25,8 @@ var is_right_update = false;
 
 var current_sorted = true;
 var init_zoom = 7;
+var rou = 0.0;
+
 var ken = [];
 //var norData = [];
 var coresetData = [];
@@ -72,24 +40,20 @@ var right_is_origin = false;
 
 // GOOGLE map
 var canvasLayer;
+var left_canvas;
 var left_context;
 var left_map;
 var mapProjection;
 
+// canvas
 var canvasWidth;
 var canvasHeight;
-
 var rectLatLng = new google.maps.LatLng(40,-95);
 var resolutionScale = window.devicePixelRatio || 1;
 
-// // Color Range
-// var colorRange = ["rgba(194,68,41, 1.0)", "rgba(198,0,101, 1.0)","rgba(202,68,163, 1.0)", "rgba(183,0,206, 1.0)", "rgba(123,0,210, 1.0)", "rgba(62,0,213, 1.0)", "rgba(0,1,217, 1.0)", "rgba(0,68,221, 1.0)", "rgba(0,137,225, 1.0)", "rgba(0,208,229, 1.0)"];
-
-// var res = 200.0;
-// var edge = 500.0;
+// Default parameters
 var delta = 0.0016;
-
-var data_length_mark = 0;
+var STD = 0.01;
 
 
 var max_max = 0;
@@ -98,21 +62,21 @@ var max = 0;
 var full_size = 199162;
 var full_data_length = 0;
 
-var percent = 1.0;
+//var percent = 1.0;
 
-var scale_value = 1.0;
-var transform_x = 0.0;
-var transform_y = 0.0;
+//var data_length_mark = 0;
+// var scale_value = 1.0;
+// var transform_x = 0.0;
+// var transform_y = 0.0;
 
-var r_transform_x = 0.0;
-var r_transform_y = 0.0;
+// var r_transform_x = 0.0;
+// var r_transform_y = 0.0;
 
-var rescale_x = 0;
-var rescale_y = 0;
+// var rescale_x = 0;
+// var rescale_y = 0;
 
-var STD = 0.01;
 
-var formatPercent = d3.format(".0%");
+
 
 // Default tau scale.
 
@@ -120,27 +84,16 @@ var radius_scale = d3.scaleLinear()
     .domain([0,1])
     .range([0, maxY - minY]);
 
-var xBar = d3.scaleLinear()
-    .domain([0, 1])
-    .range([0, 340]);
-
-var barAxis = d3.axisBottom(xBar)
-    .tickSize(20)
-    .tickValues(threshold.domain())
-    .tickFormat(function(d) { return formatPercent(d); });
-
-var others;
-
 
 /**
   * -----------------------------------------------
-  * Create Google map
+  * Create Google map and rectangle frame.
   * -----------------------------------------------
  **/
 
-
 function init_googlemap(){
 
+  // initiate map
   var mapOptions = {
     zoom:init_zoom,
     center: new google.maps.LatLng(centerX, centerY),
@@ -158,6 +111,7 @@ function init_googlemap(){
 
   left_map = new google.maps.Map(mapDiv, mapOptions);
 
+  // initate cancas layer
   var canvasLayerOptions = {
     map: left_map,
     resizeHandler: map_resize,
@@ -167,10 +121,11 @@ function init_googlemap(){
   };
 
   canvasLayer = new CanvasLayer(canvasLayerOptions);
-  left_context = canvasLayer.canvas.getContext('2d');
+
+  left_canvas = canvasLayer.canvas;
+  left_context = left_canvas.getContext('2d');
 
   // Rectangle, pre kill chaos.
-
   var bounds = {
           north: centerX,
           south: centerX+0.001,
@@ -202,7 +157,7 @@ function init_googlemap(){
         'Recommend min percentage: ' + max_tau + '<br>' +
         'Recommend min radius: 0.01';
 
-        // Set the info window's content and position.
+    // Set the info window's content and position.
     infoWindow.setContent(contentString);
     infoWindow.setPosition(ne);
 
@@ -210,7 +165,6 @@ function init_googlemap(){
   });
 
   // Define an info window on the map.
-
   function showNewRect(event) {
   }
 }
@@ -219,8 +173,15 @@ function map_resize(){
 // do nothing.
 }
 
+/**
+  * -----------------------------------------------
+  * Update Google map and canvas layer.
+  * -----------------------------------------------
+ **/
+
 function map_update(){
-  //console.log("map_left_update");
+
+
   canvasWidth = canvasLayer.canvas.width;
   canvasHeight = canvasLayer.canvas.height;
   left_context.clearRect(0,0, canvasWidth, canvasHeight);
@@ -244,19 +205,19 @@ function map_update(){
   var scale = Math.pow(2, left_map.zoom) * resolutionScale;
   left_context.scale(scale, scale);
 
+  // Synchronize two maps.
   if(right_map != undefined){
     right_map.setZoom(left_map.zoom);
-    //right_map.setCenter(left_map.getCenter());
   if(left_map.getCenter()!=right_map.getCenter()){
     last_left_center = left_map.getCenter();
     right_map.setCenter(left_map.getCenter());
   }
   }
 
-   /* If the map was not translated, the topLeft corner would be 0,0 in
-    * world coordinates. Our translation is just the vector from the
-    * world coordinate of the topLeft corder to 0,0.
-    */
+  /* If the map was not translated, the topLeft corner would be 0,0 in
+   * world coordinates. Our translation is just the vector from the
+   * world coordinate of the topLeft corder to 0,0.
+   */
   if(mapProjection != undefined && coresetData.length != 0){
     var offset = mapProjection.fromLatLngToPoint(canvasLayer.getTopLeft());
     left_context.translate(-offset.x, -offset.y);
@@ -270,7 +231,6 @@ function map_update(){
  *  Pre calculate and recommand the percentage and radius to users if they try to
  *  kill the chaos in the choosen range.
  **/
-
 
 function pre_kill_chaos(){
 
@@ -302,14 +262,12 @@ function pre_kill_chaos(){
       }
     }
   });
-
   return max_tau;
 }
 
 function map_draw(){
 
 
-  //console.log("************* left draw **************");
   left_context.clearRect(0,0, canvasWidth, canvasHeight);
   left_context.globalAlpha = 0.5;
   var test1 = new google.maps.LatLng(30.00, -100.04);
@@ -328,8 +286,7 @@ function map_draw(){
 
   var pro_y;
 
-  console.log("coresetData:");
-  console.log(coresetData);
+
   coresetData.forEach(function(d){
 
     if(d.color != "#f7f4f9"){
@@ -346,7 +303,7 @@ function map_draw(){
       left_context.beginPath();
 
       left_context.rect(newpoint.x, newpoint.y, pro*parseFloat(delta), pro_y*parseFloat(delta));
-      if(d.color == "#f7f4f9" || d.color == "#fff"){
+      if(d.color == "#f7f4f9" || d.color == "#fff" || d.color == "#f7f7f7"){
         left_context.fillStyle = "rgba(0, 0, 0, 0)";
       }else{
         if(left_click_latlng != 0){
@@ -359,7 +316,6 @@ function map_draw(){
           )
         {
           left_context.fillStyle = "#000";
-          console.log(pro*parseFloat(delta));
         }else{
           left_context.fillStyle = d.color;
         }
@@ -388,19 +344,27 @@ function init_kernel(fileName, is_sorted, is_left){
 
   d3.csv(fileName,function(data){
 
-    console.log("full data length:" + data.length);
+    init_googlemap();
     update_color_bar(0);
     ken = [];
     var epsilon = 0.03;
 
+    function getBaseLog(x, y) {
+      return Math.log(y) / Math.log(x);
+    }
+
     var size = Math.floor(1/(epsilon*epsilon)*Math.log(1000));
 
-    // mark data length.
-    data_length_mark = size;
+    var log_size = Math.ceil(getBaseLog(2, size));
+
+    size = Math.pow(2, log_size);
 
     set_data_size(size);
 
-    percent = parseFloat(size)/parseFloat(full_size);
+
+    // mark data length.
+    //data_length_mark = size;
+    //percent = parseFloat(size)/parseFloat(full_size);
 
     var sampleList = [];
 
@@ -469,7 +433,6 @@ function init_kernel(fileName, is_sorted, is_left){
       }
     }
 
-    console.log(ken);
     full_data_length = ken.length;
     //getCore(is_left, STD, 101, 0.05);
     // var d1 = performance.now();
@@ -495,8 +458,6 @@ function init_kernel(fileName, is_sorted, is_left){
     //   draw_full_canvas();
     // }
 
-    console.log("init kernel done!");
-
     if(right_is_origin){
 
      getMax(101, 0.1, STD);
@@ -513,7 +474,6 @@ function init_kernel(fileName, is_sorted, is_left){
 
     //right_fill(0, 101, 0.1, 0.01, x, y, true);
     }
-    init_googlemap();
     //init_googlemap();
   });
 
@@ -560,7 +520,6 @@ function init(data_select, left_is_sorted, right_is_sorted, left_is_origin, righ
       });
 
       max = cur_max;
-      console.log("left origin max:", max);
       init_googlemap();
       map_draw();
       //right_map_update();
@@ -568,7 +527,6 @@ function init(data_select, left_is_sorted, right_is_sorted, left_is_origin, righ
     });
   }else{
 
-    console.log("left is not origin" + left_is_diff);
     delta = delta_list[data_select];
     STD = STD_list[data_select];
     init_zoom = zoom_list[data_select];
@@ -583,7 +541,6 @@ function init(data_select, left_is_sorted, right_is_sorted, left_is_origin, righ
 
     left_current_file = left_fileName;
 
-    console.log("init_kernel");
     init_kernel(left_fileName, left_is_sorted, true);
   }
 
@@ -610,7 +567,6 @@ function init(data_select, left_is_sorted, right_is_sorted, left_is_origin, righ
 
       right_max = cur_max;
 
-      console.log("right origin max:" + right_max);
       right_init_googlemap();
       right_map_draw();
       //right_current_file = fileName;
@@ -632,7 +588,6 @@ function init(data_select, left_is_sorted, right_is_sorted, left_is_origin, righ
 
     right_current_file = right_fileName;
 
-    console.log("right_init_kernel");
     right_init_kernel(right_fileName, right_is_sorted, true);
   }
 
@@ -794,7 +749,6 @@ function random_sampling(std, epsilon){
         }
       });
 
-       console.log("rs right max:", right_max);
       right_max = cur_max;
 
       right_init_googlemap();
@@ -810,72 +764,28 @@ function random_sampling(std, epsilon){
 
 
   // random sampling right.
-  if(right_is_origin){
-
-    console.log("right is origin!!!!!");
-    // do nothing.
-  }else{
+  if(!right_is_origin){
   //console.log("keep random sampling");
 
-  d3.csv(right_current_file,function(data){
+    d3.csv(right_current_file,function(data){
 
     //update_color_bar(0);
-    right_ken = [];
-    // var epsilon = 0.03;
+      right_ken = [];
+      // var epsilon = 0.03;
 
-    var size = Math.floor(1/(epsilon*epsilon)*Math.log(1000));
+      var size = Math.floor(1/(epsilon*epsilon)*Math.log(1000));
 
-    // mark data length.
-    data_length_mark = size;
+      // mark data length.
+      data_length_mark = size;
 
-    //size = 199162;
-    // if(size > data.length){
-    //   size = data.length;
-    // }
-    set_right_data_size(size);
+      set_right_data_size(size);
 
-    // percent = parseFloat(size)/parseFloat(full_size);
+      var sampleList = [];
 
-    // if(STD > 0.01){
-    //   STD = 0.01;
-    // }
-    var sampleList = [];
-
-    var tmpMinX = 10000;
-    var tmpMaxX = -10000;
-
-    var tmpMinY = 10000;
-    var tmpMaxY = -10000;
 
     if (!right_current_sorted){
       data.forEach(function(d,i){
-        //nothing
-        var tmpX;
-        var tmpY;
-        Object.values(d).forEach(function(item){
-          var items = item.split(" ");
-          tmpX = parseFloat(items[0]);
-          tmpY = parseFloat(items[1]);
-        });
 
-        if (tmpX < tmpMinX){
-          tmpMinX = tmpX;
-        }
-        if (tmpX > tmpMaxX){
-          tmpMaxX = tmpX;
-        }
-
-        if(tmpY < tmpMinY){
-          tmpMinY = tmpY;
-        }
-
-        if(tmpY > tmpMaxY){
-          tmpMaxY = tmpY;
-        }
-
-        // if(i<size){
-        //   sampleList.push(d);
-        // }
         if(i<size){
           sampleList.push(d);
         }else{
@@ -885,10 +795,6 @@ function random_sampling(std, epsilon){
           }
         }
       });
-      // var formatedList = [];
-      // console.log(tmpMinX + " " + tmpMaxX);
-      // console.log(tmpMinY + " " + tmpMaxY);
-
       sampleList.forEach(function(d){
         var cordinate = [];
         Object.values(d).forEach(function(item){
@@ -942,46 +848,76 @@ function getMax(radius, tau, std){
   // ------------------ Get left max. -----------------
   if(left_is_origin){
     max_max = max;
+    d3.select("#max_value").text("");
   }else{
 
     d3.csv(full_data_list[current_data], function(error, data){
       if(error) throw error;
 
-  //coresetData = [];
-   var full_Data = data;
-   var sum = 0.0;
-   var count = 0;
-  // var d0 = performance.now();
-   var v = 0.0;
-   var cur_max = 0.0;
-   for(var i=minX; i<=maxX; i+=delta){
-     for(var j=minY; j<=maxY; j+=delta){
-       v = kde_kernel(ken, std, i+delta/2.0, j+delta/2.0);
-       if(left_is_diff!=0){
+      var origin_max = 0.0;
+      if(left_is_diff != 0){
+        data.forEach(function(d){
+          if(parseFloat(d.value) > origin_max){
+            origin_max = parseFloat(d.value);
+          }
+        });
+      }
 
-         v = (parseFloat(full_Data[count].value) - v);
+      //coresetData = [];
+      var full_Data = data;
+      var sum = 0.0;
+      var count = 0;
+      // var d0 = performance.now();
+      var v = 0.0;
+      var cur_max = 0.0;
+      var neg_cur_max = 0.0;
+      var pos_cur_max = 0.0;
+      for(var i=minX; i<=maxX; i+=delta){
+        for(var j=minY; j<=maxY; j+=delta){
+          v = kde_kernel(ken, std, i+delta/2.0, j+delta/2.0);
+          if(left_is_diff!=0){
 
-         v = Math.abs(v);
-         if(left_is_diff == 2){
-           if(full_Data[count].value != 0){
-             v = v/parseFloat(full_Data[count].value);
-           }else{
-             v = 0;
-           }
-         }
-         count += 1;
-       }
+            if(parseFloat(full_Data[count].value)/origin_max < rou){
+              v = 0.0;
+            }else{
+              v = (parseFloat(full_Data[count].value) - v);
 
-       sum += v;
-       if (v > cur_max){
-         cur_max = v;
-       }
-     }
-   }
 
-   console.log("left average difference:" + sum/parseFloat(count));
-   max = cur_max;
-   max_max = max;
+              if(left_is_diff == 2){
+                if(full_Data[count].value != 0){
+                  v = v/parseFloat(full_Data[count].value);
+                }else{
+                  v = 0;
+                }
+              }
+            }
+
+            count += 1;
+            if(v < 0){
+              if(v < neg_cur_max){
+                neg_cur_max = v;
+              }
+            }else{
+              if(v > pos_cur_max){
+                pos_cur_max = v;
+              }
+            }
+            v = Math.abs(v);
+            sum += v;
+          }
+
+
+          if (v > cur_max){
+            cur_max = v;
+          }
+        }
+      }
+
+
+      console.log("left average difference:" + sum/parseFloat(count));
+      max = cur_max;
+      set_left_max_value(max);
+      max_max = max;
  });
 
   }
@@ -990,7 +926,7 @@ function getMax(radius, tau, std){
   if(right_is_origin){
 
     max_max = max > right_max ? max : right_max;
-    console.log(max_max);
+    d3.select("#right_max_value").text("");
 
   }else{
  d3.csv(full_data_list[current_data], function(error, data){
@@ -1003,6 +939,14 @@ function getMax(radius, tau, std){
     *
     **/
    //right_coresetData = [];
+   var origin_max = 0.0;
+   if(right_is_diff != 0){
+     data.forEach(function(d){
+       if(parseFloat(d.value) > origin_max){
+         origin_max = parseFloat(d.value);
+       }
+     });
+   }
 
    var sum = 0.0;
    var count = 0;
@@ -1015,31 +959,35 @@ function getMax(radius, tau, std){
 
        if(right_is_diff!=0){
 
-         v = (parseFloat(fullData[count].value) - v);
+         if(parseFloat(fullData[count].value)/origin_max < rou){
+           v = 0.0;
+         }else{
+           v = (parseFloat(fullData[count].value) - v);
 
-         v = Math.abs(v);
-         if(right_is_diff == 2){
-           if(fullData[count].value != 0){
-             v = v/parseFloat(fullData[count].value);
-           }else{
-             v = 0;
+           v = Math.abs(v);
+           if(right_is_diff == 2){
+             if(fullData[count].value != 0){
+               v = v/parseFloat(fullData[count].value);
+             }else{
+               v = 0;
+             }
            }
          }
+
          count += 1;
        }
-
-      sum += v;
-      if (v > cur_max){
-        cur_max = v;
-      }
-    }
-  }
+       sum += v;
+       if (v > cur_max){
+         cur_max = v;
+       }
+     }
+   }
 
    console.log("right average difference: " + sum/parseFloat(count));
    right_max = cur_max;
-   //console.log("right max no origin:" + right_max);
+   set_right_max_value(right_max);
    max_max = max > right_max ? max : right_max;
-   console.log(max_max);
+   console.log("max max:", max_max);
  });
   }
 
@@ -1399,6 +1347,7 @@ var zoom;
 //     .attr('transform', "translate(100 200)");
 //var width = +svg.attr("width");
 //var height = +svg.attr("height");
+
 var width = 700;
 var height = 500;
 
@@ -1448,9 +1397,6 @@ function getCore(is_left, std, radius, tau){
 
   // fill with density rectangles.
   fill(norData, radius, tau, std, x, y, is_left);
-  // kill chaos.
-  //killChaos(std, radius, tau);
-
 
 }
 
@@ -1480,7 +1426,6 @@ function killChaos(std, radius, tau){
   //updateHeapMap();
   //draw_canvas();
   //map_draw();
-
 
   map_update();
 
@@ -1532,47 +1477,56 @@ function fill(norData, radius, tau, std, x, y, is_left){
    */
 
  d3.csv(full_data_list[current_data], function(error, data){
-  //if(error) throw error;
-  var d0 = performance.now();
-  coresetData = [];
-  var full_Data = data;
-  //  var sum = 0.0;
-  //  var count = 0;
-  // var d0 = performance.now();
-  // var v = 0.0;
-  // var cur_max = 0.0;
-  // for(var i=minX; i<=maxX; i+=delta){
-  //   for(var j=minY; j<=maxY; j+=delta){
-  //     v = kde_kernel(norData, std, i+delta/2.0, j+delta/2.0);
+   //if(error) throw error;
+   var origin_max = 0.0;
+   if(left_is_diff != 0){
+      data.forEach(function(d){
+        if(parseFloat(d.value) > origin_max){
+          origin_max = parseFloat(d.value);
+        }
+      });
+   }
 
-  //     if(left_is_diff!=0){
+   var d0 = performance.now();
+   coresetData = [];
+   var full_Data = data;
+   //  var sum = 0.0;
+   //  var count = 0;
+   // var d0 = performance.now();
+   // var v = 0.0;
+   // var cur_max = 0.0;
+   // for(var i=minX; i<=maxX; i+=delta){
+   //   for(var j=minY; j<=maxY; j+=delta){
+   //     v = kde_kernel(norData, std, i+delta/2.0, j+delta/2.0);
 
-  //       v = (parseFloat(full_Data[count].value) - v);
+   //     if(left_is_diff!=0){
 
-  //       v = Math.abs(v);
-  //       if(left_is_diff == 2){
-  //         if(full_Data[count].value != 0){
-  //           v = v/parseFloat(full_Data[count].value);
-  //           if (v > 1){
-  //             console.log("coreset position: x:" + i + "y:" + j);
-  //             console.log("full data position : x:" + full_Data[count].x + "y:" + full_Data[count].y);
-  //             console.log("full data value:" + full_Data[count].value + " data value:" + v*parseFloat(full_Data[count].value));
-  //           }
-  //         }else{
-  //           v = 0;
-  //         }
-  //       }
-  //       count += 1;
-  //     }
+   //       v = (parseFloat(full_Data[count].value) - v);
 
-  //     sum += v;
-  //     if (v > cur_max){
-  //       cur_max = v;
-  //     }
-  //   }
-  // }
+   //       v = Math.abs(v);
+   //       if(left_is_diff == 2){
+   //         if(full_Data[count].value != 0){
+   //           v = v/parseFloat(full_Data[count].value);
+   //           if (v > 1){
+   //             console.log("coreset position: x:" + i + "y:" + j);
+   //             console.log("full data position : x:" + full_Data[count].x + "y:" + full_Data[count].y);
+   //             console.log("full data value:" + full_Data[count].value + " data value:" + v*parseFloat(full_Data[count].value));
+   //           }
+   //         }else{
+   //           v = 0;
+   //         }
+   //       }
+   //       count += 1;
+   //     }
 
-  //  console.log("left average difference:" + sum/parseFloat(count));
+   //     sum += v;
+   //     if (v > cur_max){
+   //       cur_max = v;
+   //     }
+   //   }
+   // }
+
+   //  console.log("left average difference:" + sum/parseFloat(count));
    //  max = cur_max;
 
    if(!right_is_origin){
@@ -1588,6 +1542,8 @@ function fill(norData, radius, tau, std, x, y, is_left){
    console.log("fill----:" + left_is_diff);
    var max_diff = 0;
    var count = 0;
+   var neg_c = 0;
+   var pos_c = 0;
    for(var i=minX; i<=maxX; i+=delta){
     for(var j=minY; j<=maxY; j+=delta){
       var value = kde_kernel(ken, std, i+delta/2.0, j+delta/2.0);
@@ -1596,32 +1552,53 @@ function fill(norData, radius, tau, std, x, y, is_left){
         // console.log("coreset position: x:" + i + "y:" + j);
         // console.log("full data position : x:" + full_Data[count].x + "y:" + full_Data[count].y);
         // console.log("full data value:" + full_Data[count].value + " data value:" + value);
-        value = (parseFloat(full_Data[count].value) - value);
+        if(parseFloat(full_Data[count].value)/origin_max < rou){
+          value = 0.0;
+        }else{
+          value = (parseFloat(full_Data[count].value) - value);
 
-        // if(value < 0){
-        //       console.log("value < 0", value);
-        //       console.log("value > 0", Math.abs(value));
-        // }
-        value = Math.abs(value);
-        if(left_is_diff == 2){
-          if(full_Data[count].value != 0){
-            value = value/parseFloat(full_Data[count].value);
-          }else{
-            value = 0;
+          // if(value < 0){
+          //       console.log("value < 0", value);
+          //       console.log("value > 0", Math.abs(value));
+          // }
+
+          //abs
+          //value = Math.abs(value);
+
+          if(left_is_diff == 2){
+            if(full_Data[count].value != 0){
+              value = value/parseFloat(full_Data[count].value);
+            }else{
+              value = 0;
+            }
           }
-        }
 
-        if(value > max_diff){
-          max_diff = value;
+          if(value > max_diff){
+            max_diff = value;
+          }
         }
         count += 1;
       }
-      if(parseFloat(value) > max){
-        value = max;
+
+
+      var percent = 0.0;
+      if(left_is_diff != 0){
+        percent = Math.abs(parseFloat(value)/max)/2.0;
+      }else{
+        percent = Math.abs(parseFloat(value)/max);
       }
-      var percent = parseFloat(value)/max;
 
+      if(left_is_diff != 0){
+        if(value < 0){
+          neg_c += 1;
+          percent = 0.5 - percent;
+        }else{
+          pos_c += 1;
+          percent = percent + 0.5;
+        }
 
+        value = percent*max;
+      }
       var color_value = 0.0;
 
       threshold.range().map(function(color) {
@@ -1698,11 +1675,10 @@ function fill(norData, radius, tau, std, x, y, is_left){
     }
   }
    //return coresetData;
-
-   console.log("max diff:" + max_diff);
    //spinner_left.stop();
    //map_update();
    killChaos(std, radius, tau);
+
    //map_draw();
    var d1 = performance.now();
    set_time((d1-d0)/1000);
@@ -1947,6 +1923,22 @@ function clickFunction(){
 //   .on("click", reset);
 
 
+function set_left_max_value(value){
+  if(left_is_diff != 0){
+    d3.select("#max_value").text("Max difference value: "+parseFloat(value).toFixed(5));
+  }else{
+    d3.select("#max_value").text("");
+  }
+}
+
+function set_right_max_value(value){
+  if(right_is_diff != 0){
+    d3.select("#right_max_value").text("Max difference value: "+parseFloat(value).toFixed(5));
+  }else{
+    d3.select("#right_max_value").text("");
+  }
+}
+
 function set_data_size(size){
   if(left_is_origin == true){
     d3.select("#sample_value").text(full_data_size[current_data]);
@@ -2007,13 +1999,19 @@ d3.select("#tau").on("input",function(d){
 });
 
 
-function handleRadiusClick(event){
-
+d3.select("#rou").on("input",function(d){
   // var std = d3.select("#std").property("value");
-  // document.getElementById("compare_btn").disabled = true;
-  // document.getElementById("tau_confirm").disabled = true;
-  // document.getElementById("epsilon_confirm").disabled = true;
-  // document.getElementById("radius_confirm").disabled = true;
+  // var radius = d3.select("#radius").property("value");
+
+  // d3.select("#tau-value").text(+this.value);
+  d3.select("#rou_input").property("value", +this.value);
+  d3.select("#rou").property("value", +this.value);
+
+  // killChaos(0.01, radius, +this.value);
+});
+
+
+function handleRadiusClick(event){
 
   var std = 0.01;
   var value = document.getElementById("radius_input").value;
@@ -2035,11 +2033,6 @@ function handleRadiusClick(event){
 
 function handleTauClick(event){
 
-  // var std = d3.select("#std").property("value");
-  // document.getElementById("compare_btn").disabled = true;
-  // document.getElementById("tau_confirm").disabled = true;
-  // document.getElementById("epsilon_confirm").disabled = true;
-  // document.getElementById("radius_confirm").disabled = true;
   var std = 0.01;
   var value = document.getElementById("tau_input").value;
 
@@ -2061,11 +2054,6 @@ function handleTauClick(event){
 
 function handleEpsilonClick(event){
 
-  // var std = d3.select("#std").property("value");
-  // document.getElementById("compare_btn").disabled = true;
-  // document.getElementById("tau_confirm").disabled = true;
-  // document.getElementById("epsilon_confirm").disabled = true;
-  // document.getElementById("radius_confirm").disabled = true;
   var std = 0.01;
   var value = document.getElementById("epsilon_input").value;
 
@@ -2078,6 +2066,33 @@ function handleEpsilonClick(event){
   console.log("left origin? :" + left_is_origin);
   console.log("right origin? :" + right_is_origin);
   random_sampling(std, parseFloat(value));
+  // if(right_is_origin == false){
+  //   console.log("right is not origin");
+  //   right_randomSample(std, parseFloat(value), 1);
+  // }
+  return false;
+}
+
+
+function handleRouClick(event){
+
+  var std = 0.01;
+  var epsilon = document.getElementById("epsilon_input").value;
+
+  if(epsilon == ""){
+    epsilon = 0.03;
+  }
+  console.log(epsilon);
+  rou = parseFloat(document.getElementById("rou_input").value);
+
+  // d3.select("#epsilon-value").text(value);
+  d3.select("#rou").property("value", parseFloat(rou));
+  // if(left_is_origin == false){
+  //   randomSample(std, parseFloat(value), 1);
+  // }
+
+
+  random_sampling(std, parseFloat(epsilon));
   // if(right_is_origin == false){
   //   console.log("right is not origin");
   //   right_randomSample(std, parseFloat(value), 1);
@@ -2167,37 +2182,58 @@ function handleCompare(event){
   right_is_origin = right_origin;
 
   current_data = data_value;
-  // init left and right
-  // if(last_data != data_value || left_dropdown_value != left_map_type){
-  //   if(last_data != data_value || right_dropdown_value != right_map_type){
-  //     is_right_update = true;
-  //   }else{
-  //     is_right_update = false;
-  //   }
-  //   document.getElementById("compare_btn").disabled = true;
-  //   document.getElementById("tau_confirm").disabled = true;
-  //   document.getElementById("epsilon_confirm").disabled = true;
-  //   document.getElementById("radius_confirm").disabled = true;
-
-  //   left_map_type = left_dropdown_value;
-  //   init_left(data_value, is_sorted, is_origin, true);
-  // }
-
-  // if(last_data != data_value || right_dropdown_value != right_map_type){
-
-  //   document.getElementById("compare_btn").disabled = true;
-  //   document.getElementById("tau_confirm").disabled = true;
-  //   document.getElementById("epsilon_confirm").disabled = true;
-  //   document.getElementById("radius_confirm").disabled = true;
-
-  //   console.log("comming" + right_origin + " " + right_is_origin);
-  //   right_map_type = right_dropdown_value;
-  //   init_right(data_value, right_is_sorted, right_origin, false);
-  // }
-
 
   left_map_type = left_dropdown_value;
   right_map_type = right_dropdown_value;
+
+  // if(left_is_diff != 0 && right_is_diff != 0){
+  //   threshold = d3.scaleThreshold()
+  //     .domain(domain_vals)
+  //     .range(color_data[21]["value"][11]);
+
+  //   barAxis = d3.axisBottom(xBar)
+  //     .tickSize(20)
+  //     .tickValues(threshold.domain())
+  //     .tickFormat(function(d) { return formatPercent(d-0.5); });
+
+  // }else{
+
+  //   threshold = d3.scaleThreshold()
+  //     .domain(domain_vals)
+  //     .range(default_color_scheme);
+
+  //   barAxis = d3.axisBottom(xBar)
+  //     .tickSize(20)
+  //     .tickValues(threshold.domain())
+  //     .tickFormat(function(d) { return formatPercent(d); });
+  // }
+
+  coresetData = [];
+  right_coresetData = [];
+  map_draw();
+  right_map_draw();
+
+  if(left_is_diff != 0 && right_is_diff != 0){
+    threshold = d3.scaleThreshold()
+      .domain(domain_vals)
+      .range(color_data[21]["value"][11]);
+
+    barAxis = d3.axisBottom(xBar)
+      .tickSize(20)
+      .tickValues(threshold.domain())
+      .tickFormat(function(d) { return formatPercent(d-0.5); });
+
+  }else{
+
+    threshold = d3.scaleThreshold()
+      .domain(domain_vals)
+      .range(default_color_scheme);
+
+    barAxis = d3.axisBottom(xBar)
+      .tickSize(20)
+      .tickValues(threshold.domain())
+      .tickFormat(function(d) { return formatPercent(d); });
+  }
 
   init(data_value, is_sorted, right_is_sorted, is_origin, right_is_origin);
 
@@ -2208,6 +2244,12 @@ function handleCompare(event){
 //   svg.transition().duration(500)
 //     .call(zoom.transform, d3.zoomIdentity);
 // }
+
+function handle_left_save(event){
+  window.open(left_canvas.toDataURL("image/jpg"));
+  return false;
+}
+
 
 function normalize(){
   var diff = maxX - minX > maxY - minY ? maxX - minX : maxY - minY;

@@ -38,6 +38,7 @@ var right_ne, right_sw;
 // GOOGLE map
 var last_right_center;
 var right_canvasLayer;
+var right_canvas;
 var right_context;
 var right_map;
 var right_mapProjection;
@@ -173,7 +174,8 @@ function right_init_googlemap(){
   };
 
   right_canvasLayer = new CanvasLayer(canvasLayerOptions);
-  right_context = right_canvasLayer.canvas.getContext('2d');
+  right_canvas = right_canvasLayer.canvas;
+  right_context = right_canvas.getContext('2d');
 
     // Rectangle, pre kill chaos.
 
@@ -304,7 +306,7 @@ function right_map_draw(){
     //console.log(newpoint);
     right_context.beginPath();
     right_context.rect(newpoint.x, newpoint.y, pro*parseFloat(delta), pro_y*parseFloat(delta));
-    if(d.color == "#f7f4f9"){
+    if(d.color == "#f7f4f9" || d.color == "#fff" || d.color == "#f7f7f7"){
       right_context.fillStyle = "rgba(0, 0, 0, 0)";
     }else{
       right_context.fillStyle = d.color;
@@ -336,7 +338,15 @@ function right_init_kernel(fileName, is_sorted, is_right){
     right_ken = [];
     var epsilon = 0.03;
 
+    function getBaseLog(x, y) {
+      return Math.log(y) / Math.log(x);
+    }
+
     var size = Math.floor(1/(epsilon*epsilon)*Math.log(1000));
+
+    var log_size = Math.ceil(getBaseLog(2, size));
+
+    size = Math.pow(2, log_size);
 
     // mark data length.
     data_length_mark = size;
@@ -939,6 +949,14 @@ function right_fill(norData, radius, tau, std, x, y, is_right){
    var d2 = performance.now();
    if(error) throw error;
 
+   var origin_max = 0.0;
+   if(right_is_diff != 0){
+      data.forEach(function(d){
+        if(parseFloat(d.value) > origin_max){
+          origin_max = parseFloat(d.value);
+        }
+      });
+   }
    var fullData = data;
    /**
     *  map
@@ -1010,47 +1028,50 @@ function right_fill(norData, radius, tau, std, x, y, is_right){
 
          // console.log("coreset position: x:" + i + "y:" + j);
         // console.log("full data position : x:" + full_Data[count].x + "y:" + full_Data[count].y);
-        // console.log("full data value:" + full_Data[count].value + " data value:" + value);
-        value = (parseFloat(fullData[count].value) - value);
+         // console.log("full data value:" + full_Data[count].value + " data value:" + value);
+        if(parseFloat(fullData[count].value)/origin_max < rou){
+          value = 0.0;
+        }else{
+          value = (parseFloat(fullData[count].value) - value);
 
-        // if(value < 0){
-        //       console.log("value < 0", value);
-        //       console.log("value > 0", Math.abs(value));
-        // }
-        value = Math.abs(value);
-        if(right_is_diff == 2){
-          if(fullData[count].value != 0){
-            value = value/parseFloat(fullData[count].value);
-          }else{
-            value = 0;
+          // if(value < 0){
+          //       console.log("value < 0", value);
+          //       console.log("value > 0", Math.abs(value));
+          // }
+          //value = Math.abs(value);
+          if(right_is_diff == 2){
+            if(fullData[count].value != 0){
+              value = value/parseFloat(fullData[count].value);
+            }else{
+              value = 0;
+            }
+          }
+
+          if(value > max_diff){
+            max_diff = value;
           }
         }
-        // console.log(value);
-        // console.log(max);
-        // for(var data_i = 0; data_i < full_Data.length; data_i ++){
-        //   if(i == full_Data[data_i].x && j == full_Data[data_i].y){
-        //     value = (full_Data[data_i].value - value);
-        //     if(value < 0){
-        //       console.log("value < 0", value);
-        //       console.log("value > 0", Math.abs(value));
-        //     }
-        //     value = Math.abs(value);
-        //     if(left_is_diff == 2){
-        //       value = value/full_Data[data_i];
-        //     }
-        // }
-        // }
-
-         if(value > max_diff){
-           max_diff = value;
-         }
-
          count += 1;
 
        }
 
-      var percent = parseFloat(value)/right_max;
+      //var percent = parseFloat(value)/right_max;
 
+      var percent = 0.0;
+      if(right_is_diff != 0){
+        percent = Math.abs(parseFloat(value)/right_max)/2.0;
+      }else{
+        percent = Math.abs(parseFloat(value)/right_max);
+      }
+
+      if(right_is_diff !=0){
+        if(value < 0){
+          percent = 0.5 - percent;
+        }else{
+          percent = percent + 0.5;
+        }
+        value = percent * right_max;
+      }
       var color_value = 0.0;
 
       threshold.range().map(function(color) {
@@ -1538,6 +1559,14 @@ function set_right_data_size(size){
   }
   d3.select("#right_full_value").text(full_data_size[current_data]);
 }
+
+
+function handle_right_save(event){
+
+  window.open(right_canvas.toDataURL("image/png"));
+  return false;
+}
+
 
 
 function normalize(){

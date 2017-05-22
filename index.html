@@ -14,6 +14,7 @@
   <body>
 
     <!-- The Modal -->
+    <div id="download"></div>
     <div id="myModal" class="modal">
 
       <!-- Modal content -->
@@ -89,6 +90,21 @@
        </form>
           </td>
         </tr>
+        <tr>
+          <td>
+            <label for="rou"
+                   style="display: inline-block; width: 50%; text-align: right">
+              Pho (0.00 - 0.05):
+            </label>
+            <input id="rou" type="range" min="0.0" max="0.05" step="0.01" value="0.0" />
+          </td>
+          <td>
+       <form id="rou_input_form" name="rou_form" onSubmit="return handleRouClick()">
+            <input type="text" id="rou_input" placeholder="0.0">
+            <input id="rou_confirm" name="rou_submit"  type="submit" value="Confirm" >
+       </form>
+          </td>
+        </tr>
         </table>
       <!-- <table> -->
       <!-- <p> -->
@@ -158,6 +174,10 @@
       <p id="full_time">
         Full Data running time: <span id="full_time_value"></span> seconds.
       </p>
+      <p id="max_diff">
+        <span id="max_value"></span>
+      </p>
+
 
         <select id="map_type_select_left">
           <option>Coreset</option>
@@ -168,6 +188,8 @@
           <option>Random Sampling Difference</option>
           <option>Original</option>
         </select>
+        <button id="left_save_btn" onclick="handle_left_save()">Save</button>
+
       <h1 id="left_coreset_title"> Coreset </h1>
       <!-- <div id="map-div-left"> -->
 
@@ -192,6 +214,10 @@
             <p id="right_full_time">
               Full Data running time: <span id="right_full_time_value"></span> seconds.
             </p>
+             <p id="right_max_diff">
+                <span id="right_max_value"></span>
+             </p>
+
         <select id="map_type_select_right">
           <option>Random Sampling</option>
           <option>Coreset</option>
@@ -201,6 +227,7 @@
           <option>Random Sampling Difference</option>
           <option>Original</option>
         </select>
+        <button id="right_save_btn" onclick="handle_right_save()">Save</button>
       <h1 id="right_coreset_title"> Random Sampling </h1>
       <!-- <svg class="color_bar_svg" height="500", width="50"></svg> -->
       <!-- <div id="map-div-right"></div> -->

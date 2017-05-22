@@ -30,12 +30,12 @@ var full_data_time = {"Kentucky" : 120.5,
 
 var STD_list = {"Kentucky": 0.07,
                 "Philadelphia Crimes": 0.003,
-                "Japan": 0.46,
+                "Japan": 0.54,
                 "Synthetic": 0.008};
 
 var delta_list = {"Kentucky": 0.04,
                   "Philadelphia Crimes":0.002,
-                  "Japan": 0.1,
+                  "Japan": 0.09,
                   "Synthetic": 0.008};
 
 var zoom_list = {"Kentucky": 7,
@@ -53,7 +53,7 @@ var full_data_list = {"Kentucky": "../data/kentucky_coreset_full.csv",
 var fullzoom;
 var STD = 0.43;
 //var std = 0.01;
-var currentData = "Japan";
+var currentData = "Synthetic";
 
 //var fullsvg = d3.select("#full_svg");
 //var width = +fullsvg.attr("width");
@@ -69,7 +69,30 @@ var fullx;
 
 var fully;
 
-init_right("Japan", false, true, false);
+// var finalVal = '';
+
+// for (var i = 0; i < content.length; i++) {
+//     var value = content[i];
+
+//     for (var j = 0; j < value.length; j++) {
+//         var innerValue = value[j];
+//         var result = innerValue.replace(/"/g, '""');
+//         if (result.search(/("|,|\n)/g) >= 0)
+//             result = '"' + result + '"';
+//         if (j > 0)
+//             finalVal += ',';
+//         finalVal += result;
+//     }
+
+//     finalVal += '\n';
+// }
+
+// var pom = document.createElement('a');
+// pom.setAttribute('href', 'data:text/csv;charset=utf-8,' + encodeURIComponent(finalVal));
+// pom.setAttribute('download', 'test.csv');
+// pom.click();
+
+init_right("Synthetic", false, true, false);
 
 function init_right(data_select, is_sorted, is_origin, is_left){
   currentData = data_select;
@@ -397,20 +420,104 @@ function full_update(std, epsilon){
     console.log(key);
   }
   console.log(coresetData.length);
-  var csvContent = "data:text/csv;charset=utf-8,";
+  //var csvContent = "data:text/csv;charset=utf-8,";
+  var csvContent = "";
+  csvContent +="x,y,color,delta,value\n";
+  var count = 0;
+  coresetData.forEach(function(infoArray){
+    var dataString = "";
+
+    if(count <= coresetData.length/4){
+
+      for(var key in infoArray){
+        dataString += infoArray[key]+",";
+      }
+      csvContent += dataString+ "\n";
+    }
+    count += 1;
+  });
+
+  // console.log(csvContent);
+  // var encodedUri = encodeURI(csvContent);
+  // window.open(encodedUri);
+  var pom = document.createElement('a');
+  pom.setAttribute('href', 'data:text/csv;charset=utf-8,' + encodeURIComponent(csvContent));
+  pom.setAttribute('download', 'test.csv');
+  pom.click();
+
+  count = 0;
+  csvContent = "";
   csvContent +="x,y,color,delta,value\n";
   coresetData.forEach(function(infoArray){
     var dataString = "";
-    for(var key in infoArray){
-      dataString += infoArray[key]+",";
-    }
-    csvContent += dataString+ "\n";
 
+    if(count > coresetData.length/4 && count <= coresetData.length/2){
+
+      for(var key in infoArray){
+        dataString += infoArray[key]+",";
+      }
+      csvContent += dataString+ "\n";
+    }
+    count += 1;
   });
 
-  console.log(csvContent);
-  var encodedUri = encodeURI(csvContent);
-  window.open(encodedUri);
+  // console.log(csvContent);
+  // var encodedUri = encodeURI(csvContent);
+  // window.open(encodedUri);
+  pom = document.createElement('a');
+  pom.setAttribute('href', 'data:text/csv;charset=utf-8,' + encodeURIComponent(csvContent));
+  pom.setAttribute('download', 'test.csv');
+  pom.click();
+
+  count = 0;
+
+   csvContent = "";
+  csvContent +="x,y,color,delta,value\n";
+    coresetData.forEach(function(infoArray){
+    var dataString = "";
+
+    if(count > coresetData.length/2 && count <= coresetData.length*3/4){
+
+      for(var key in infoArray){
+        dataString += infoArray[key]+",";
+      }
+      csvContent += dataString+ "\n";
+    }
+    count += 1;
+  });
+
+  // console.log(csvContent);
+  // var encodedUri = encodeURI(csvContent);
+  // window.open(encodedUri);
+  pom = document.createElement('a');
+  pom.setAttribute('href', 'data:text/csv;charset=utf-8,' + encodeURIComponent(csvContent));
+  pom.setAttribute('download', 'test.csv');
+  pom.click();
+  count = 0;
+
+    csvContent = "";
+  csvContent +="x,y,color,delta,value\n";
+
+    coresetData.forEach(function(infoArray){
+    var dataString = "";
+
+      if(count > coresetData.length*3/4){
+
+      for(var key in infoArray){
+        dataString += infoArray[key]+",";
+      }
+      csvContent += dataString+ "\n";
+    }
+    count += 1;
+  });
+
+  // console.log(csvContent);
+  // var encodedUri = encodeURI(csvContent);
+  // window.open(encodedUri);
+  pom = document.createElement('a');
+  pom.setAttribute('href', 'data:text/csv;charset=utf-8,' + encodeURIComponent(csvContent));
+  pom.setAttribute('download', 'test.csv');
+  pom.click();
 }
   // var rects = fullsvg.selectAll("rect").data(fullData);
 
