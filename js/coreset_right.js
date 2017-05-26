@@ -232,7 +232,7 @@ function right_map_update(){
   right_canvasWidth = right_canvasLayer.canvas.width;
   right_canvasHeight = right_canvasLayer.canvas.height;
   right_context.clearRect(0,0, right_canvasWidth, right_canvasHeight);
-  right_context.globalAlpha = 0.5;
+  right_context.globalAlpha = 1.0;
 
   /* We need to scale and translate the map for current view.
    * see https://developers.google.com/maps/documentation/javascript/maptypes#MapCoordinates
@@ -277,7 +277,7 @@ function right_map_draw(){
 
   //console.log("**************** right draw ****************");
   right_context.clearRect(0,0, right_canvasWidth, right_canvasHeight);
-  right_context.globalAlpha = 0.5;
+  right_context.globalAlpha = 1.0;
   // var newpoint;
 
   var test1 = new google.maps.LatLng(30.00, -100.04);
@@ -329,9 +329,31 @@ function right_map_draw(){
 
 function right_init_kernel(fileName, is_sorted, is_right){
 
-  d3.csv(fileName,function(data){
+  right_init_googlemap();
+  if(last_data == current_data && right_is_diff != 0){
+
+     getMax(101, 0.1, STD);
+
+
+    var x = 1.0;
+    var y = (maxY-minY)/(maxX-minX);
+
+    // left fill
+
+    if(!left_is_origin){
+      fill(0, 101, 0.1, 0.01, x, y, true);
+    }
+
+    // right fill
+
+    right_fill(0, 101, 0.1, 0.01, x, y, true);
+
+  }else{
+
+    d3.csv(fileName,function(data){
+
+      console.log("init right kernel!!!!!");
   //right_init_googlemap();
-    right_init_googlemap();
 
     // update_color_bar(0);
     //update_color_bar(0);
@@ -478,6 +500,7 @@ function right_init_kernel(fileName, is_sorted, is_right){
 
     right_fill(0, 101, 0.1, 0.01, x, y, true);
   });
+  }
 
 }
 

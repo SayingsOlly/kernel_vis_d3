@@ -185,7 +185,7 @@ function map_update(){
   canvasWidth = canvasLayer.canvas.width;
   canvasHeight = canvasLayer.canvas.height;
   left_context.clearRect(0,0, canvasWidth, canvasHeight);
-  left_context.globalAlpha = 0.5;
+  left_context.globalAlpha = 1.0;
 
   /* We need to scale and translate the map for current view.
    * see https://developers.google.com/maps/documentation/javascript/maptypes#MapCoordinates
@@ -269,7 +269,7 @@ function map_draw(){
 
 
   left_context.clearRect(0,0, canvasWidth, canvasHeight);
-  left_context.globalAlpha = 0.5;
+  left_context.globalAlpha = 1.0;
   var test1 = new google.maps.LatLng(30.00, -100.04);
   var test2 = new google.maps.LatLng(30.00, -100.08);
 
@@ -342,10 +342,33 @@ function map_draw(){
 
 function init_kernel(fileName, is_sorted, is_left){
 
-  d3.csv(fileName,function(data){
+  init_googlemap();
+  update_color_bar(0);
+  if(last_data == current_data && left_is_diff != 0){
 
-    init_googlemap();
-    update_color_bar(0);
+    if(right_is_origin){
+
+     getMax(101, 0.1, STD);
+
+
+     var x = 1.0;
+     var y = (maxY-minY)/(maxX-minX);
+
+    // left fill
+
+    fill(0, 101, 0.1, 0.01, x, y, true);
+
+    // right fill
+
+    //right_fill(0, 101, 0.1, 0.01, x, y, true);
+    }
+
+  }else{
+
+    d3.csv(fileName,function(data){
+
+      console.log("init kernel!!!!!!!!!");
+
     ken = [];
     var epsilon = 0.03;
 
@@ -476,7 +499,7 @@ function init_kernel(fileName, is_sorted, is_left){
     }
     //init_googlemap();
   });
-
+  }
 
 }
 
@@ -609,7 +632,7 @@ function init(data_select, left_is_sorted, right_is_sorted, left_is_origin, righ
 }
 
 
-function random_sampling(std, epsilon){
+function random_sampling(flag, std, epsilon){
 
 
   if(left_is_origin == true){
@@ -635,8 +658,47 @@ function random_sampling(std, epsilon){
     });
   }else{
 
+    if(flag == 1){
+      if(right_is_origin){
+
+      getMax(101, 0.05, std);
+
+      var x = 1.0;
+      var y = (maxY-minY)/(maxX-minX);
+
+      // left fill
+
+      fill(0, 101, 0.1, 0.01, x, y, true);
+
+     d3.csv(full_data_list[current_data], function(error, data){
+      if(error) throw error;
+
+      // console.log("right full data!!!!!!!!!!");
+      set_right_data_size(1);
+      set_right_time(1);
+      right_coresetData = data;
+
+      var cur_max = 0;
+      // console.log("init right!!!!!");
+      right_coresetData.forEach(function(d){
+        if(parseFloat(d.value) > cur_max){
+          cur_max = d.value;
+        }
+      });
+
+      right_max = cur_max;
+
+      right_init_googlemap();
+       right_map_draw();
+     });
+      // right fill
+
+      //right_fill(0, 101, 0.1, 0.01, x, y, true);
+    }
+    }else{
   d3.csv(left_current_file,function(data){
 
+    console.log("random sampling.");
     //update_color_bar(0);
     ken = [];
     // var epsilon = 0.03;
@@ -759,6 +821,7 @@ function random_sampling(std, epsilon){
       //right_fill(0, 101, 0.1, 0.01, x, y, true);
     }
   });
+    }
   }
 
 
@@ -767,8 +830,25 @@ function random_sampling(std, epsilon){
   if(!right_is_origin){
   //console.log("keep random sampling");
 
+    if(flag == 1){
+      getMax(101, 0.05, std);
+
+      var x = 1.0;
+      var y = (maxY-minY)/(maxX-minX);
+
+    // left fill
+
+      if(!left_is_origin){
+        fill(0, 101, 0.1, 0.05, x, y, true);
+      }
+      // right fill
+
+      right_fill(0, 101, 0.1, 0.05, x, y, true);
+    }
+    else{
     d3.csv(right_current_file,function(data){
 
+      console.log("random sampling right");
     //update_color_bar(0);
       right_ken = [];
       // var epsilon = 0.03;
@@ -783,7 +863,7 @@ function random_sampling(std, epsilon){
       var sampleList = [];
 
 
-    if (!right_current_sorted){
+      if(!right_current_sorted){
       data.forEach(function(d,i){
 
         if(i<size){
@@ -832,7 +912,8 @@ function random_sampling(std, epsilon){
     // right fill
 
     right_fill(0, 101, 0.1, 0.05, x, y, true);
-  });
+    });
+    }
 
   }
 
@@ -2065,7 +2146,7 @@ function handleEpsilonClick(event){
 
   console.log("left origin? :" + left_is_origin);
   console.log("right origin? :" + right_is_origin);
-  random_sampling(std, parseFloat(value));
+  random_sampling(0, std, parseFloat(value));
   // if(right_is_origin == false){
   //   console.log("right is not origin");
   //   right_randomSample(std, parseFloat(value), 1);
@@ -2092,7 +2173,7 @@ function handleRouClick(event){
   // }
 
 
-  random_sampling(std, parseFloat(epsilon));
+  random_sampling(1, std, parseFloat(epsilon));
   // if(right_is_origin == false){
   //   console.log("right is not origin");
   //   right_randomSample(std, parseFloat(value), 1);
