@@ -1054,7 +1054,6 @@ function getMax(radius, tau, std){
 
       console.log("left average difference:" + sum/parseFloat(count));
       max = cur_max;
-
       if(left_is_diff != 0){
         set_left_max_value(diff_max);
       }else{
@@ -1136,17 +1135,19 @@ function getMax(radius, tau, std){
 
    console.log("right average difference: " + sum/parseFloat(count));
    right_max = cur_max;
-   set_right_max_value(right_max);
+
    if(right_is_diff != 0){
      set_right_max_value(diff_max);
    }else{
      set_right_max_value(right_max);
    }
+
+   set_right_max_value(right_max);
    max_max = max > right_max ? max : right_max;
    console.log("diff max:", diff_max);
    console.log("max max:", max_max);
 
-     if(left_is_diff != 0 && right_is_diff != 0){
+    if(left_is_diff != 0 && right_is_diff != 0){
       threshold = d3.scaleThreshold()
         .domain(domain_vals)
         .range(color_data[21]["value"][11]);
@@ -1157,7 +1158,7 @@ function getMax(radius, tau, std){
       barAxis = d3.axisBottom(xBar)
         .tickSize(20)
         .tickValues(threshold.domain())
-         .tickFormat(function(d) { return formatPercent((d-0.5)*(2.0*diff_max/max_max)); });
+         .tickFormat(function(d) { return formatPercent((d-0.5)*2.0); });
        update_color_bar(0);
 
     }else{
