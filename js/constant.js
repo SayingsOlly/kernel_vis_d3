@@ -217,18 +217,18 @@ var centerX = (maxX+minX)/2, centerY = (maxY+minY)/2;
 // Origin data.
 var data_list = {"Kentucky":"../data/kentucky_org.txt",
                  "Philadelphia Crimes":"../data/crime_clean.txt",
-                 "Japan": "../data/twitter_clean_jp.txt",
+                 "Japan": "../data/twitter_clean_UK.txt",
                  "Synthetic": "../data/nonuniform_2D.txt"};
 
 // Coreset sorted data.
 var sorted_data_list = {"Kentucky":"../data/ken_sort.txt",
                         "Philadelphia Crimes":"../data/crime_sort.txt",
-                        "Japan": "../data/twitter_sort.txt",
+                        "Japan": "../data/twitter_UK_sort.txt",
                         "Synthetic" : "../data/nonuniform_2D_Zorder_sort.txt"};
 // Full data.
 var full_data_list = {"Kentucky": "../data/kentucky_coreset_full.csv",
                       "Philadelphia Crimes": "../data/crime_full_new2.csv",
-                      "Japan": "../data/japan_full.csv",
+                      "Japan": "../data/UK_full.csv",
                       "Synthetic": '../data/synthetic_full.csv'};
 
 
@@ -244,12 +244,12 @@ var full_data_time = {"Kentucky" : 120.5,
 
 var STD_list = {"Kentucky": 0.07,
                 "Philadelphia Crimes": 0.003,
-                "Japan": 0.54,
+                "Japan": 0.15,
                 "Synthetic": 0.008};
 
 var delta_list = {"Kentucky": 0.04,
                   "Philadelphia Crimes":0.002,
-                  "Japan": 0.09,
+                  "Japan": 0.05,
                   "Synthetic": 0.008};
 
 

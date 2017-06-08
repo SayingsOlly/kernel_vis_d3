@@ -54,7 +54,7 @@
           </td>
           <td>
       <form id="epsilon_input_form" name="epsilon_form" onSubmit="return handleEpsilonClick()">
-            <input type="text" id="epsilon_input" placeholder="0.03">
+            <input type="text" id="epsilon_input" value="0.03" placeholder="0.03">
             <input id="epsilon_confirm" name="epsilon_submit"  type="submit" value="Confirm" >
       </form>
 
@@ -69,7 +69,7 @@
           <input id="radius" type="range" min="0.01" max="1" step="0.01" value="1" /><br /></td>
           <td>
       <form id="radius_input_form" name="radius_form" onSubmit="return handleRadiusClick()">
-            <input type="text" id="radius_input" placeholder="1">
+            <input type="text" id="radius_input"  value="1" placeholder="1">
             <input id="radius_confirm" name="radius_submit"  type="submit" value="Confirm" >
       </form>
             </td>
@@ -85,7 +85,7 @@
           </td>
           <td>
        <form id="tau_input_form" name="tau_form" onSubmit="return handleTauClick()">
-            <input type="text" id="tau_input" placeholder="0.05">
+            <input type="text" id="tau_input"  value="0.05" placeholder="0.05">
             <input id="tau_confirm" name="tau_submit"  type="submit" value="Confirm" >
        </form>
           </td>
@@ -100,7 +100,7 @@
           </td>
           <td>
        <form id="rou_input_form" name="rou_form" onSubmit="return handleRouClick()">
-            <input type="text" id="rou_input" placeholder="0.0">
+            <input type="text" id="rou_input"  value="0.0" placeholder="0.0">
             <input id="rou_confirm" name="rou_submit"  type="submit" value="Confirm" >
        </form>
           </td>
@@ -142,7 +142,7 @@
 
 
 
-
+      <button id="resampling_btn" onclick="handleResampling()">Resampling</button>
        <button id="compare_btn" onclick="handleCompare()">Compare</button>
        <select id="data_type_select">
           <option>Kentucky</option>

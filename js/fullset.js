@@ -10,12 +10,12 @@ var centerX = (maxX+minX)/2, centerY = (maxY+minY)/2;
 
 var data_list = {"Kentucky":"../data/kentucky_org.txt",
                  "Philadelphia Crimes":"../data/crime_clean.txt",
-                 "Japan": "../data/twitter_clean_jp.txt",
+                 "Japan": "../data/twitter_clean_UK.txt",
                  "Synthetic": "../data/nonuniform_2D.txt"};
 
 var sorted_data_list = {"Kentucky":"../data/ken_sort.txt",
                         "Philadelphia Crimes":"../data/crime_sort.txt",
-                        "Japan": "../data/twitter_sort.txt",
+                        "Japan": "../data/twitter_UK_sort.txt",
                         "Synthetic" : "../data/nonuniform_2D_Zorder_sort.txt"};
 
 var full_data_size = {"Kentucky": 199163,
@@ -30,12 +30,12 @@ var full_data_time = {"Kentucky" : 120.5,
 
 var STD_list = {"Kentucky": 0.07,
                 "Philadelphia Crimes": 0.003,
-                "Japan": 0.54,
+                "Japan": 0.15,
                 "Synthetic": 0.008};
 
 var delta_list = {"Kentucky": 0.04,
                   "Philadelphia Crimes":0.002,
-                  "Japan": 0.09,
+                  "Japan": 0.05,
                   "Synthetic": 0.008};
 
 var zoom_list = {"Kentucky": 7,
@@ -92,7 +92,7 @@ var fully;
 // pom.setAttribute('download', 'test.csv');
 // pom.click();
 
-init_right("Synthetic", false, true, false);
+init_right("Japan", false, true, false);
 
 function init_right(data_select, is_sorted, is_origin, is_left){
   currentData = data_select;
@@ -150,7 +150,8 @@ function init_right(data_select, is_sorted, is_origin, is_left){
 
   if(data_select == "Japan"){
     console.log("Japan");
-    minY = 124.16, maxY = 145.571, minX = 24.3471, maxX = 45.4094;
+    //minY = 124.16, maxY = 145.571, minX = 24.3471, maxX = 45.4094;
+    minX = 49.9602, maxX = 58.6301, minY = -7.5684, maxY = 1.6815;
     // x = d3.scaleLinear()
     // .range([-1, width+1])
     // .domain([minX, maxX]);

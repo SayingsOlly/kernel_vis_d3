@@ -275,6 +275,7 @@ function right_map_update(){
 
 function right_map_draw(){
 
+
   //console.log("**************** right draw ****************");
   right_context.clearRect(0,0, right_canvasWidth, right_canvasHeight);
   right_context.globalAlpha = 1.0;
@@ -327,12 +328,14 @@ function right_map_draw(){
   * -----------------------------------------------
   **/
 
-function right_init_kernel(fileName, is_sorted, is_right){
+function right_init_kernel(resampling_flag, fileName, is_sorted, is_right){
 
   right_init_googlemap();
-  if(last_data == current_data && right_is_diff != 0){
+  if(last_right_sorted == is_sorted && last_data == current_data && !resampling_flag){
 
-     getMax(101, 0.1, STD);
+     var radius = parseFloat(document.getElementById("radius_input").value);
+      var tau = parseFloat(document.getElementById("tau_input").value);
+     getMax(radius, tau, STD);
 
 
     var x = 1.0;
@@ -341,12 +344,12 @@ function right_init_kernel(fileName, is_sorted, is_right){
     // left fill
 
     if(!left_is_origin){
-      fill(0, 101, 0.1, 0.01, x, y, true);
+      fill(0, radius, tau, 0.01, x, y, true);
     }
 
     // right fill
 
-    right_fill(0, 101, 0.1, 0.01, x, y, true);
+    right_fill(0, radius, tau, 0.01, x, y, true);
 
   }else{
 
@@ -358,7 +361,7 @@ function right_init_kernel(fileName, is_sorted, is_right){
     // update_color_bar(0);
     //update_color_bar(0);
     right_ken = [];
-    var epsilon = 0.03;
+      var epsilon = parseFloat(document.getElementById("epsilon_input").value);
 
     function getBaseLog(x, y) {
       return Math.log(y) / Math.log(x);
@@ -484,7 +487,10 @@ function right_init_kernel(fileName, is_sorted, is_right){
     //   draw_full_canvas();
     // }
 
-     getMax(101, 0.1, STD);
+      var radius = parseFloat(document.getElementById("radius_input").value);
+      var tau = parseFloat(document.getElementById("tau_input").value);
+
+      getMax(radius, tau, STD);
 
 
     var x = 1.0;
@@ -493,14 +499,16 @@ function right_init_kernel(fileName, is_sorted, is_right){
     // left fill
 
     if(!left_is_origin){
-      fill(0, 101, 0.1, 0.01, x, y, true);
+      fill(0, radius, tau, 0.01, x, y, true);
     }
 
     // right fill
 
-    right_fill(0, 101, 0.1, 0.01, x, y, true);
+    right_fill(0, radius, tau, 0.01, x, y, true);
   });
   }
+
+  last_right_sorted = is_sorted;
 
 }
 
@@ -593,7 +601,15 @@ function right_randomSample(std, epsilon, flag){
     right_ken = [];
     // var epsilon = 0.03;
 
+    function getBaseLog(x, y) {
+      return Math.log(y) / Math.log(x);
+    }
+
     var size = Math.floor(1/(epsilon*epsilon)*Math.log(1000));
+
+    var log_size = Math.ceil(getBaseLog(2, size));
+
+    size = Math.pow(2, log_size);
 
     // mark data length.
     data_length_mark = size;
@@ -682,7 +698,9 @@ function right_randomSample(std, epsilon, flag){
     }
 
     full_data_length = right_ken.length;
-    right_getCore(true, STD, 101, 0.05);
+    var radius = parseFloat(document.getElementById("radius_input").value);
+        var tau = parseFloat(document.getElementById("tau_input").value);
+    right_getCore(true, STD, radius, tau);
     // var d1 = performance.now();
     // set_right_time((d1-d0)/1000);
     //right_map_draw();
@@ -1030,6 +1048,10 @@ function right_fill(norData, radius, tau, std, x, y, is_right){
      right_max = max_max;
    }
 
+
+   if(left_is_diff!=0){
+     right_max = diff_max;
+   }
    console.log("right_max:" + right_max);
    var count = 0;
    var max_diff = 0;
